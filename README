@@ -1,0 +1,10 @@
+CMSC 23300 - Networks and Distributed Systems
+University of Chicago
+http://www.classes.cs.uchicago.edu/archive/2012/winter/23300-1/
+
+This project provides the basic source code necessary to get started on the
+chirc project. It also includes several automated tests for students to verify
+the correctness of their implementation.
+
+For instructions on how to build the project, and on how to run the tests,
+see the documentation in the doc/ directory.
