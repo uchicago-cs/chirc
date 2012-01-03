@@ -8,7 +8,7 @@ LDLIBS = -pthread
 all: $(BIN)
 	
 $(BIN): $(OBJS)
-	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJS) -o$(BIN)
+	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJS) -o $(BIN)
 	
 %.d: %.c
 
