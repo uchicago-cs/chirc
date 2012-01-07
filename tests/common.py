@@ -119,6 +119,8 @@ class ChircClient(object):
 
 class ChircTestCase(unittest.TestCase):
     
+    CHIRC_EXE = "./chirc"
+
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         
@@ -127,7 +129,7 @@ class ChircTestCase(unittest.TestCase):
         else:
             stdout = open('/dev/null', 'w')
             stderr = subprocess.STDOUT 
-        self.chirc_proc = subprocess.Popen([os.getcwd() + "/chirc", "-p", "7776", "-o", "passwd"], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
+        self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", "7776", "-o", "passwd"], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
         rc = self.chirc_proc.poll()        
         if rc != None:
             self.fail("chirc process failed to start. rc = %i" % rc)
