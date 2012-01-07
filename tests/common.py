@@ -105,7 +105,7 @@ class ChircClient(object):
         self.client.close()
         
     def get_message(self):
-        msg = self.client.read_until("\r\n", timeout=1)
+        msg = self.client.read_until("\r\n", timeout=0.1)
         if msg[-2:] != "\r\n":
             raise ReplyTimeoutException()
         msg = IRCMessage(msg)
