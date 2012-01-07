@@ -14,5 +14,8 @@ htmltests: chirc
 singletest: chirc
 	python -c "import tests.runners; tests.runners.single_runner('$(TEST)')" 
 
+grade: chirc
+	python -c "import tests.runners; tests.runners.grade_runner(csv=False)"
+
 clean: 
 	$(MAKE) clean -C src/
