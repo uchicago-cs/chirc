@@ -58,16 +58,25 @@ def html_runner(html_file):
     result = runner.run(tests.alltests)
     return result
 
-def grade_runner(csv, exe = None):
+def grade_runner(csv, htmlfile = None, exe = None):
     if exe != None:
         tests.common.ChircTestCase.CHIRC_EXE = exe
 
-    if not csv:
-        stream = sys.stderr
+    if htmlfile is not None:
+        fp = file(htmlfile, 'wb')
+        runner = HTMLTestRunner.HTMLTestRunner(
+                    stream=fp,
+                    verbosity = 0,
+                    title='chirc',
+                    description='Results of running all chirc unit tests'
+                    )
     else:
-        stream = open("/dev/null", "w")
+        if not csv:
+            stream = sys.stderr
+        else:
+            stream = open("/dev/null", "w")
 
-    runner = unittest.TextTestRunner(stream = stream)
+        runner = unittest.TextTestRunner(stream = stream)
     
     # run the test
     result = runner.run(tests.alltests)
