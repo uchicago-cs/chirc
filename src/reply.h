@@ -21,6 +21,8 @@
 #define RPL_LUSERME			"255"
 
 #define RPL_AWAY			"301"
+#define RPL_UNAWAY          "305"
+#define RPL_NOWAWAY         "306"
 
 #define RPL_WHOISUSER		"311"
 #define RPL_WHOISSERVER		"312"
@@ -35,6 +37,8 @@
 #define RPL_LIST			"322"
 #define RPL_LISTEND			"323"
 
+#define RPL_CHANNELMODEIS	"324"
+
 #define RPL_NOTOPIC			"331"
 #define RPL_TOPIC			"332"
 
@@ -45,15 +49,22 @@
 #define RPL_MOTD			"372"
 #define RPL_ENDOFMOTD		"376"
 
+#define RPL_YOUREOPER		"381"
+
 #define ERR_NOSUCHNICK			"401"
 #define ERR_NOSUCHCHANNEL		"403"
 #define ERR_CANNOTSENDTOCHAN	"404"
 #define ERR_UNKNOWNCOMMAND		"421"
 #define ERR_NOMOTD              "422"
 #define ERR_NICKNAMEINUSE		"433"
+#define ERR_USERNOTINCHANNEL	"441"
 #define ERR_NOTONCHANNEL		"442"
 #define ERR_NOTREGISTERED		"451"
 #define ERR_ALREADYREGISTRED	"462"
+#define ERR_PASSWDMISMATCH      "464"
+#define ERR_UNKNOWNMODE			"472"
 #define ERR_CHANOPRIVSNEEDED	"482"
+#define ERR_UMODEUNKNOWNFLAG	"501"
+#define ERR_USERSDONTMATCH		"502"
 
 #endif /* REPLY_H_ */
