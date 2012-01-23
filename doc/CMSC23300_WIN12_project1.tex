@@ -766,7 +766,7 @@ You must implement the \texttt{OPER} message as described in \RFCsection{2812}{3
 \item You must only support the \texttt{RPL\_YOUREOPER} and \texttt{ERR\_PASSWDMISMATCH}.
 \end{itemize}
 
-Take into account that the password expected by the \texttt{OPER} command is the one specified in the \texttt{-o} command-line parameter to the \texttt{chirc} executable.
+Take into account that you should expect a \texttt{<user>} parameter but will ignore its content; the password expected by the \texttt{OPER} command is the one specified in the \texttt{-o} command-line parameter to the \texttt{chirc} executable.
 
 You must implement the \texttt{MODE} message as described in \RFCsection{2812}{3.1.5} (for user modes) and \RFCsection{2812}{3.2.3} (for member status and channel modes), with the following exceptions:
 
@@ -791,14 +791,14 @@ The reply should be:
 
 \item For channel modes:
 \begin{itemize}
-\item When only a single parameter (a channel name) is used, the only error condition you must support is the \texttt{ERR\_USERNOTINCHANNEL} reply. If the command is successful, return a \texttt{RPL\_CHANNELMODEIS} reply.
-\item When two parameters (a channel name and a mode string) are used, you must support the following error replies: \texttt{ERR\_CHANOPRIVSNEEDED}, \texttt{ERR\_UNKNOWNMODE}, and \texttt{ERR\_USERNOTINCHANNEL}. If the command is successful, the message is relayed back to the user and to all the users in the channel.
+\item When only a single parameter (a channel name) is used, the only error condition you must support is the \texttt{ERR\_NOSUCHCHANNEL} reply (although this is not included in the specification for \texttt{MODE}). If the command is successful, return a \texttt{RPL\_CHANNELMODEIS} reply (in this reply, the  \texttt{<mode>} parameter must be a plus sign followed by the channel modes; you must omit the \texttt{<mode params>} parameter).
+\item When two parameters (a channel name and a mode string) are used, you must support the following error replies: \texttt{ERR\_NOSUCHCHANNEL}, \texttt{ERR\_CHANOPRIVSNEEDED}, and \texttt{ERR\_UNKNOWNMODE}. If the command is successful, the message is relayed back to the user and to all the users in the channel.
 \end{itemize}
 
 \item For member status modes:
 \begin{itemize}
 \item You only need to support three parameters: the channel, the mode string, and the nick.
-\item You must support the following error replies: \texttt{ERR\_CHANOPRIVSNEEDED}, \texttt{ERR\_UNKNOWNMODE}, and \texttt{ERR\_USERNOTINCHANNEL}.
+\item You must support the following error replies: \texttt{ERR\_NOSUCHCHANNEL}, \texttt{ERR\_CHANOPRIVSNEEDED}, \texttt{ERR\_UNKNOWNMODE}, and \texttt{ERR\_USERNOTINCHANNEL}.
 \item If the command is successful, the message is relayed back to the user and to all the users in the channel.
 \end{itemize}
 
@@ -807,8 +807,9 @@ The reply should be:
 You must observe the following rules when dealing with modes:
 
 \begin{itemize}
-\item The \texttt{OPER} message is the \emph{only} way of gaining operator status (the \texttt{o} user mode). Thus, \texttt{+o} is an invalid mode string when using \texttt{MODE}.
+\item The \texttt{OPER} message is the \emph{only} way for a user to gain operator status (the \texttt{o} user mode). As indicated in the specification, a request for \texttt{+o} by a non-operator should be ignored.
 \item The \texttt{a} user mode cannot be toggled using the \texttt{MODE} command. Only the \texttt{AWAY} message can manipulate that mode.
+Requests to change it should be ignored.
 \item When a channel is created (when the first user enters that channel), that user is automatically granted the channel operator mode.
 \item In a channel, only a channel operator can change the channel modes.
 \item In a channel, only a channel operator can change the member status modes of users in that channel.
@@ -831,7 +832,7 @@ Implement the \texttt{NAMES} command, as described in \RFCsection{2812}{3.2.5}, 
 \item You only need to support \texttt{NAMES} messages with no parameters or with a single parameter.
 \begin{itemize}
 \item When no parameters are specified, you must return a \texttt{RPL\_NAMREPLY} reply for each channel. Since we are not supporting invisible users,
-the final \texttt{RPL\_NAMREPLY} must include the names of all the users who are not on any channel.
+the final \texttt{RPL\_NAMREPLY} must include the names of all the users who are not on any channel. If all connected users are in a channel, this final \texttt{RPL\_NAMREPLY} is omitted.
 \item When a single parameters is specified, that parameter is interpreted to be a channel.
 \end{itemize}
 \item You do not need to support the \texttt{ERR\_TOOMANYMATCHES} and \texttt{ERR\_NOSUCHSERVER} replies.
@@ -877,7 +878,7 @@ Implement the \texttt{WHO} command, as described in \RFCsection{2812}{3.6.1}, wi
 
 \begin{itemize}
 \item When a channel is not specified, the \texttt{<channel>} field in the \texttt{RPL\_WHOREPLY} reply must be set to \texttt{*}.
-\item In the \texttt{RPL\_WHOREPLY} reply, the \texttt{<\# visible>} refers to the total number of users on that channel (since we are not supporting invisible users, the number of visible users equals the total number of users in the channel).
+\item In the \texttt{RPL\_WHOREPLY} reply, the \texttt{<hopcount>} should be hardcoded to \texttt{0} (zero).
 \item The \texttt{RPL\_WHOREPLY} must return a series of flags, which is specified as \verb|( "H" / "G" > ["*"] [ ( "@" / "+" ) ]| without explanation (furthermore, the \texttt{>} is a typo, and should be a right parenthesis). The flags must be constructed thusly, in this order:
 \begin{itemize}
 \item If the user is not away, include \texttt{H} (``here'')
@@ -886,6 +887,7 @@ Implement the \texttt{WHO} command, as described in \RFCsection{2812}{3.6.1}, wi
 \item If the user is a channel operator, include \texttt{@}
 \item If the user has the voice mode in the channel, include \texttt{+}
 \end{itemize}
+When a channel is not specified, the \texttt{@} and \texttt{+} flags are not included (regardless of what channel modes that user may have in the users he belongs to).
 \end{itemize}
 
 \subsection{Updating commands from Project 1b \points{5}}
@@ -895,7 +897,7 @@ Update the implementation of the following commands:
 \begin{itemize}
 \item \texttt{NICK}: When a user sends this message, and the change of nick is successful, it must be relayed to all the channels that user is in.
 \item \texttt{QUIT}: When a user sends this message, it must be relayed to all the channels that user is in. Take into account that a \texttt{QUIT} results in that user leaving all the channels he is in.
-\item \texttt{WHOIS}: Add support for the \texttt{RPL\_WHOISOPERATOR}, \texttt{RPL\_WHOISCHANNELS}, and \texttt{RPL\_AWAY} replies.
+\item \texttt{WHOIS}: Add support for the \texttt{RPL\_WHOISOPERATOR}, \texttt{RPL\_WHOISCHANNELS}, and \texttt{RPL\_AWAY} replies. These are only sent if the user is an IRC operator, on at least one channel, or away, respectively. The order of all the replies will be:  \texttt{RPL\_WHOISUSER}, \texttt{RPL\_WHOISCHANNELS}, \texttt{RPL\_WHOISSERVER}, \texttt{RPL\_AWAY}, \texttt{RPL\_WHOISOPERATOR}, \texttt{RPL\_ENDOFWHOIS}.
 \end{itemize}
 
 \end{document}
