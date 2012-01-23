@@ -553,9 +553,14 @@ class LIST(ChircTestCase):
         users = self._channels_connect(channels2)
         
         users["user1"].send_cmd("TOPIC #test1 :Topic One")
-        users["user4"].send_cmd("TOPIC #test2 :Topic Two")
-        users["user7"].send_cmd("TOPIC #test3 :Topic Three")
+        self._test_relayed_topic(users["user1"], from_nick="user1", channel="#test1", topic="Topic One")
         
+        users["user4"].send_cmd("TOPIC #test2 :Topic Two")
+        self._test_relayed_topic(users["user4"], from_nick="user4", channel="#test2", topic="Topic Two")
+
+        users["user7"].send_cmd("TOPIC #test3 :Topic Three")
+        self._test_relayed_topic(users["user7"], from_nick="user7", channel="#test3", topic="Topic Three")
+
         self._test_list(channels2, users["user10"], "user10",
                         expect_topics = {"#test1": "Topic One",
                                          "#test2": "Topic Two",
