@@ -7,6 +7,7 @@ import test_lusers_motd
 import test_whois
 import test_unknown
 import test_channel
+import test_modes
 
 alltests = unittest.TestSuite([
                                unittest.TestLoader().loadTestsFromModule(test_connection),
@@ -15,7 +16,8 @@ alltests = unittest.TestSuite([
                                unittest.TestLoader().loadTestsFromModule(test_lusers_motd),
                                unittest.TestLoader().loadTestsFromModule(test_whois),
                                unittest.TestLoader().loadTestsFromModule(test_unknown),
-                               unittest.TestLoader().loadTestsFromModule(test_channel)
+                               unittest.TestLoader().loadTestsFromModule(test_channel),
+                               unittest.TestLoader().loadTestsFromModule(test_modes)
                                ])
 
 DEBUG = False
