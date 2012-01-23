@@ -1,3 +1,5 @@
+FAST ?= 0
+
 all: chirc
 
 .PHONY: chirc tests
@@ -15,7 +17,7 @@ singletest: chirc
 	python -c "import tests.runners; tests.runners.single_runner('$(TEST)')" 
 
 grade: chirc
-	python -c "import tests.runners; tests.runners.grade_runner(csv=False)"
+	python -c "import tests.runners; tests.runners.grade_runner(csv=False, fast=$(FAST))"
 
 clean: 
 	$(MAKE) clean -C src/

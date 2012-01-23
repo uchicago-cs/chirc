@@ -58,10 +58,17 @@ def html_runner(html_file):
     result = runner.run(tests.alltests)
     return result
 
-def grade_runner(csv, htmlfile = None, exe = None):
+def grade_runner(csv, htmlfile = None, exe = None, fast = 0):
     if exe != None:
         tests.common.ChircTestCase.CHIRC_EXE = exe
 
+    if fast == 1:
+        tests.common.ChircTestCase.MESSAGE_TIMEOUT = 0.2
+        tests.common.ChircTestCase.INTERTEST_PAUSE = 0.0
+    else:
+        tests.common.ChircTestCase.MESSAGE_TIMEOUT = 1.0
+        tests.common.ChircTestCase.INTERTEST_PAUSE = 0.15
+        
     if htmlfile is not None:
         fp = file(htmlfile, 'wb')
         runner = HTMLTestRunner.HTMLTestRunner(

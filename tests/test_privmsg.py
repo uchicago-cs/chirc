@@ -28,8 +28,12 @@ class PRIVMSG(ChircTestCase):
             self._test_relayed_privmsg(client2, from_nick="user1", recip="user2", msg="Message %i" % (i+1))
 
 
-    def _test_multi_clients(self, numclients, nummsgs):
+    def _test_multi_clients(self, numclients, nummsgs, msg_timeout = None):
         clients = self._clients_connect(numclients)
+        
+        if msg_timeout is not None:
+            for nick, client in clients:
+                client.msg_timeout = msg_timeout
         
         msgs_sent = set()
         
@@ -78,11 +82,11 @@ class PRIVMSG(ChircTestCase):
 
     @score(category="PRIVMSG_NOTICE")
     def test_privmsg_multiple4(self):
-        self._test_multi_clients(10,2)
+        self._test_multi_clients(10,2, msg_timeout = 2.5)
 
     @score(category="PRIVMSG_NOTICE")
     def test_privmsg_multiple5(self):
-        self._test_multi_clients(20,5)
+        self._test_multi_clients(20,5, msg_timeout = 5)
 
     @score(category="PRIVMSG_NOTICE")
     def test_privmsg_nonick(self):
