@@ -44,6 +44,7 @@ class PRIVMSG(ChircTestCase):
                         msg = "Message %i from %s to %s" % (i+1, nick1, nick2)
                         client1.send_cmd("PRIVMSG %s :%s" % (nick2, msg))
                         msgs_sent.add((nick1, nick2, msg))
+                        time.sleep(0.000001)
 
         msgs_rcvd = []
         for (nick1, client1) in clients:
