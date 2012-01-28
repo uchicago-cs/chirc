@@ -35,6 +35,7 @@ PROJ_1B.add_category("MOTD", "MOTD", 5)
 PROJ_1B.add_category("LUSERS", "LUSERS", 10)
 PROJ_1B.add_category("WHOIS", "WHOIS", 10)
 PROJ_1B.add_category("ERR_UNKNOWN", "ERR_UNKNOWN", 2.5)
+PROJ_1B.add_category("ROBUST", "Robustness", 0)
     
 PROJ_1C.add_category("CHANNEL_JOIN", "JOIN", 15)
 PROJ_1C.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 15)

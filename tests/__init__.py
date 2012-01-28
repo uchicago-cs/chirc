@@ -8,6 +8,7 @@ import test_whois
 import test_unknown
 import test_channel
 import test_modes
+import test_robustness
 
 alltests = unittest.TestSuite([
                                unittest.TestLoader().loadTestsFromModule(test_connection),
@@ -17,7 +18,8 @@ alltests = unittest.TestSuite([
                                unittest.TestLoader().loadTestsFromModule(test_whois),
                                unittest.TestLoader().loadTestsFromModule(test_unknown),
                                unittest.TestLoader().loadTestsFromModule(test_channel),
-                               unittest.TestLoader().loadTestsFromModule(test_modes)
+                               unittest.TestLoader().loadTestsFromModule(test_modes),
+                               unittest.TestLoader().loadTestsFromModule(test_robustness)
                                ])
 
 DEBUG = False
