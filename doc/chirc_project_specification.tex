@@ -271,13 +271,13 @@ Leaving a channel is accomplished with the \texttt{PART} message, which follows 
 We are providing some basic code and Makefiles to use as a starting point in your project. It is located in the following GitHub repository:
 
 \begin{center}
-\url{https://github.com/uchicago-cmsc23300/chirc}
+\url{https://github.com/uchicago-cs/chirc}
 \end{center}
 
 To download the \chirc code, simply run the following:
 
 \begin{example}
-git clone -o upstream git://github.com/uchicago-cmsc23300/chirc.git
+git clone -o upstream git://github.com/uchicago-cs/chirc.git
 \end{example}
 
 This creates a Git repository in directory \texttt{chirc} with a clone of the \chirc repository from GitHub (we will explain what this means in the next section). 
@@ -298,8 +298,8 @@ Of course, these two repositories are certainly related, and it can be useful to
 You can list the remotes for a repository using \texttt{git remote -v}, which should show the following:
 
 \begin{example}
-upstream	git://github.com/uchicago-cmsc23300/chirc.git (fetch)
-upstream	git://github.com/uchicago-cmsc23300/chirc.git (push)
+upstream	git://github.com/uchicago-cs/chirc.git (fetch)
+upstream	git://github.com/uchicago-cs/chirc.git (push)
 \end{example}
 
 In this case, you have a single remote called \texttt{upstream} (we specified this name in the \texttt{-o} parameter to \texttt{git clone}). Take into account that \texttt{git remote} simply lists the URLs for the repositories, regardless of whether you have permission to use them or not. In particular, you don't actually have \emph{push} permissions on the \chirc repository on GitHub (only the instructors have \emph{push} permissions on that repository).  
@@ -401,7 +401,7 @@ This will write a brief summary to the console, and a more detailed report to \t
 Once you have formed a group for your project, the instructor will create a private repository for you on GitHub (you will need a GitHub account to access the repository; you will receive instructions about this when the time comes to create your GitHub repository). Only the students in your group will have access to that repository. It will be located in a URL of the following form (the instructor will send you the exact URL when the repository is created):
 
 \begin{center}
-\url{https://github.com/uchicago-cmsc23300-students/GROUP_NAME}
+\url{https://github.com/uchicago-cs/GROUP_NAME}
 \end{center}
 
 This is the repository that the graders will collect your project from. To push the commits from your local Git repository to it, you must set it up as a remote repository. You can do this by running the following:
@@ -413,10 +413,10 @@ git remote add origin git@github.com:uchicago-cmsc23300-students/GROUP_NAME.git
 This means your repository now has \emph{two} remotes. \texttt{git remote -v} will now show this:
 
 \begin{example}
-upstream	git://github.com/uchicago-cmsc23300/chirc.git (fetch)
-upstream	git://github.com/uchicago-cmsc23300/chirc.git (push)
-origin 		git@github.com:uchicago-cmsc23300-students/GROUP_NAME.git (fetch)
-origin 		git@github.com:uchicago-cmsc23300-students/GROUP_NAME.git (push)
+upstream	git://github.com/uchicago-cs/chirc.git (fetch)
+upstream	git://github.com/uchicago-cs/chirc.git (push)
+origin 		git@github.com:uchicago-cs/GROUP_NAME.git (fetch)
+origin 		git@github.com:uchicago-cs/GROUP_NAME.git (push)
 \end{example}
 
 To push all the changes in your local repository to your GitHub repository, just run the following:
