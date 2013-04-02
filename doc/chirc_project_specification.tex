@@ -285,7 +285,7 @@ This creates a Git repository in directory \texttt{chirc} with a clone of the \c
 \section{Git in a nutshell}
 \label{sec:git}
 
-If you are accustomed to using SVN, we suggest that, at first, you use Git in an ``SVN-like'' manner, without using some of Git's bells and whistles (in fact, you can find a mapping of SVN commands to Git commands in the Git SVN Crash Course: \url{https://git.wiki.kernel.org/articles/g/i/t/GitSvnCrashCourse_512d.html}).
+If you are accustomed to using SVN, we suggest that, at first, you use Git in an ``SVN-like'' manner, without using some of Git's bells and whistles (in fact, you can find a mapping of SVN commands to Git commands in the Git SVN Crash Course: \url{http://git.or.cz/course/svn.html}).
 
 Even so, you should take into account an important difference between Git and SVN: Git is a \emph{distributed} version control system, and SVN is a centralized one. In SVN, there is the notion of a \emph{central} (typically remote) SVN repository that you check out from, check into, and update from. You may have a \emph{working copy} on your local machine, but any time you commit code, the code is committed to the central SVN repository.
 
@@ -324,16 +324,16 @@ So, \emph{you do not have to wait until you have that private repository to star
 
 \subsection{Git References}
 
-To learn more about Git, you can find a pretty good introduction here:
+To learn more about Git, you can find a quick introduction here:
 
 \begin{center}
-\url{http://learn.github.com/p/intro.html}
+\url{http://learn.github.com/p/index.html}
 \end{center}
 
 If you are familiar with SVN, or other centralized version control systems, you may want to read the Git SVN crash course:
 
 \begin{center}
-\url{https://git.wiki.kernel.org/articles/g/i/t/GitSvnCrashCourse_512d.html}
+\url{http://git.or.cz/course/svn.html}
 \end{center}
 
 Finally, since we will be setting up a private GitHub repository for you, you may want to work through GitHub's \emph{Set Up Git} guide (\url{help.github.com/set-up-git-redirect/}) to make sure Git is correctly installed on your machine, and set up to work with GitHub.
@@ -407,7 +407,7 @@ Once you have formed a group for your project, the instructor will create a priv
 This is the repository that the graders will collect your project from. To push the commits from your local Git repository to it, you must set it up as a remote repository. You can do this by running the following:
 
 \begin{example}
-git remote add origin git@github.com:uchicago-cmsc23300-students/GROUP_NAME.git
+git remote add origin git@github.com:uchicago-cs/GROUP_NAME.git
 \end{example}
 
 This means your repository now has \emph{two} remotes. \texttt{git remote -v} will now show this:
