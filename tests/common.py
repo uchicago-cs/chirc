@@ -1,5 +1,6 @@
 import subprocess
 import telnetlib
+import random
 import unittest
 import time
 import replies
@@ -116,7 +117,7 @@ class ChircClient(object):
 
         while tries > 0:
             try:
-                self.client = telnetlib.Telnet("localhost", "7776", 1)
+                self.client = telnetlib.Telnet("localhost", `self.port`, 1)
                 break
             except Exception, e:
                 tries -= 1
@@ -150,12 +151,13 @@ class ChircTestCase(unittest.TestCase):
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         
+        self.port = random.randint(10000,60000)
         if tests.DEBUG:
             stdout = stderr = None
         else:
             stdout = open('/dev/null', 'w')
             stderr = subprocess.STDOUT 
-        self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", "7776", "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
+        self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
         rc = self.chirc_proc.poll()        
         if rc != None:
             self.fail("chirc process failed to start. rc = %i" % rc)
@@ -174,7 +176,7 @@ class ChircTestCase(unittest.TestCase):
         time.sleep(self.INTERTEST_PAUSE)
         
     def get_client(self):
-        c = ChircClient(msg_timeout = self.MESSAGE_TIMEOUT)
+        c = ChircClient(msg_timeout = self.MESSAGE_TIMEOUT, port=self.port)
         self.clients.append(c)
         return c
         
