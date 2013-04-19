@@ -58,7 +58,7 @@ def html_runner(html_file):
     result = runner.run(tests.alltests)
     return result
 
-def grade_runner(csv, htmlfile = None, exe = None, fast = 0):
+def grade_runner(csv, htmlfile = None, exe = None, randomize_ports=0, fast = 0):
     if exe != None:
         tests.common.ChircTestCase.CHIRC_EXE = exe
 
@@ -68,6 +68,11 @@ def grade_runner(csv, htmlfile = None, exe = None, fast = 0):
     else:
         tests.common.ChircTestCase.MESSAGE_TIMEOUT = 1.0
         tests.common.ChircTestCase.INTERTEST_PAUSE = 0.15
+
+    if randomize_ports == 1:
+        tests.common.ChircTestCase.RANDOMIZE_PORTS = True
+    else:
+        tests.common.ChircTestCase.RANDOMIZE_PORTS = False
         
     if htmlfile is not None:
         fp = file(htmlfile, 'wb')
