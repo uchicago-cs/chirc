@@ -147,20 +147,35 @@ class ChircTestCase(unittest.TestCase):
     CHIRC_EXE = "./chirc"
     MESSAGE_TIMEOUT = 1.0
     INTERTEST_PAUSE = 0.0
+    RANDOMIZE_PORTS = False
+    DEFAULT_PORT = 7776
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         
-        self.port = random.randint(10000,60000)
+        if self.RANDOMIZE_PORTS:
+            self.port = random.randint(10000,60000)
+        else:
+            self.port = self.DEFAULT_PORT
+
         if tests.DEBUG:
             stdout = stderr = None
         else:
             stdout = open('/dev/null', 'w')
-            stderr = subprocess.STDOUT 
-        self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
-        rc = self.chirc_proc.poll()        
-        if rc != None:
-            self.fail("chirc process failed to start. rc = %i" % rc)
+            stderr = subprocess.STDOUT
+ 
+        tries = 3
+
+        while tries > 0:
+            self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
+            rc = self.chirc_proc.poll()        
+            if rc != None:
+                self.fail("chirc process failed to start. rc = %i" % rc)
+                tries -=1
+                if self.RANDOMIZE_PORTS:
+                    self.port = random.randint(10000,60000)
+            else:
+                break        
             
         self.clients = []
         
