@@ -186,7 +186,9 @@ class ChircTestCase(unittest.TestCase):
         if rc != None:
             self.fail("chirc process failed during test. rc = %i" % rc)
             shutil.rmtree(self.tmpdir)
-        self.chirc_proc.terminate()
+        else:
+            self.chirc_proc.kill()
+        self.chirc_proc.wait()
         shutil.rmtree(self.tmpdir)
         time.sleep(self.INTERTEST_PAUSE)
         
