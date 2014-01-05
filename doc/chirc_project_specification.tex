@@ -123,7 +123,7 @@ PRIVMSG #cmsc23300 :Hello everybody
 QUIT :Done for the day, leaving
 \end{example}
 
-\item Some messages also include a \emph{prefix} before the command and the command parameters. The presence of a prefix is indicated with a single leading colon character. The prefix is used to indicate the \emph{origin} of the message. For example, when a user sends a message to a channel, the server will forward that message to all the user in the channel, and will include a prefix to specify the user that sent that message originally. We will explain the use of prefixes in more detail in the next section. 
+\item Some messages also include a \emph{prefix} before the command and the command parameters. The presence of a prefix is indicated with a single leading colon character. The prefix is used to indicate the \emph{origin} of the message. For example, when a user sends a message to a channel, the server will forward that message to all the users in the channel, and will include a prefix to specify the user that sent that message originally. We will explain the use of prefixes in more detail in the next section. 
 
 The following are examples of valid IRC messages with prefixes:
 
@@ -274,69 +274,8 @@ We are providing some basic code and Makefiles to use as a starting point in you
 \url{https://github.com/uchicago-cs/chirc}
 \end{center}
 
-To download the \chirc code, simply run the following:
+In this course, you will be provided with a private GitHub repository where your team can work collaboratively on this project. We will also be using your GitHub repository to collect and grade your code. Your instructor will provide specific instructions on how to set up your repository and how to make project submissions.
 
-\begin{example}
-git clone -o upstream git://github.com/uchicago-cs/chirc.git
-\end{example}
-
-This creates a Git repository in directory \texttt{chirc} with a clone of the \chirc repository from GitHub (we will explain what this means in the next section). 
-
-\section{Git in a nutshell}
-\label{sec:git}
-
-If you are accustomed to using SVN, we suggest that, at first, you use Git in an ``SVN-like'' manner, without using some of Git's bells and whistles (in fact, you can find a mapping of SVN commands to Git commands in the Git SVN Crash Course: \url{http://git.or.cz/course/svn.html}).
-
-Even so, you should take into account an important difference between Git and SVN: Git is a \emph{distributed} version control system, and SVN is a centralized one. In SVN, there is the notion of a \emph{central} (typically remote) SVN repository that you check out from, check into, and update from. You may have a \emph{working copy} on your local machine, but any time you commit code, the code is committed to the central SVN repository.
-
-Git, on the other hand, has a more general model where, for the same codebase,  there can be multiple repositories, and you have to explicitly state the relationship between them. In practice, it's not uncommon to have one repository that essentially acts as the ``reference'' repository (i.e., the one that is meant to contain the ``authoritative'' version of the code).
-
-So, for example, the \chirc repository on GitHub is simply ``a Git repository''. \texttt{git clone} then created a replica of that repository on your local machine, and this local copy is also just ``a Git repository'' (which happens to be an exact replica of the one on GitHub). This is an important distinction: you are not ``checking out'' code from a server, which is then tied to the server you checked it out from (as is the case with SVN). You are creating a \emph{clone} of an existing Git repository.
-
-Of course, these two repositories are certainly related, and it can be useful to keep track of that relationship. In fact, when cloning a repository, Git will keep track of the clone's \emph{origin} (sometimes called the \emph{upstream} repository). More specifically, a Git repository can track any number of \emph{remote} repositories. Depending on your permissions on those remote repositories, you may be able to \emph{push} changes from your repository to the remote repository (similar, but not exactly, to an \emph{svn commit}), and \emph{fetch} (or \emph{pull}) changes from the remote repository to your repository (e.g., if another developer pushed some changes, and you want to apply them to your own repository, similar to an \texttt{svn update}). 
-
-You can list the remotes for a repository using \texttt{git remote -v}, which should show the following:
-
-\begin{example}
-upstream	git://github.com/uchicago-cs/chirc.git (fetch)
-upstream	git://github.com/uchicago-cs/chirc.git (push)
-\end{example}
-
-In this case, you have a single remote called \texttt{upstream} (we specified this name in the \texttt{-o} parameter to \texttt{git clone}). Take into account that \texttt{git remote} simply lists the URLs for the repositories, regardless of whether you have permission to use them or not. In particular, you don't actually have \emph{push} permissions on the \chirc repository on GitHub (only the instructors have \emph{push} permissions on that repository).  
-
-However, you \emph{can} make as many changes as you want to your local clone of the \chirc repository, including making commits. This may sound odd if you're accustomed to SVN, since a commit in SVN always implies ``sending'' that commit to the SVN server. Instead, in Git, you make commits to your local repository. In fact, the only two commands you will need to use at first are just:
-
-\begin{example}
-git add \emph{file}
-\end{example}
-
-and 
-
-\begin{example}
-git commit
-\end{example}
-
-Like \texttt{svn add}, the \texttt{git add} command is used to indicate that ``I want to keep track of this file in version control''. However, in Git, it is also used with files that are \emph{already} under version control. More specifically, if you modify a file, you will need to \texttt{git add} it before you can commit it. Once you've added the files that you want to include in a commit, then you run \texttt{git commit}.
-
-Once we provide your team with a private GitHub repository (where you will have both pull \emph{and} push permissions), you will associate this repository with your local repository as an \emph{additional} remote repository. You will then be able to push those changes to that repository, which the instructors will also have access to. We describe how to use this repository in Section~\ref{sec:repo}. 
-
-So, \emph{you do not have to wait until you have that private repository to start working on your project}. Instead, you can work on your local repository (committing changes to your local repository) and, once you get your private GitHub repository, you should push your commits to it (we will explain how to do this in Section~\ref{sec:repo}).
-
-\subsection{Git References}
-
-To learn more about Git, you can find a quick introduction here:
-
-\begin{center}
-\url{http://learn.github.com/p/index.html}
-\end{center}
-
-If you are familiar with SVN, or other centralized version control systems, you may want to read the Git SVN crash course:
-
-\begin{center}
-\url{http://git.or.cz/course/svn.html}
-\end{center}
-
-Finally, since we will be setting up a private GitHub repository for you, you may want to work through GitHub's \emph{Set Up Git} guide (\url{help.github.com/set-up-git-redirect/}) to make sure Git is correctly installed on your machine, and set up to work with GitHub.
 
 \section{Building and Testing \chirc}
 \label{sec:build}
@@ -360,16 +299,16 @@ To modify the code, you should \emph{only} add files to the \texttt{src/} direct
 The provided code also includes a number of automated tests that will be used to verify the correctness of your implementation. You can run all the tests by running the following:
 
 \begin{example}
-make tests
+make grade
 \end{example}
 
-For each test that fails, \texttt{make tests} will print the error that caused the test to fail. This output may not be too useful when you first start running the test (and most of the tests will be failing). So, to run a single test, just run the following:
+For each test that fails, \texttt{make grade} will print the error that caused the test to fail. This output may not be too useful when you first start running the test (and most of the tests will be failing). So, to run a single test, just run the following:
 
 \begin{example}
 make singletest TEST=\emph{testname}
 \end{example}
 
-The test names are printed when a test fails in \texttt{make tests}. For example, if you see the following:
+The test names are printed when a test fails in \texttt{make grade}. For example, if you see the following:
 
 \begin{example}
 ======================================================================
@@ -394,61 +333,6 @@ make htmltests
 
 This will write a brief summary to the console, and a more detailed report to \texttt{report.html}. 
 
-
-\section{Using your GitHub repository}
-\label{sec:repo}
-
-Once you have formed a group for your project, the instructor will create a private repository for you on GitHub (you will need a GitHub account to access the repository; you will receive instructions about this when the time comes to create your GitHub repository). Only the students in your group will have access to that repository. It will be located in a URL of the following form (the instructor will send you the exact URL when the repository is created):
-
-\begin{center}
-\url{https://github.com/uchicago-cs/GROUP_NAME}
-\end{center}
-
-This is the repository that the graders will collect your project from. To push the commits from your local Git repository to it, you must set it up as a remote repository. You can do this by running the following:
-
-\begin{example}
-git remote add origin git@github.com:uchicago-cs/GROUP_NAME.git
-\end{example}
-
-This means your repository now has \emph{two} remotes. \texttt{git remote -v} will now show this:
-
-\begin{example}
-upstream	git://github.com/uchicago-cs/chirc.git (fetch)
-upstream	git://github.com/uchicago-cs/chirc.git (push)
-origin 		git@github.com:uchicago-cs/GROUP_NAME.git (fetch)
-origin 		git@github.com:uchicago-cs/GROUP_NAME.git (push)
-\end{example}
-
-To push all the changes in your local repository to your GitHub repository, just run the following:
-
-\begin{example}
-git push origin master
-\end{example}
-
-Take into account that, to be able to run this command (which will write to your GitHub repository), you must be authorized to access your GitHub repository from your machine. This is done by adding your SSH key to your GitHub account. You can find instructions on how to do this here: \url{help.github.com/set-up-git-redirect/}.
-
-Furthermore, you can modify the \texttt{.git/config} file so that the default remote is \texttt{origin}, instead of \texttt{upstream} (the read-only repository with the original code). Just make the following change:
-
-\begin{example}
-[branch "master"]
-	remote = \emph{\textbf{origin}}
-	merge = refs/heads/master
-\end{example}
-
-This will allow you to push just by running this:
-
-\begin{example}
-git push
-\end{example}
-
-Finally, if there are any changes in the upstream repository (the one with the original code; e.g., if the instructors find a bug in the code and fix it), you can pull those changes into your repository by running the following:
-
-\begin{example}
-git pull upstream master
-\end{example}
-
-\pagebreak
-
 \section{Grading}
 \label{sec:grading}
 
@@ -457,6 +341,8 @@ For each part of the project, 50\% of the project grade will be determined by th
 The remaining 50\% of the project grade will be determined by the ``design'' of your code. We will read through your code and check whether you used the appropriate data structures, synchronization primitives, etc. in the various components of your solution. In our experience, the ``design'' grade is typically very similar to the ``tests'' grade so, if you pass 90\% of the tests, it is likely you will get a ``design'' grade in that vicinity. However, the type of feedback you get for this grade is more detailed (instead of a list of automated tests that you pass/fail).
 
 In the specification of what you must do in each project, each part is accompanied by a number of points (e.g., \points{10}). This refers to the design points for that specific part. The amount of points for the automated tests will be roughly, but not exactly, the same (see the report generated by \texttt{make htmltests} for the exact points allocated to each automated test).
+
+\pagebreak
 
 \section{Tips}
 \label{sec:tips}
@@ -472,7 +358,7 @@ In the specification of what you must do in each project, each part is accompani
 telnet irc.freenode.net 6667
 \end{example}
 
-\item Similarly, you can also test your implementation with an existing IRC client. We recommend using \texttt{irssi} (\url{http://irssi.org/}), which is installed on the Maclab Linux machines.
+\item Similarly, you can also test your implementation with an existing IRC client. We recommend using \texttt{irssi} (\url{http://irssi.org/}), which is installed on the CS Linux machines.
 \item Finally, it can sometimes be useful to take a peek at the exact messages that are being exchanged between a client and your server. You can use network sniffers like \texttt{tcpdump} and Wireshark. The console version of Wireshark, \texttt{tshark} can be useful to debug the automated tests. In particular, you can capture the traffic of a test (run with \texttt{make singletest}) by running \texttt{tshark} like this:
 
 \begin{example}
