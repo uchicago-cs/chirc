@@ -1,5 +1,6 @@
 FAST ?= 0
 RANDOM_PORTS ?= 1
+CATEGORY ?= ALL
 
 all: chirc
 
@@ -18,7 +19,7 @@ singletest: chirc
 	python -c "import tests.runners; tests.runners.single_runner('$(TEST)')" 
 
 grade: chirc
-	python -c "import tests.runners; tests.runners.grade_runner(csv=False, randomize_ports=$(RANDOM_PORTS), fast=$(FAST))"
+	python -c "import tests.runners; tests.runners.grade_runner(csv=False, category='$(CATEGORY)', randomize_ports=$(RANDOM_PORTS), fast=$(FAST))"
 
 clean: 
 	$(MAKE) clean -C src/
