@@ -596,7 +596,7 @@ class ChircTestCase(unittest.TestCase):
     def _test_names_single(self, reply, nick, expect_channel = None, expect_names = None):        
         if expect_channel is not None:
             if expect_channel == "*":
-                self.assertEqual(reply.params[1], "*", "Expected first parameter to be '=': %s" % reply._s)
+                self.assertEqual(reply.params[1], "=", "Expected first parameter to be '=': %s" % reply._s)
                 self.assertEqual(reply.params[2], "*", "Expected second parameter to be '*': %s" % reply._s)
             else:
                 self.assertEqual(reply.params[1], "=", "Expected first parameter to be '=': %s" % reply._s)
