@@ -523,7 +523,7 @@ class ChircTestCase(unittest.TestCase):
                 r.append(reply)
 
             reply = self.get_reply(client, expect_code = replies.RPL_ENDOFMOTD, expect_nick = nick, 
-                                   expect_nparams = 1, long_param_re = "- End of MOTD command")     
+                                   expect_nparams = 1, long_param_re = "End of MOTD command")     
             r.append(reply)
 
         return r
