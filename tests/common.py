@@ -613,8 +613,13 @@ class ChircTestCase(unittest.TestCase):
                                expect_nparams = 3)        
         self._test_names_single(reply, nick, expect_channel, expect_names)
             
+        if expect_channel is not None:
+            expect_short_params = [expect_channel]
+        else:
+            expect_short_params = None
+            
         self.get_reply(client, expect_code = replies.RPL_ENDOFNAMES, expect_nick = nick,
-                       expect_nparams = 2)        
+                       expect_short_params = expect_short_params, expect_nparams = 2)        
     
         
     def _connect_user(self, nick, username):
