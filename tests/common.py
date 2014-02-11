@@ -1,6 +1,6 @@
 import subprocess
 import telnetlib
-import random
+import socket
 import unittest
 import time
 import replies
@@ -153,29 +153,24 @@ class ChircTestCase(unittest.TestCase):
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         
-        if self.RANDOMIZE_PORTS:
-            self.port = random.randint(10000,60000)
-        else:
-            self.port = self.DEFAULT_PORT
-
         if tests.DEBUG:
             stdout = stderr = None
         else:
             stdout = open('/dev/null', 'w')
             stderr = subprocess.STDOUT
- 
-        tries = 3
 
-        while tries > 0:
-            self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
-            rc = self.chirc_proc.poll()        
-            if rc != None:
-                self.fail("chirc process failed to start. rc = %i" % rc)
-                tries -=1
-                if self.RANDOMIZE_PORTS:
-                    self.port = random.randint(10000,60000)
-            else:
-                break        
+        if self.RANDOMIZE_PORTS:
+            temp_socket = socket.socket()
+            temp_socket.bind(('', 0)) # request a port from the operating system
+            self.port = temp_socket.getsockname()[1]
+            temp_socket.close()
+        else:
+            self.port = self.DEFAULT_PORT
+
+        self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
+        rc = self.chirc_proc.poll()
+        if rc != None:
+            self.fail("chirc process failed to start. rc = %i" % rc)
             
         self.clients = []
         
