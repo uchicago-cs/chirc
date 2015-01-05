@@ -306,7 +306,7 @@ class TOPIC(ChircTestCase):
                                long_param_re = "You're not on that channel")             
     
     @score(category="CHANNEL_TOPIC")
-    def test_topic4(self):
+    def test_topic5(self):
         client1 = self._connect_user("user1", "User One")
         
         client1.send_cmd("TOPIC #test :This is the channel's topic")
@@ -316,7 +316,7 @@ class TOPIC(ChircTestCase):
                                long_param_re = "You're not on that channel")       
         
     @score(category="CHANNEL_TOPIC")
-    def test_topic5(self):
+    def test_topic6(self):
         client1 = self._connect_user("user1", "User One")
         client2 = self._connect_user("user2", "User Two")
         
@@ -329,7 +329,7 @@ class TOPIC(ChircTestCase):
                                long_param_re = "You're not on that channel")       
 
     @score(category="CHANNEL_TOPIC")
-    def test_topic6(self):
+    def test_topic7(self):
         client1 = self._connect_user("user1", "User One")
         client2 = self._connect_user("user2", "User Two")
        
@@ -345,7 +345,7 @@ class TOPIC(ChircTestCase):
                                long_param_re = "You're not on that channel")       
   
     @score(category="CHANNEL_TOPIC")
-    def test_topic7(self):
+    def test_topic8(self):
         client1 = self._connect_user("user1", "User One")
         client2 = self._connect_user("user2", "User Two")
        
@@ -359,7 +359,7 @@ class TOPIC(ChircTestCase):
         self._test_join(client2, "user2", "#test", expect_topic=topic)    
         
     @score(category="CHANNEL_TOPIC")
-    def test_topic8(self):
+    def test_topic9(self):
         clients = self._clients_connect(10, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -371,7 +371,7 @@ class TOPIC(ChircTestCase):
             self._test_relayed_topic(client, from_nick=nick1, channel="#test", topic=topic)    
             
     @score(category="CHANNEL_TOPIC")
-    def test_topic9(self):
+    def test_topic10(self):
         clients = self._clients_connect(10)
         
         nick1, client1 = clients[0]
