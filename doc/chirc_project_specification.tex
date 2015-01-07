@@ -42,9 +42,9 @@ In this project, you will implement a simple Internet Relay Chat (IRC) server ca
  \item To allow you to become comfortable with high-level networking concepts before we move on to the lower-level concepts in this course.
 \end{enumerate}
 
-This project is divided into three parts. The first part is meant as a relatively short warmup exercise, and you should be able to do it just by applying what you learned about network sockets in CMSC 15400. The other two parts are more complex, but should still be doable if you've taken CMSC 15400 (we will, nonetheless, be covering some additional topics in the first lectures that will come in handy to do this project).
+This project is divided into three parts. The first part is meant as a relatively short warmup exercise, and you should be able to do it just by applying what you learned about network sockets in CMSC 15400. The other two parts are more complex, but should still be doable if you've taken CMSC 15400 (we will, nonetheless, be providing a review of sockets and concurrent programming in the first two discussion sessions of CMSC 23300).
 
-This document is divided into three parts: Sections \ref{sec:irc} through \ref{sec:examples} provide an overview of IRC and provide several examples of valid IRC communications; Sections \ref{sec:code} to \ref{sec:repo} describe how to get the \chirc code, and how to build it and upload it to your code repository; finally, Sections \ref{sec:grading} to \ref{sec:proj1c} describe how the project will be graded, and the specific requirements of the three parts the project is divided into.
+This document is divided into three parts: Sections \ref{sec:irc} through \ref{sec:examples} provide an overview of IRC and provide several examples of valid IRC communications; Sections \ref{sec:code} and \ref{sec:build} describe how to get the \chirc code and how to build it; finally, Sections \ref{sec:grading} to \ref{sec:proj1c} describe how the project will be graded, and the specific requirements of the three parts the project is divided into.
 
 \section{Internet Relay Chat}
 \label{sec:irc}
@@ -302,13 +302,48 @@ The provided code also includes a number of automated tests that will be used to
 make grade
 \end{example}
 
-For each test that fails, \texttt{make grade} will print the error that caused the test to fail. This output may not be too useful when you first start running the test (and most of the tests will be failing). So, to run a single test, just run the following:
+This output may not be too useful when you first start working on the project (and most of the tests will be failing), so you can also run only a single \emph{category} of tests like this:
 
 \begin{example}
-make singletest TEST=\emph{testname}
+make grade CATEGORY=\emph{category}
 \end{example}
 
-The test names are printed when a test fails in \texttt{make grade}. For example, if you see the following:
+Where \texttt{\emph{category}} is one of the following:
+
+\begin{enumerate}
+ \item Project 1a
+ \begin{itemize}
+  \item \verb+BASIC_CONNECTION+ 
+ \end{itemize}
+
+ \item Project 1b
+ \begin{itemize}
+\item \verb+CONNECTION_REGISTRATION+
+\item \verb+PRIVMSG_NOTICE+
+\item \verb+PING_PONG+
+\item \verb+MOTD+
+\item \verb+LUSERS+
+\item \verb+WHOIS+
+\item \verb+ERR_UNKNOWN+
+\item \verb+ROBUST+
+ \end{itemize}
+
+ \item Project 1c
+ \begin{itemize}
+\item \verb+CHANNEL_JOIN+
+\item \verb+CHANNEL_PRIVMSG_NOTICE+
+\item \verb+CHANNEL_PART+
+\item \verb+CHANNEL_TOPIC+
+\item \verb+MODES+
+\item \verb+AWAY+
+\item \verb+NAMES+
+\item \verb+LIST+
+\item \verb+WHO+
+\item \verb+UPDATE_1B+
+ \end{itemize}
+\end{enumerate}
+
+When a specific test fails in \texttt{make grade} (with or without \texttt{CATEGORY}), the test output will include the \emph{name} of the test that is failing. For example, if you see the following:
 
 \begin{example}
 ======================================================================
@@ -336,7 +371,7 @@ This will write a brief summary to the console, and a more detailed report to \t
 \section{Grading}
 \label{sec:grading}
 
-For each part of the project, 50\% of the project grade will be determined by the number of automated tests your solution passes successfully, as determined by running \texttt{make tests}. We will use the exact same tests provided in the upstream repository (i.e., there are no additional secret tests that only the graders have access to), and we will let you know what tests will be used specifically for each project part. So, if your solution passes 90\% of the tests before the deadline, you can be certain that you will get at least 45 out of 100 points (i.e., 90\% of 50).
+For each part of the project, 50\% of the project grade will be determined by the number of automated tests your solution passes successfully, as determined by running \texttt{make grade}. We will use the exact same tests provided in the upstream repository (i.e., there are no additional secret tests that only the graders have access to). So, if your solution passes 90\% of the tests before the deadline, you can be certain that you will get at least 45 out of 100 points (i.e., 90\% of 50).
 
 The remaining 50\% of the project grade will be determined by the ``design'' of your code. We will read through your code and check whether you used the appropriate data structures, synchronization primitives, etc. in the various components of your solution. In our experience, the ``design'' grade is typically very similar to the ``tests'' grade so, if you pass 90\% of the tests, it is likely you will get a ``design'' grade in that vicinity. However, the type of feedback you get for this grade is more detailed (instead of a list of automated tests that you pass/fail).
 
