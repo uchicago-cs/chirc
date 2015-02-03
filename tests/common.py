@@ -168,10 +168,14 @@ class ChircTestCase(unittest.TestCase):
 
         while tries > 0:
             self.chirc_proc = subprocess.Popen([os.path.abspath(ChircTestCase.CHIRC_EXE), "-p", `self.port`, "-o", OPER_PASSWD], stdout=stdout, stderr=stderr, cwd = self.tmpdir)
+            time.sleep(0.01)  #Ensures the subprocess has had enough time to quit
             rc = self.chirc_proc.poll()        
             if rc != None:
-                self.fail("chirc process failed to start. rc = %i" % rc)
                 tries -=1
+                
+                # Without this if condition, the test fails at the first try and never gets around to the other two attempts.
+                if tries ==0:
+                    self.fail("chirc process failed to start. rc = %i" % rc)
                 if self.RANDOMIZE_PORTS:
                     self.port = random.randint(10000,60000)
             else:
