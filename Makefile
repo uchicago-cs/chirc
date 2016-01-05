@@ -23,4 +23,4 @@ tests:
 
 grade: 
 	@test -s tests/report.json || { echo; echo "Test report file (tests/report.json) does not exist."; echo "Cannot generate grade without it. Make sure you run the tests first."; echo; exit 1; }
-	python3 tests/grade.py --tests-file tests/alltests --report-file tests/report.json
+	python3 tests/grade.py --tests-file ./alltests --report-file tests/report.json

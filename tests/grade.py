@@ -66,13 +66,14 @@ with open(args.report_file) as f:
     results = json.load(f)
 
 for test in results["report"]["tests"]:
-    category = test["call"]["metadata"]["category"]
-    test_id = test["name"]
-    outcome = test["outcome"]
-    run_test_ids.add(test_id)
+    if "call" in test:
+        category = test["call"]["metadata"]["category"]
+        test_id = test["name"]
+        outcome = test["outcome"]
+        run_test_ids.add(test_id)
     
-    if outcome == "passed":
-        tests[category][test_id] = 1
+        if outcome == "passed":
+            tests[category][test_id] = 1
     
 not_run = all_test_ids.difference(run_test_ids)
 
