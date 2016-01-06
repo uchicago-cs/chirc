@@ -62,7 +62,7 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
     }
 
     flockfile(stdout);
-    printf("[%s] %6s", buf, levelstr);
+    printf("[%s] %6s ", buf, levelstr);
 
     vprintf(fmt, argptr);
     printf("\n");
