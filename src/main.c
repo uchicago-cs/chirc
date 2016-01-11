@@ -2,7 +2,7 @@
  *
  *  CMSC 23300 / 33300 - Networks and Distributed Systems
  *
- *  main() code for chirc project
+ *  main.c: main() code for chirc project
  *
  */
 #include <stdio.h>
@@ -34,17 +34,17 @@ int main(int argc, char *argv[])
             verbosity = -1;
             break;
         case 'h':
-            fprintf(stderr, "Usage: chirc -o PASSWD [-p PORT] [(-q|-v|-vv)]\n");
+            chilog(CRITICAL, "Usage: chirc -o PASSWD [-p PORT] [(-q|-v|-vv)]\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "ERROR: Unknown option -%c\n", opt);
+            chilog(CRITICAL, "ERROR: Unknown option -%c\n", opt);
             exit(-1);
         }
 
     if (!passwd)
     {
-        fprintf(stderr, "ERROR: You must specify an operator password\n");
+        chilog(CRITICAL, "ERROR: You must specify an operator password\n");
         exit(-1);
     }
 
@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
         break;
     }
 
-	/* Your code goes here */
+    /* Your code goes here */
 
-	return 0;
+    return 0;
 }
 

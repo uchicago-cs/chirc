@@ -1,5 +1,5 @@
 /*
- *  Logging functions
+ *  log.h: Logging functions
  *
  *  Use these functions to print log messages. Each message has an
  *  associated log level:

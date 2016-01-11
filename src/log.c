@@ -1,7 +1,7 @@
 /*
  *  chirc
  *
- *  Logging functions
+ *  log.c: Logging functions
  *
  *  see log.h for descriptions of functions, parameters, and return values.
  *
