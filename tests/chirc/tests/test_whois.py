@@ -43,8 +43,8 @@ class TestWHOIS(object):
                 channel = qchannel
                 
             users = channels[channel]
-            
-            assert modchar + nick in users, "RPL_WHOISCHANNELS: Expected {} to be in {} (for channels '{}')" % (modchar + nick, channel, channelstring)
+
+            assert modchar + nick in users, "RPL_WHOISCHANNELS: Expected {} to be in {} (for channels '{}')".format(modchar + nick, channel, channelstring)            
         
     @pytest.mark.category("UPDATE_1B")
     def test_whois2(self, irc_session):
