@@ -5,6 +5,10 @@ from chirc import replies
 class TestUnknownCommands(object):
 
     def test_unknown1(self, irc_session):
+        """
+        Test sending an unknown command.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("VERSION")
@@ -15,6 +19,10 @@ class TestUnknownCommands(object):
         
         
     def test_unknown2(self, irc_session):
+        """
+        Test sending an unknown command.
+        """
+
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("WHOWAS user2")
@@ -25,6 +33,10 @@ class TestUnknownCommands(object):
 
 
     def test_unknown3(self, irc_session):
+        """
+        Test sending an unknown command.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("KILL user2 :Bad user")

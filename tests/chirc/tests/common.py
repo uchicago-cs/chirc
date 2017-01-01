@@ -278,9 +278,7 @@ class IRCSession():
                                     explanation = "Expected MODE's prefix to be nick '{}'".format(nick),
                                     irc_msg = reply)                
             else:
-                with pytest.raises(ReplyTimeoutException):
-                    self.get_reply(client)                 
-            
+                self.get_reply(client, expect_timeout = True)            
         
     def set_channel_mode(self, client, nick, channel, mode = None, nick_mode = None, expect_mode = None, 
                       expect_wrong_channel=False, expect_wrong_mode = False, expect_ops_needed = False,
@@ -336,14 +334,36 @@ class IRCSession():
     # Message/reply getters
 
     def get_reply(self, client, expect_code = None, expect_nick = None, expect_nparams = None,
-                  expect_short_params = None, long_param_re = None, long_param_values = None):
-        msg = client.get_message()
+                  expect_short_params = None, long_param_re = None, long_param_values = None,
+                  expect_timeout = False):
+        try:
+            msg = client.get_message()
+            
+            if expect_timeout:
+                pytest.fail("Was not expecting a reply, but got one:\n" + msg.raw(bookends=True))                
+        except EOFError:
+            pytest.fail("Server closed connection unexpectedly. Possible segfault in server?")                
+        except ReplyTimeoutException as rte:
+            if expect_timeout:
+                return None
+            
+            if len(rte.bytes_received) == 0:
+                failmsg = "Expected a reply but got none (no bytes received)"
+            else:
+                failmsg = "Expected a reply but did not get valid reply terminated with \\r\\n. Bytes received:\n|||{}|||".format(rte.bytes_received)
+            pytest.fail(failmsg)  
+            
         self.verify_reply(msg, expect_code, expect_nick, expect_nparams, expect_short_params, long_param_re, long_param_values)
+        
         return msg
     
     def get_message(self, client, expect_prefix = None, expect_cmd = None, expect_nparams = None,
                   expect_short_params = None, long_param_re = None, long_param_values = None):
-        msg = client.get_message()
+        try:
+            msg = client.get_message()
+        except EOFError:
+            pytest.fail("Server closed connection unexpectedly. Possible segfault in server?")
+            
         self.verify_message(msg, expect_prefix, expect_cmd, 
                            expect_nparams, expect_short_params, 
                            long_param_re, long_param_values)
@@ -493,6 +513,16 @@ class IRCSession():
             r.append(reply)
 
         return r
+    
+    def verify_disconnect(self, client):
+        try:
+            client.get_message()
+        except EOFError:
+            return
+        except ReplyTimeoutException:
+            pytest.fail("Server did not close connection after QUIT")
+        else:
+            pytest.fail("Server did not close connection after QUIT")                
     
     def verify_join(self, client, nick, channel, expect_topic = None, expect_names = None):
         self.verify_relayed_join(client, nick, channel)

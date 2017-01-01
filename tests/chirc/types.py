@@ -12,7 +12,8 @@ class ServerDisconnectedException(Exception):
     pass
 
 class ReplyTimeoutException(Exception):
-    pass
+    def __init__(self, bytes_received):
+        self.bytes_received = bytes_received
 
 class MessageNotWellFormedException(Exception):
     def __init__(self, reason, irc_msg):

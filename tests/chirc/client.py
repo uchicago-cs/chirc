@@ -34,7 +34,7 @@ class ChircClient(object):
         msg = self.client.read_until(str.encode("\r\n"), timeout=self.msg_timeout)
         msg = msg.decode()
         if msg[-2:] != "\r\n":
-            raise ReplyTimeoutException()
+            raise ReplyTimeoutException(msg)
         msg = IRCMessage(msg)
         return msg
 

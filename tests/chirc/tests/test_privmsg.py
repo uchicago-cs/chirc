@@ -1,15 +1,16 @@
-import time
 import re
 import pytest
 
 from chirc import replies
-from chirc.types import ReplyTimeoutException
-
 
 @pytest.mark.category("PRIVMSG_NOTICE")
 class TestPRIVMSG(object):
 
     def test_privmsg1(self, irc_session):
+        """
+        Test sending a PRIVMSG from user1 to user2
+        """        
+        
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
         
@@ -19,6 +20,10 @@ class TestPRIVMSG(object):
 
 
     def test_privmsg2(self, irc_session):
+        """
+        Test sending one hundred PRIVMSGs from user1 to user2
+        """        
+
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
 
@@ -30,6 +35,11 @@ class TestPRIVMSG(object):
 
 
     def _test_multi_clients(self, irc_session, numclients, nummsgs, msg_timeout = None):
+        """
+        Connects `numclients` clients to the server, and then has them send
+        `nummsgs` messages to each other.
+        """
+        
         clients = irc_session.connect_clients(numclients)
         
         if msg_timeout is not None:
@@ -79,21 +89,41 @@ class TestPRIVMSG(object):
             pairs_seen[(from_nick, to_nick)] = msgnum
             
     def test_privmsg_multiple1(self, irc_session):
+        """
+        Test two users sending one message to each other.        
+        """
         self._test_multi_clients(irc_session,2,1)
 
     def test_privmsg_multiple2(self, irc_session):
+        """
+        Test two users sending two messages to each other.        
+        """
         self._test_multi_clients(irc_session,2,2)
 
     def test_privmsg_multiple3(self, irc_session):
+        """
+        Test four users sending two messages to each other.        
+        """
         self._test_multi_clients(irc_session,4,2)
 
     def test_privmsg_multiple4(self, irc_session):
+        """
+        Test ten users sending two messages to each other.        
+        """        
         self._test_multi_clients(irc_session,10,2, msg_timeout = 2.5)
 
     def test_privmsg_multiple5(self, irc_session):
+        """
+        Test twenty users sending five messages to each other.        
+        """
         self._test_multi_clients(irc_session,20,5, msg_timeout = 5)
 
     def test_privmsg_nonick(self, irc_session):
+        """
+        Test sending a message to a user (user2) that does
+        not exist in the server
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("PRIVMSG user2 :Hello")
@@ -107,6 +137,10 @@ class TestPRIVMSG(object):
 class TestNOTICE(object):
     
     def test_notice(self, irc_session):
+        """
+        Test sending a NOTICE from user1 to user2
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
         
@@ -115,11 +149,14 @@ class TestNOTICE(object):
         irc_session.verify_relayed_notice(client2, from_nick="user1", recip="user2", msg="Hello")        
     
     def test_notice_nonick(self, irc_session):
+        """
+        Test sending a NOTICE to a user (user2) that doesn't exist in the server.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("NOTICE user2 :Hello")
 
-        with pytest.raises(ReplyTimeoutException):
-            irc_session.get_reply(client1)    
+        irc_session.get_reply(client1, expect_timeout = True)
           
     

@@ -3,7 +3,7 @@
 import argparse
 import json
 
-class Project(object):
+class Assignment(object):
     
     def __init__(self, name, points):
         self.name = name
@@ -16,33 +16,33 @@ class Project(object):
         self.lcategories.append(cid)
     
 
-PROJ_1A = Project("Project 1a", 50)    
-PROJ_1B = Project("Project 1b", 100)    
-PROJ_1C = Project("Project 1c", 100)    
+ASSIGNMENT_1 = Assignment("Assignment 1", 50)    
+ASSIGNMENT_2 = Assignment("Assignment 2", 100)    
+ASSIGNMENT_3 = Assignment("Assignment 3", 100)    
 
-PROJECTS = [PROJ_1A, PROJ_1B, PROJ_1C]
+ASSIGNMENTS = [ASSIGNMENT_1, ASSIGNMENT_2, ASSIGNMENT_3]
 
-PROJ_1A.add_category("BASIC_CONNECTION", "Basic Connection", 50)
+ASSIGNMENT_1.add_category("BASIC_CONNECTION", "Basic Connection", 50)
 
-PROJ_1B.add_category("CONNECTION_REGISTRATION", "Connection Registration", 35)
-PROJ_1B.add_category("PRIVMSG_NOTICE", "PRIVMSG and NOTICE", 30)
-PROJ_1B.add_category("PING_PONG", "PING and PONG", 2.5)
-PROJ_1B.add_category("MOTD", "MOTD", 5)    
-PROJ_1B.add_category("LUSERS", "LUSERS", 10)
-PROJ_1B.add_category("WHOIS", "WHOIS", 10)
-PROJ_1B.add_category("ERR_UNKNOWN", "ERR_UNKNOWN", 2.5)
-PROJ_1B.add_category("ROBUST", "Robustness", 5)
+ASSIGNMENT_2.add_category("CONNECTION_REGISTRATION", "Connection Registration", 35)
+ASSIGNMENT_2.add_category("PRIVMSG_NOTICE", "PRIVMSG and NOTICE", 30)
+ASSIGNMENT_2.add_category("PING_PONG", "PING and PONG", 2.5)
+ASSIGNMENT_2.add_category("MOTD", "MOTD", 5)    
+ASSIGNMENT_2.add_category("LUSERS", "LUSERS", 10)
+ASSIGNMENT_2.add_category("WHOIS", "WHOIS", 10)
+ASSIGNMENT_2.add_category("ERR_UNKNOWN", "ERR_UNKNOWN", 2.5)
+ASSIGNMENT_2.add_category("ROBUST", "Robustness", 5)
     
-PROJ_1C.add_category("CHANNEL_JOIN", "JOIN", 15)
-PROJ_1C.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 15)
-PROJ_1C.add_category("CHANNEL_PART", "PART", 10)
-PROJ_1C.add_category("CHANNEL_TOPIC", "TOPIC", 10)
-PROJ_1C.add_category("MODES", "User and channel modes", 25)
-PROJ_1C.add_category("AWAY", "AWAY", 5)
-PROJ_1C.add_category("NAMES", "NAMES", 5)
-PROJ_1C.add_category("LIST", "LIST", 5)
-PROJ_1C.add_category("WHO", "WHO", 5)
-PROJ_1C.add_category("UPDATE_1B", "UPDATE_1B", 5)
+ASSIGNMENT_3.add_category("CHANNEL_JOIN", "JOIN", 15)
+ASSIGNMENT_3.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 15)
+ASSIGNMENT_3.add_category("CHANNEL_PART", "PART", 10)
+ASSIGNMENT_3.add_category("CHANNEL_TOPIC", "TOPIC", 10)
+ASSIGNMENT_3.add_category("MODES", "User and channel modes", 25)
+ASSIGNMENT_3.add_category("AWAY", "AWAY", 5)
+ASSIGNMENT_3.add_category("NAMES", "NAMES", 5)
+ASSIGNMENT_3.add_category("LIST", "LIST", 5)
+ASSIGNMENT_3.add_category("WHO", "WHO", 5)
+ASSIGNMENT_3.add_category("UPDATE_ASSIGNMENT2", "Update Assignment 2", 5)
 
 
 parser = argparse.ArgumentParser()
@@ -82,25 +82,25 @@ if len(not_run) > 0 and not args.csv:
 
 
 scores = {}
-for proj in PROJECTS:
-    scores[proj.name] = {}
-    for category in proj.lcategories:
+for assignment in ASSIGNMENTS:
+    scores[assignment.name] = {}
+    for category in assignment.lcategories:
         num_total = len(tests[category])
         num_success = sum(tests[category].values())
         num_failed = num_total - num_success
-        scores[proj.name][category] = (num_success, num_failed, num_total)
+        scores[assignment.name][category] = (num_success, num_failed, num_total)
 
 pscores = []
-for proj in PROJECTS:
+for assignment in ASSIGNMENTS:
     pscore = 0.0
     if not args.csv:
-        print(proj.name)
+        print(assignment.name)
         print("=" * 73)
         print("%-35s %-6s / %-10s  %-6s / %-10s" % ("Category", "Passed", "Total", "Score", "Points"))
         print("-" * 73)
-    for cid in proj.lcategories:
-        (num_success, num_failed, num_total) = scores[proj.name][cid]
-        cname, cpoints = proj.categories[cid]
+    for cid in assignment.lcategories:
+        (num_success, num_failed, num_total) = scores[assignment.name][cid]
+        cname, cpoints = assignment.categories[cid]
 
         if num_total == 0:
             cscore = 0.0
@@ -113,7 +113,7 @@ for proj in PROJECTS:
             print("%-35s %-6i / %-10i  %-6.2f / %-10.2f" % (cname, num_success, num_total, cscore, cpoints))
     if not args.csv:
         print("-" * 73)
-        print("%54s = %-6.2f / %-10i" % ("TOTAL", pscore, proj.points))
+        print("%54s = %-6.2f / %-10i" % ("TOTAL", pscore, assignment.points))
         print("=" * 73)
         print()
     pscores.append(pscore)

@@ -1,6 +1,5 @@
 import pytest
 from chirc.tests.fixtures import channels1, channels2, channels3, channels4
-from chirc.types import ReplyTimeoutException
 from chirc import replies
 
 @pytest.mark.category("CHANNEL_JOIN")
@@ -8,6 +7,11 @@ class TestJOIN(object):
 
 
     def test_join1(self, irc_session):
+        """
+        A single user connects to the server and joins a channel
+        that does not already exist.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("JOIN #test")
@@ -16,6 +20,12 @@ class TestJOIN(object):
         
 
     def test_join2(self, irc_session):
+        """
+        A single user connects to the server and joins a channel
+        that does not already exist. The user tries to join it again,
+        which results in no reply.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("JOIN #test")
@@ -23,11 +33,14 @@ class TestJOIN(object):
         irc_session.verify_join(client1, "user1", "#test")
 
         client1.send_cmd("JOIN #test")
-        with pytest.raises(ReplyTimeoutException):
-            irc_session.get_reply(client1)        
+        irc_session.get_reply(client1, expect_timeout = True)
         
 
     def test_join3(self, irc_session):
+        """
+        Five clients connect to the server and join the same channel
+        """
+        
         clients = irc_session.connect_clients(5)
 
         for (nick, client) in clients:
@@ -36,6 +49,12 @@ class TestJOIN(object):
         
 
     def test_join4(self, irc_session):
+        """
+        Two clients connect to the server, one joins a channel
+        (that does not previously exist) first, and the other
+        one joins it after that.
+        """        
+        
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
         
@@ -50,6 +69,11 @@ class TestJOIN(object):
         
 
     def test_join5(self, irc_session):
+        """
+        Five clients connect to the server and all join the same channel.
+        We verify that the JOINs are correctly relayed in the channel.
+        """
+        
         clients = irc_session.connect_clients(5)
 
         for (nick, client) in clients:
@@ -68,6 +92,12 @@ class TestJOIN(object):
 class TestChannelPRIVMSG(object):
     
     def _test_join_and_privmsg(self, irc_session, numclients):
+        """
+        Connect `numclients` to the server, join the same channel,
+        and have each of them send a PRIVMSG to the channel (and
+        verify it is relayed correctly to everyone else in the channel
+        """
+        
         clients = irc_session.connect_clients(numclients, join_channel = "#test")
         
         for (nick1, client1) in clients:
@@ -78,18 +108,35 @@ class TestChannelPRIVMSG(object):
     
 
     def test_channel_privmsg1(self, irc_session):
+        """
+        Two clients connect to the server, join the same channel,
+        and send a PRIVMSG to the channel.
+        """
         self._test_join_and_privmsg(irc_session, 2)
         
 
     def test_channel_privmsg2(self, irc_session):
+        """
+        Five clients connect to the server, join the same channel,
+        and send a PRIVMSG to the channel.
+        """
         self._test_join_and_privmsg(irc_session, 5)
 
 
     def test_channel_privmsg3(self, irc_session):
+        """
+        Twenty clients connect to the server, join the same channel,
+        and send a PRIVMSG to the channel.
+        """
         self._test_join_and_privmsg(irc_session, 20)
         
 
     def test_channel_privmsg_nochannel(self, irc_session):
+        """
+        A user connects to the server and sends a message to
+        a channel that doesn't exist
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("PRIVMSG #test :Hello")
@@ -100,6 +147,11 @@ class TestChannelPRIVMSG(object):
         
 
     def test_channel_privmsg_notonchannel(self, irc_session):
+        """
+        Two clients connect to the server. One joins #test, and the other
+        one tries to send a message to #test.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
 
         client1.send_cmd("JOIN #test")
@@ -118,21 +170,34 @@ class TestChannelNOTICE(object):
     
 
     def test_channel_notice_nochannel(self, irc_session):
+        """
+        A client connects to the server and sends a NOTICE to a channel
+        that does not exist.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("NOTICE #test :Hello")
 
-        with pytest.raises(ReplyTimeoutException):
-            irc_session.get_reply(client1)        
+        irc_session.get_reply(client1, expect_timeout = True)
         
         
 @pytest.mark.category("CHANNEL_PART")
 class TestPART(object):
     def _test_join_and_part(self, irc_session, numclients):
+        """
+        Connect `numclients` clients to the server, have them all
+        join channel #test and then have them all leave channel #test
+        """
         clients = irc_session.connect_clients(numclients, join_channel = "#test")
         irc_session.part_channel(clients, "#test")
         
     def _test_join_and_part_and_join_and_part(self, irc_session, numclients):
+        """
+        Connect `numclients` clients to the server, have them all
+        join channel #test and then have them all leave channel #test,
+        and then have them join and leave again.
+        """
         clients = irc_session.connect_clients(numclients, join_channel = "#test")
         irc_session.part_channel(clients, "#test")        
         irc_session.join_channel(clients, "#test")
@@ -140,6 +205,11 @@ class TestPART(object):
 
 
     def test_channel_part1(self, irc_session):
+        """
+        Two clients connect to the server and join #test. The first
+        user leaves #test. Both clients should get a relay of the PART
+        message.
+        """
         clients = irc_session.connect_clients(2, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -151,6 +221,11 @@ class TestPART(object):
 
 
     def test_channel_part2(self, irc_session):
+        """
+        Two clients connect to the server and join #test. The first
+        user leaves #test (with a custom message). Both clients should 
+        get a relay of the PART message.
+        """
         clients = irc_session.connect_clients(2, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -162,6 +237,14 @@ class TestPART(object):
                 
 
     def test_channel_part3(self, irc_session):
+        """
+        Two clients connect to the server and join #test.
+        
+        The first one sends a PRIVMSG to the channel. Then, the second one
+        leaves the channel. The first one sends another PRIVMSG to the channel.
+        The second one shouldn't receive anything.
+        """
+        
         clients = irc_session.connect_clients(2, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -175,35 +258,60 @@ class TestPART(object):
         irc_session.verify_relayed_part(client1, from_nick=nick2, channel="#test", msg=None)
         
         client1.send_cmd("PRIVMSG #test :Hello?")
-        with pytest.raises(ReplyTimeoutException):
-            irc_session.get_reply(client2)        
-                
+        irc_session.get_reply(client2, expect_timeout = True)
+                        
 
     def test_channel_part4(self, irc_session):
+        """
+        Two clients connect to the server, join a channel, and then leave it.
+        """
         self._test_join_and_part(irc_session, 2)
         
 
     def test_channel_part5(self, irc_session):
+        """
+        Five clients connect to the server, join a channel, and then leave it.
+        """
         self._test_join_and_part(irc_session, 5)
 
 
     def test_channel_part6(self, irc_session):
+        """
+        Twenty clients connect to the server, join a channel, and then leave it.
+        """
         self._test_join_and_part(irc_session, 20)         
         
 
     def test_channel_part7(self, irc_session):
+        """
+        Two clients connect to the server, join a channel, then leave it,
+        then join it again, and leave it again.
+        """        
         self._test_join_and_part_and_join_and_part(irc_session, 2)
 
 
     def test_channel_part8(self, irc_session):
+        """
+        Five clients connect to the server, join a channel, then leave it,
+        then join it again, and leave it again.
+        """        
         self._test_join_and_part_and_join_and_part(irc_session, 5)
 
 
     def test_channel_part9(self, irc_session):
+        """
+        Twenty clients connect to the server, join a channel, then leave it,
+        then join it again, and leave it again.
+        """        
         self._test_join_and_part_and_join_and_part(irc_session, 10)
 
 
     def test_channel_part_nochannel1(self, irc_session):
+        """
+        A client connects to the server and tries to leave a channel
+        the user is not in (furthermore, the channel doesn't exist)
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("PART #test")
@@ -214,6 +322,12 @@ class TestPART(object):
         
 
     def test_channel_part_nochannel2(self, irc_session):
+        """
+        A client connects to the server, joins the #test channel
+        and leaves it. Then, the user tries to leave a channel
+        again.
+        """
+        
         clients = irc_session.connect_clients(1, join_channel = "#test")
         irc_session.part_channel(clients, "#test")  
         
@@ -227,6 +341,11 @@ class TestPART(object):
         
 
     def test_channel_part_notonchannel1(self, irc_session):
+        """
+        Two clients connect to the server. The first one joins #test,
+        and the second one tries to leave #test (the second client
+        is not in the channel, but the channel exists)
+        """
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
         
@@ -241,6 +360,11 @@ class TestPART(object):
         
 
     def test_channel_part_notonchannel2(self, irc_session):
+        """
+        Two clients connect to the server and both join #test.
+        The first one leaves the channel, and then tries to leave
+        again.
+        """
         clients = irc_session.connect_clients(2, join_channel = "#test") 
         
         nick1, client1 = clients[0]
@@ -256,7 +380,11 @@ class TestPART(object):
 @pytest.mark.category("CHANNEL_TOPIC")        
 class TestTOPIC(object):
 
-    def test_topic1(self, irc_session):
+    def test_topic01(self, irc_session):
+        """
+        A client connects to the server, joins #test and sets the channel topic
+        """
+        
         topic = "This is the channel's topic"
         
         client1 = irc_session.connect_user("user1", "User One")
@@ -270,7 +398,12 @@ class TestTOPIC(object):
         irc_session.verify_relayed_topic(client1, from_nick="user1", channel="#test", topic=topic)
 
 
-    def test_topic2(self, irc_session):
+    def test_topic02(self, irc_session):
+        """
+        A client connects to the server, joins #test, sets the channel topic,
+        and then asks for the topic.
+        """
+        
         topic = "This is the channel's topic"
         
         client1 = irc_session.connect_user("user1", "User One")
@@ -290,7 +423,12 @@ class TestTOPIC(object):
                                long_param_re = topic)        
 
 
-    def test_topic3(self, irc_session):
+    def test_topic03(self, irc_session):
+        """
+        A client connects to the server, joins #test and then asks for the topic
+        (but no topic has been set)
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("JOIN #test")
@@ -304,7 +442,12 @@ class TestTOPIC(object):
                                long_param_re = "No topic is set")        
         
 
-    def test_topic4(self, irc_session):
+    def test_topic04(self, irc_session):
+        """
+        A client connects to the server and asks for the topic of a channel
+        that does not exists.
+        """
+        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("TOPIC #test")
@@ -314,7 +457,11 @@ class TestTOPIC(object):
                                long_param_re = "You're not on that channel")             
     
 
-    def test_topic5(self, irc_session):
+    def test_topic05(self, irc_session):
+        """
+        A client connects to the server and tries to set the topic of a channel
+        that does not exists.
+        """        
         client1 = irc_session.connect_user("user1", "User One")
         
         client1.send_cmd("TOPIC #test :This is the channel's topic")
@@ -324,7 +471,12 @@ class TestTOPIC(object):
                                long_param_re = "You're not on that channel")       
         
 
-    def test_topic6(self, irc_session):
+    def test_topic06(self, irc_session):
+        """
+        Two clients connect to the server. The first one joins #test, the
+        second one does not. The second one tries to ask for the channel topic.
+        """
+                
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
         
@@ -337,7 +489,12 @@ class TestTOPIC(object):
                                long_param_re = "You're not on that channel")       
 
 
-    def test_topic7(self, irc_session):
+    def test_topic07(self, irc_session):
+        """
+        Two clients connect to the server. The first one joins #test and sets
+        the channel topic. The second one does not join the channel, but
+        tries to ask for the channel topic.
+        """        
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
        
@@ -353,7 +510,12 @@ class TestTOPIC(object):
                                long_param_re = "You're not on that channel")       
   
 
-    def test_topic8(self, irc_session):
+    def test_topic08(self, irc_session):
+        """
+        Two clients connect to the server. The first one joins #test and sets
+        the channel topic. The second one joins after that, and should receive
+        the topic when joining.
+        """               
         client1 = irc_session.connect_user("user1", "User One")
         client2 = irc_session.connect_user("user2", "User Two")
        
@@ -367,7 +529,13 @@ class TestTOPIC(object):
         irc_session.verify_join(client2, "user2", "#test", expect_topic=topic)    
         
 
-    def test_topic9(self, irc_session):
+    def test_topic09(self, irc_session):
+        """
+        Ten clients connect to the server and join #test. The first
+        user changes the topic of the channel. Everyone should
+        receive the relay of the topic.
+        """
+        
         clients = irc_session.connect_clients(10, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -380,6 +548,11 @@ class TestTOPIC(object):
             
 
     def test_topic10(self, irc_session):
+        """
+        Ten clients connect to the server. The first one joins #test
+        and sets the channel topic. The remaining nine then join
+        the channel, and should all receive the topic when joining
+        """
         clients = irc_session.connect_clients(10)
         
         nick1, client1 = clients[0]
@@ -399,6 +572,11 @@ class TestTOPIC(object):
 class TestNAMES(object):
     
     def _test_names_channel(self, irc_session, channels, client, nick):
+        """
+        `channels` is a dictionary mapping channels to the users
+        in that channel. Send the NAMES command for each channel,
+        and verify that the replies are correct.
+        """
         channelsl = [k for k in channels.keys() if k is not None]
         channelsl.sort()
         for channel in channelsl:
@@ -407,6 +585,11 @@ class TestNAMES(object):
             irc_session.verify_names(client, nick, expect_channel = channel, expect_names = channelusers)
             
     def _test_names_all(self, irc_session, channels, client, nick):
+        """
+        `channels` is a dictionary mapping channels to the users
+        in that channel. Send the NAMES command without a parameter,
+        and verify the replies.
+        """        
         client.send_cmd("NAMES")
 
         channelsl = set([k for k in channels.keys() if k is not None])
@@ -436,31 +619,115 @@ class TestNAMES(object):
 
 
     def test_names1(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        This test verifies that the correct RPL_NAMREPLY and RPL_ENDOFNAMES
+        replies are sent when each of the users joins a channel.
+        """        
         irc_session.connect_and_join_channels(channels1, test_names = True)
         
 
     def test_names2(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        This test verifies that the correct RPL_NAMREPLY and RPL_ENDOFNAMES
+        replies are sent when each of the users joins a channel.
+        """        
         irc_session.connect_and_join_channels(channels2, test_names = True)
 
 
     def test_names3(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        This test verifies that the correct RPL_NAMREPLY and RPL_ENDOFNAMES
+        replies are sent when each of the users joins a channel.       
+        """      
         irc_session.connect_and_join_channels(channels3, test_names = True)     
         
 
 
     def test_names4(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        This test send a NAMES command for each of the channels and verifies
+        the replies.
+        """        
         users = irc_session.connect_and_join_channels(channels1, test_names = True)
         
         self._test_names_channel(irc_session, channels1, users["user1"], "user1")
         
 
     def test_names5(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        This test send a NAMES command for each of the channels and verifies
+        the replies.
+        """        
         users = irc_session.connect_and_join_channels(channels2, test_names = True)
         
         self._test_names_channel(irc_session, channels2, users["user1"], "user1")
 
 
     def test_names6(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        This test send a NAMES command for each of the channels and verifies
+        the replies.
+        """      
         users = irc_session.connect_and_join_channels(channels3, test_names = True)
         
         self._test_names_channel(irc_session, channels3, users["user1"], "user1")
@@ -468,24 +735,72 @@ class TestNAMES(object):
         
 
     def test_names7(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        This test send a NAMES command without a parameter and verifies
+        the replies.
+        """        
         users = irc_session.connect_and_join_channels(channels1, test_names = True)
         
         self._test_names_all(irc_session, channels1, users["user1"], "user1")
         
 
     def test_names8(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        This test send a NAMES command without a parameter and verifies
+        the replies.
+        """        
         users = irc_session.connect_and_join_channels(channels2, test_names = True)
         
         self._test_names_all(irc_session, channels2, users["user1"], "user1")
 
 
     def test_names9(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        This test send a NAMES command without a parameter and verifies
+        the replies.
+        """      
         users = irc_session.connect_and_join_channels(channels3, test_names = True)                    
         
         self._test_names_all(irc_session, channels3, users["user1"], "user1")
         
 
     def test_names10(self, irc_session):
+        """
+        Connects five users to the server, with none of them joining any channels.    
+        
+        This test send a NAMES command without a parameter and verifies
+        the replies.
+        """      
         users = irc_session.connect_and_join_channels(channels4, test_names = True)                    
         
         self._test_names_all(irc_session, channels4, users["user1"], "user1")        
@@ -493,6 +808,19 @@ class TestNAMES(object):
         
 
     def test_names11(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        user1 then sends a NAMES command for a channel that does not
+        exist
+        """
+        
         users = irc_session.connect_and_join_channels(channels1, test_names = True)
         
         users["user1"].send_cmd("NAMES #noexist")
@@ -504,6 +832,12 @@ class TestNAMES(object):
 class TestLIST(object):
             
     def _test_list(self, irc_session, channels, client, nick, expect_topics = None):
+        """
+        User `nick` sends a LIST command and we verify the replies.
+        `channels` is a dictionary mapping channel names to users in each channel.
+        `expect_topics` is a dictionary mapping channel names to their topics
+        """
+        
         client.send_cmd("LIST")
 
         channelsl = set([k for k in channels.keys() if k is not None])
@@ -541,24 +875,68 @@ class TestLIST(object):
 
 
     def test_list1(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        user1 then sends a LIST command.
+        """        
         users = irc_session.connect_and_join_channels(channels1)
         
         self._test_list(irc_session, channels1, users["user1"], "user1")
         
 
     def test_list2(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        user1 then sends a LIST command.
+        """        
         users = irc_session.connect_and_join_channels(channels2)
         
         self._test_list(irc_session, channels2, users["user1"], "user1")
         
 
     def test_list3(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        user1 then sends a LIST command.
+        """      
         users = irc_session.connect_and_join_channels(channels3)
         
         self._test_list(irc_session, channels3, users["user1"], "user1")
         
 
     def test_list4(self, irc_session):
+        """
+        Connects five users to the server, with none of them joining any channels.    
+        
+        user1 then sends a LIST command.
+        """      
         users = irc_session.connect_and_join_channels(channels4)
         
         self._test_list(irc_session, channels4, users["user1"], "user1")        
@@ -566,6 +944,21 @@ class TestLIST(object):
   
 
     def test_list5(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        The operator in each channel then sets the topic for the
+        channel. user10 sends a LIST command, and the replies
+        should include the topics of the channels.
+        """                
         users = irc_session.connect_and_join_channels(channels2)
         
         users["user1"].send_cmd("TOPIC #test1 :Topic One")
@@ -586,6 +979,15 @@ class TestLIST(object):
 class TestWHO(object):
             
     def _test_who(self, irc_session, channels, client, nick, channel, aways = None, ircops = None):
+        """
+        User `nick` sends a WHO command with `channel` as a parameter, and
+        we verify that the replies are correct.
+        
+        `channels` is a dictionary mapping channel names to users in each channel.
+        `aways` is a list of users that are away, and `ircops` is a list of users
+        that are IRCops.
+        """
+        
         client.send_cmd("WHO %s" % channel)
 
         if channel == "*":
@@ -681,6 +1083,17 @@ class TestWHO(object):
 
 
     def test_who1(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        user1 then sends a WHO for each channel.
+        """               
         users = irc_session.connect_and_join_channels(channels1)
         
         self._test_who(irc_session, channels1, users["user1"], "user1", channel = "#test1")        
@@ -689,6 +1102,17 @@ class TestWHO(object):
         
 
     def test_who2(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        user1, user4, and user7 each send a "WHO *" command.
+        """               
         users = irc_session.connect_and_join_channels(channels1)
         
         self._test_who(irc_session, channels1, users["user1"], "user1", channel = "*")        
@@ -697,6 +1121,19 @@ class TestWHO(object):
         
 
     def test_who3(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        Not in a channel: user10, user11  
+        
+        user1, user4, user7, and user10 each send a "WHO *" command.
+        """               
         users = irc_session.connect_and_join_channels(channels2)
         
         self._test_who(irc_session, channels2, users["user1"], "user1", channel = "*")        
@@ -706,6 +1143,21 @@ class TestWHO(object):
         
 
     def test_who4(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        user1 then sends a WHO for each channel.
+        """          
         users = irc_session.connect_and_join_channels(channels3)
         
         self._test_who(irc_session, channels3, users["user1"], "user1", channel = "#test1")        
@@ -717,6 +1169,18 @@ class TestWHO(object):
         
 
     def test_who5(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators):
+        
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        
+        user4, user5, and user7 mark themselves as away. user4 and user6 become
+        IRCops. user1 then sends a WHO for each channel.
+        """                  
         aways = ["user4", "user5", "user7"]
         ircops = ["user4", "user6"]
 
@@ -729,6 +1193,22 @@ class TestWHO(object):
         
 
     def test_who6(self, irc_session):
+        """
+        Connects eleven users to the server, and has them join
+        the following channels, and set the following privileges:
+        (@ denotes channel operators, and + denotes a user with voice privileges):
+        
+        #test1: @user1, user2, user3
+        #test2: @user2
+        #test3: @user3, @user4, user5, user6
+        #test4: @user7, +user8, +user9, user1, user2
+        #test5: @user1, @user5 
+        
+        Not in a channel: user10, user11    
+        
+        user4, user8, and user10 mark themselves as away. user8, user9, user10,
+        and user11 become IRCops. user1 then sends a WHO for each channel.
+        """              
         aways = ["user4", "user8", "user10"]
         ircops = ["user8", "user9", "user10", "user11"]
         
@@ -741,11 +1221,13 @@ class TestWHO(object):
         self._test_who(irc_session, channels3, users["user1"], "user1", channel = "#test5", aways = aways, ircops = ircops)                            
                  
                  
-@pytest.mark.category("UPDATE_1B")                                 
-class TestChannelUPDATE1b(object):
-                                    
+@pytest.mark.category("UPDATE_ASSIGNMENT2")                                 
+class TestChannelUPDATEAssignment2(object):
 
     def test_update1b_nick(self, irc_session):
+        """
+        Ensure that nick changes are relayed in a channel.
+        """
         clients = irc_session.connect_clients(5, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -757,6 +1239,9 @@ class TestChannelUPDATE1b(object):
             
 
     def test_update1b_quit1(self, irc_session):
+        """
+        Ensure that a user's QUIT is relayed to the channels the user is in.
+        """
         clients = irc_session.connect_clients(5, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -764,10 +1249,19 @@ class TestChannelUPDATE1b(object):
         client1.send_cmd("QUIT")
                 
         for nick, client in clients[1:]:
-            irc_session.verify_relayed_quit(client, from_nick=nick1, msg = None)           
+            irc_session.verify_relayed_quit(client, from_nick=nick1, msg = "Client Quit")           
             
+        irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
+                                long_param_re = "Closing Link: .* \(Client Quit\)")               
+            
+        irc_session.verify_disconnect(client1)
+
 
     def test_update1b_quit2(self, irc_session):
+        """
+        Ensure that a user's QUIT (with a custom message) is relayed to the 
+        channels the user is in.
+        """        
         clients = irc_session.connect_clients(5, join_channel = "#test")
         
         nick1, client1 = clients[0]
@@ -775,4 +1269,10 @@ class TestChannelUPDATE1b(object):
         client1.send_cmd("QUIT :I'm outta here")
                 
         for nick, client in clients[1:]:
-            irc_session.verify_relayed_quit(client, from_nick=nick1, msg = "I'm outta here")                                                    
+            irc_session.verify_relayed_quit(client, from_nick=nick1, msg = "I'm outta here")   
+            
+        irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
+                                long_param_re = "Closing Link: .* \(I'm outta here\)")   
+                    
+        irc_session.verify_disconnect(client1)
+                                                                                                      
