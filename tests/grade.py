@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import sys
 
 class Assignment(object):
     
@@ -67,12 +68,18 @@ with open(args.report_file) as f:
 
 for test in results["report"]["tests"]:
     if "call" in test:
-        category = test["call"]["metadata"]["category"]
         test_id = test["name"]
         outcome = test["outcome"]
         run_test_ids.add(test_id)
     
         if outcome == "passed":
+            if "metadata" in test["call"]:
+                category = test["call"]["metadata"]["category"]
+            elif "metadata" in test:
+                category = test["metadata"][0]["category"]
+            else:
+                print("ERROR: Incorrect JSON report file (missing metadata)")
+                sys.exit(1)
             tests[category][test_id] = 1
     
 not_run = all_test_ids.difference(run_test_ids)

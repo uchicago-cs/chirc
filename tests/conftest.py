@@ -65,4 +65,7 @@ def pytest_runtest_makereport(item, call):
     if report.when == "call":
         report.metadata = {
             'category': category
+        }        
+        report.test_metadata = {
+            'category': category
         }
