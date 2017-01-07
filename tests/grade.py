@@ -18,32 +18,32 @@ class Assignment(object):
     
 
 ASSIGNMENT_1 = Assignment("Assignment 1", 50)    
-ASSIGNMENT_2 = Assignment("Assignment 2", 100)    
-ASSIGNMENT_3 = Assignment("Assignment 3", 100)    
+ASSIGNMENT_2 = Assignment("Assignment 2", 50)    
+ASSIGNMENT_3 = Assignment("Assignment 3", 50)    
 
 ASSIGNMENTS = [ASSIGNMENT_1, ASSIGNMENT_2, ASSIGNMENT_3]
 
 ASSIGNMENT_1.add_category("BASIC_CONNECTION", "Basic Connection", 50)
 
-ASSIGNMENT_2.add_category("CONNECTION_REGISTRATION", "Connection Registration", 35)
-ASSIGNMENT_2.add_category("PRIVMSG_NOTICE", "PRIVMSG and NOTICE", 30)
-ASSIGNMENT_2.add_category("PING_PONG", "PING and PONG", 2.5)
-ASSIGNMENT_2.add_category("MOTD", "MOTD", 5)    
-ASSIGNMENT_2.add_category("LUSERS", "LUSERS", 10)
-ASSIGNMENT_2.add_category("WHOIS", "WHOIS", 10)
-ASSIGNMENT_2.add_category("ERR_UNKNOWN", "ERR_UNKNOWN", 2.5)
-ASSIGNMENT_2.add_category("ROBUST", "Robustness", 5)
+ASSIGNMENT_2.add_category("CONNECTION_REGISTRATION", "Connection Registration", 15)
+ASSIGNMENT_2.add_category("PRIVMSG_NOTICE", "PRIVMSG and NOTICE", 15)
+ASSIGNMENT_2.add_category("PING_PONG", "PING and PONG", 2)
+ASSIGNMENT_2.add_category("MOTD", "MOTD", 3)    
+ASSIGNMENT_2.add_category("LUSERS", "LUSERS", 5)
+ASSIGNMENT_2.add_category("WHOIS", "WHOIS", 5)
+ASSIGNMENT_2.add_category("ERR_UNKNOWN", "ERR_UNKNOWN", 2)
+ASSIGNMENT_2.add_category("ROBUST", "Robustness", 3)
     
-ASSIGNMENT_3.add_category("CHANNEL_JOIN", "JOIN", 15)
-ASSIGNMENT_3.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 15)
-ASSIGNMENT_3.add_category("CHANNEL_PART", "PART", 10)
-ASSIGNMENT_3.add_category("CHANNEL_TOPIC", "TOPIC", 10)
-ASSIGNMENT_3.add_category("MODES", "User and channel modes", 25)
-ASSIGNMENT_3.add_category("AWAY", "AWAY", 5)
-ASSIGNMENT_3.add_category("NAMES", "NAMES", 5)
-ASSIGNMENT_3.add_category("LIST", "LIST", 5)
-ASSIGNMENT_3.add_category("WHO", "WHO", 5)
-ASSIGNMENT_3.add_category("UPDATE_ASSIGNMENT2", "Update Assignment 2", 5)
+ASSIGNMENT_3.add_category("CHANNEL_JOIN", "JOIN", 5)
+ASSIGNMENT_3.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 10)
+ASSIGNMENT_3.add_category("CHANNEL_PART", "PART", 5)
+ASSIGNMENT_3.add_category("CHANNEL_TOPIC", "TOPIC", 5)
+ASSIGNMENT_3.add_category("MODES", "User and channel modes", 15)
+ASSIGNMENT_3.add_category("AWAY", "AWAY", 2)
+ASSIGNMENT_3.add_category("NAMES", "NAMES", 2)
+ASSIGNMENT_3.add_category("LIST", "LIST", 2)
+ASSIGNMENT_3.add_category("WHO", "WHO", 2)
+ASSIGNMENT_3.add_category("UPDATE_ASSIGNMENT2", "Update Assignment 2", 2)
 
 
 parser = argparse.ArgumentParser()

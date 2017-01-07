@@ -191,7 +191,7 @@ class TestLUSERS(object):
                                   expect_channels = 0, 
                                   expect_clients = 4)           
 
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_channels1(self, irc_session):
         """
         Test calling LUSERS with a server with nine users (user1-user9)
@@ -212,7 +212,7 @@ class TestLUSERS(object):
                                   expect_channels = 3, 
                                   expect_clients = 9)           
         
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_channels2(self, irc_session):
         """
         Test calling LUSERS with a server with eleven users (user1-user11)
@@ -235,7 +235,7 @@ class TestLUSERS(object):
                                   expect_channels = 3, 
                                   expect_clients = 11)    
         
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_channels3(self, irc_session):
         """
         Test calling LUSERS with a server with eleven users (user1-user11)
@@ -260,7 +260,7 @@ class TestLUSERS(object):
                                   expect_channels = 5, 
                                   expect_clients = 11)    
         
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_ircops1(self, irc_session):
         """
         Test calling LUSERS explicitly with four clients,
@@ -283,7 +283,7 @@ class TestLUSERS(object):
                                   expect_channels = 0, 
                                   expect_clients = 4)       
         
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_ircops2(self, irc_session):
         """
         Test calling LUSERS explicitly with four clients,
@@ -329,7 +329,7 @@ class TestLUSERS(object):
                                       expect_channels = 0, 
                                       expect_clients = 4)               
         
-    @pytest.mark.category("UPDATE_1B")
+    @pytest.mark.category("UPDATE_ASSIGNMENT2")
     def test_lusers_channels_and_ircops(self, irc_session):
         """
         Test calling LUSERS with a server with eleven users (user1-user11)
