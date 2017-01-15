@@ -49,8 +49,11 @@ class TestMODE(object):
     def test_user_mode02(self, irc_session):
         """
         The user tries to remove IRCop status from itself using MODE
-        (and the user is not already an IRCop) This is not allowed, but 
-        there is no error reply. There is simply no relay of the MODE
+        (and the user is not already an IRCop) A non-IRCop can't
+        modify the the 'o' user mode, but since the user isn't
+        an IRCop, requesting -o has no effect, and the MODE
+        is relayed back (because it is accurate: the user is not
+        an IRCop)
         """
                 
         client1 = irc_session.connect_user("user1", "User One")
