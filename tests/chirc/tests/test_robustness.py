@@ -129,7 +129,7 @@ class TestRobustness(object):
         base = "PRIVMSG user2 :"
         
         
-        msg = self._gen_long_msg(512 - len(base))
+        msg = self._gen_long_msg(510 - len(base))
         client1.send_cmd(base + msg)
         privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                           expect_nparams = 2, expect_short_params = ["user2"])
