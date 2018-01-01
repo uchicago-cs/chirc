@@ -86,6 +86,18 @@ class TestJOIN(object):
                 irc_session.verify_relayed_join(client, from_nick = None, channel="#test")
             relayed -= 1
         
+    
+    def test_join_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("JOIN")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
+                                                 expect_nick="user1", expect_cmd="JOIN")
 
 
 @pytest.mark.category("CHANNEL_PRIVMSG_NOTICE")
@@ -376,6 +388,18 @@ class TestPART(object):
                                expect_nparams = 2, expect_short_params = ["#test"],
                                long_param_re = "You're not on that channel")
 
+    def test_channel_part_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("PART")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
+                                                 expect_nick="user1", expect_cmd="PART")
+
         
 @pytest.mark.category("CHANNEL_TOPIC")        
 class TestTOPIC(object):
@@ -565,7 +589,20 @@ class TestTOPIC(object):
         
         for nick, client in clients[1:]:
             client.send_cmd("JOIN #test")
-            irc_session.verify_join(client, nick, "#test", expect_topic=topic)    
+            irc_session.verify_join(client, nick, "#test", expect_topic=topic)
+            
+            
+    def test_topic_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("TOPIC")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
+                                                 expect_nick="user1", expect_cmd="TOPIC")            
         
         
 @pytest.mark.category("NAMES")                

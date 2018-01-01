@@ -41,6 +41,19 @@ class TestWHOIS(object):
                                expect_nparams = 2, expect_short_params = ["user2"],
                                long_param_re = "No such nick/channel")             
         
+        
+    @pytest.mark.category("WHOIS")
+    def test_whois_params(self, irc_session):
+        """
+        Test sending a WHOIS without parameters..
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("WHOIS")
+
+        irc_session.get_reply(client1, expect_timeout = True)              
+        
     def _test_userchannels(self, irc_session, channels, nick, channelstring):        
         whois_channels = channelstring.strip().split()
         for qchannel in whois_channels:
@@ -139,4 +152,7 @@ class TestWHOIS(object):
                                long_param_re = "is an IRC operator")                 
 
         reply = irc_session.get_reply(users["user1"], expect_code = replies.RPL_ENDOFWHOIS, 
-                           expect_nparams = 2, long_param_re = "End of WHOIS list")           
+                           expect_nparams = 2, long_param_re = "End of WHOIS list")       
+        
+        
+            

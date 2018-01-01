@@ -423,7 +423,175 @@ class TestFullConnection(object):
         irc_session.verify_welcome_messages(client, "user1")
         irc_session.verify_lusers(client, "user1")
         irc_session.verify_motd(client, "user1")        
+      
 
+@pytest.mark.category("CONNECTION_REGISTRATION")
+class TestConnectionNotRegistered(object):
+ 
+ 
+    def test_connect_not_registered1(self, irc_session):
+        """
+        Checks that ERR_NOTREGISTERED is returned if a valid
+        command is sent before registration is complete
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("PRIVMSG user2 :Hello")
+        
+        reply = irc_session.get_reply(client, expect_code = replies.ERR_NOTREGISTERED, 
+                                      expect_nick = "*", expect_nparams = 1,
+                                      long_param_re = "You have not registered")    
+
+    def test_connect_not_registered2(self, irc_session):
+        """
+        Checks that ERR_NOTREGISTERED is returned if a valid
+        command is sent before registration is complete
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")
+        client.send_cmd("PRIVMSG user2 :Hello")
+        
+        reply = irc_session.get_reply(client, expect_code = replies.ERR_NOTREGISTERED, 
+                                      expect_nick = "user1", expect_nparams = 1,
+                                      long_param_re = "You have not registered")    
+
+    def test_connect_not_registered3(self, irc_session):
+        """
+        Checks that ERR_NOTREGISTERED is returned if a valid
+        command is sent before registration is complete
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("USER user1 * * :User One")
+        client.send_cmd("PRIVMSG user2 :Hello")
+        
+        reply = irc_session.get_reply(client, expect_code = replies.ERR_NOTREGISTERED, 
+                                      expect_nick = "*", expect_nparams = 1,
+                                      long_param_re = "You have not registered")    
+        
+    def test_connect_not_registered4(self, irc_session):
+        """
+        Checks that an invalid command sent before registration is complete
+        is just silently ignored.
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")        
+        client.send_cmd("WHOWAS user2")
+        
+        irc_session.get_reply(client, expect_timeout = True)        
+
+    def test_connect_not_registered5(self, irc_session):
+        """
+        Checks that an invalid command sent before registration is complete
+        is just silently ignored.
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("WHOWAS user2")
+        
+        irc_session.get_reply(client, expect_timeout = True)    
+
+    def test_connect_not_registered6(self, irc_session):
+        """
+        Checks that an invalid command sent before registration is complete
+        is just silently ignored.
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("USER user1 * * :User One")        
+        client.send_cmd("WHOWAS user2")
+        
+        irc_session.get_reply(client, expect_timeout = True)            
+
+@pytest.mark.category("CONNECTION_REGISTRATION")
+class TestConnectionParams(object):
+
+    def test_params_NICK1(self, irc_session):
+        """
+        Checks that ERR_NONICKNAMEGIVEN is returned if no nickname
+        is specified.   
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK")
+        
+        reply = irc_session.get_reply(client, expect_code = replies.ERR_NONICKNAMEGIVEN, expect_nick = "*", expect_nparams = 1,
+                                      long_param_re = "No nickname given")     
+   
+    def test_params_NICK2(self, irc_session):
+        """
+        Checks that ERR_NONICKNAMEGIVEN is returned if no nickname
+        is specified (after sending USER)  
+        """     
+                
+        client = irc_session.get_client()
+        
+        client.send_cmd("USER user1 * * :User One")        
+        client.send_cmd("NICK")
+        
+        reply = irc_session.get_reply(client, expect_code = replies.ERR_NONICKNAMEGIVEN, expect_nick = "*", expect_nparams = 1,
+                                      long_param_re = "No nickname given")     
+
+    def test_params_USER1(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply during registration
+        """
+        
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")
+        client.send_cmd("USER user1 * *")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client, 
+                                                 expect_nick="user1", expect_cmd="USER")
+        
+    def test_params_USER2(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply during registration
+        """
+        
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")
+        client.send_cmd("USER user1 *")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client, 
+                                                 expect_nick="user1", expect_cmd="USER")
+        
+    def test_params_USER3(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply during registration
+        """
+        
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")
+        client.send_cmd("USER user1")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client, 
+                                                 expect_nick="user1", expect_cmd="USER")
+        
+    def test_params_USER4(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply during registration
+        """
+        
+        client = irc_session.get_client()
+        
+        client.send_cmd("NICK user1")
+        client.send_cmd("USER")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client, 
+                                                 expect_nick="user1", expect_cmd="USER")
 
 @pytest.mark.category("CONNECTION_REGISTRATION")
 class TestMultiuserConnection(object):        

@@ -357,6 +357,13 @@ class IRCSession():
         
         return msg
     
+    def get_ERR_NEEDMOREPARAMS_reply(self, client, expect_nick, expect_cmd):
+        reply = self.get_reply(client, expect_code = replies.ERR_NEEDMOREPARAMS, 
+                               expect_nick = expect_nick, expect_nparams = 2,
+                               expect_short_params = [expect_cmd],
+                               long_param_re = "Not enough parameters")
+        return reply    
+    
     def get_message(self, client, expect_prefix = None, expect_cmd = None, expect_nparams = None,
                   expect_short_params = None, long_param_re = None, long_param_values = None):
         try:

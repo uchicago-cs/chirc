@@ -82,7 +82,7 @@ class TestRobustness(object):
         
         base = "PRIVMSG user2 :"
         
-        msg = self._gen_long_msg(512 - len(base))
+        msg = self._gen_long_msg(512 - len(base) - 2)
         client1.send_cmd(base + msg)
         privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                           expect_nparams = 2, expect_short_params = ["user2"])
@@ -105,7 +105,7 @@ class TestRobustness(object):
         
         base = "PRIVMSG user2 :"
                 
-        msg = self._gen_long_msg(2048 - len(base))
+        msg = self._gen_long_msg(2048 - len(base) - 2)
         client1.send_cmd(base + msg)
         privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                           expect_nparams = 2, expect_short_params = ["user2"])
@@ -129,7 +129,7 @@ class TestRobustness(object):
         base = "PRIVMSG user2 :"
         
         
-        msg = self._gen_long_msg(512 - len(base))
+        msg = self._gen_long_msg(512 - len(base) - 2)
         client1.send_cmd(base + msg)
         privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                           expect_nparams = 2, expect_short_params = ["user2"])
@@ -157,7 +157,7 @@ class TestRobustness(object):
         base = "PRIVMSG user2 :"
         
         for i in (510,511,512,513,514,515):
-            msg = self._gen_long_msg(i - len(base))
+            msg = self._gen_long_msg(i - len(base) - 2)
             client1.send_cmd(base + msg)
             privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                               expect_nparams = 2, expect_short_params = ["user2"])
@@ -165,4 +165,5 @@ class TestRobustness(object):
             relayed_msg = privmsg.params[-1]
             assert relayed_msg[0] == ":"
             assert msg.startswith(relayed_msg[1:])               
+           
 

@@ -130,7 +130,31 @@ class TestPRIVMSG(object):
 
         irc_session.get_reply(client1, expect_code = replies.ERR_NOSUCHNICK, expect_nick = "user1", 
                               expect_nparams = 2, expect_short_params = ["user2"],
-                              long_param_re = "No such nick/channel")           
+                              long_param_re = "No such nick/channel")     
+        
+    def test_privmsg_notext(self, irc_session):
+        """
+        Test sending a PRIVMSG without a message
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("PRIVMSG user2")
+
+        irc_session.get_reply(client1, expect_code = replies.ERR_NOTEXTTOSEND, expect_nick = "user1", 
+                              expect_nparams = 1, long_param_re = "No text to send")     
+              
+    def test_privmsg_norecipient(self, irc_session):
+        """
+        Test sending a PRIVMSG without any parameters
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("PRIVMSG")
+
+        irc_session.get_reply(client1, expect_code = replies.ERR_NORECIPIENT, expect_nick = "user1", 
+                              expect_nparams = 1, long_param_re = "No recipient given \(PRIVMSG\)")     
         
 
 @pytest.mark.category("PRIVMSG_NOTICE")
@@ -158,5 +182,27 @@ class TestNOTICE(object):
         client1.send_cmd("NOTICE user2 :Hello")
 
         irc_session.get_reply(client1, expect_timeout = True)
+        
+    def test_notice_params1(self, irc_session):
+        """
+        Test sending a NOTICE with insufficient parameters.
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("NOTICE user2")
+
+        irc_session.get_reply(client1, expect_timeout = True)        
           
+    def test_notice_params2(self, irc_session):
+        """
+        Test sending a NOTICE with insufficient parameters.
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("NOTICE")
+
+        irc_session.get_reply(client1, expect_timeout = True)        
+
     

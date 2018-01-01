@@ -31,6 +31,18 @@ class TestOPER(object):
         reply = irc_session.get_reply(client1, expect_code = replies.ERR_PASSWDMISMATCH, expect_nick = "user1", 
                                expect_nparams = 1,
                                long_param_re = "Password incorrect")
+        
+    def test_oper_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("OPER")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
+                                                 expect_nick="user1", expect_cmd="OPER")          
 
 @pytest.mark.category("MODES")        
 class TestMODE(object):       
@@ -162,8 +174,7 @@ class TestMODE(object):
 
         client1 = irc_session.connect_user("user1", "User One")
         
-        irc_session.set_user_mode(client1, "user1", "user2", "-z")   
-        
+        irc_session.set_user_mode(client1, "user1", "user2", "-z")           
 
     def test_channel_mode01(self, irc_session):
         """
@@ -638,6 +649,19 @@ class TestMODE(object):
             irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="-o", mode_nick="user2")                                   
 
         irc_session.set_channel_mode(client2, nick2, "#test", "+v", "user4", expect_ops_needed=True)
+
+    
+    def test_mode_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+        
+        client1 = irc_session.connect_user("user1", "User One")
+        
+        client1.send_cmd("MODE")
+        
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
+                                                 expect_nick="user1", expect_cmd="MODE")           
     
 
     def test_connect_channels01(self, irc_session):
