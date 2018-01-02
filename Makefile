@@ -12,10 +12,10 @@ all: $(BIN)
 $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJS) -o$(BIN)
 	
-%.d: %.c
+-include $(DEPS)
 
 clean:
-	-rm -f $(OBJS) $(BIN) src/*.d
+	-rm -f $(OBJS) $(BIN) $(DEPS)
 
 tests:
 	@test -x $(BIN) || { echo; echo "chirc executable does not exist. Cannot run tests."; echo; exit 1; }
