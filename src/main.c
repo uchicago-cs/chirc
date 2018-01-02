@@ -1,7 +1,5 @@
 /*
  *
- *  CMSC 23300 / 33300 - Networks and Distributed Systems
- *
  *  main() code for chirc project
  *
  */
@@ -68,8 +66,8 @@ int main(int argc, char *argv[])
         break;
     }
 
-	/* Your code goes here */
+    /* Your code goes here */
 
-	return 0;
+    return 0;
 }
 
