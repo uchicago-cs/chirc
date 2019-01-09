@@ -40,7 +40,7 @@ def pytest_configure(config):
     f.close()
 
 def pytest_itemcollected(item):
-    category_marker = item.get_marker("category")
+    category_marker = item.get_closest_marker("category")
     if category_marker is not None:
         category = category_marker.args[0]
         with open("alltests", "a") as f:
@@ -49,7 +49,7 @@ def pytest_itemcollected(item):
 def pytest_runtest_setup(item):
     only_category = item.config.getoption("-C")
     if only_category is not None:    
-        category_marker = item.get_marker("category")
+        category_marker = item.get_closest_marker("category")
         if category_marker is not None:
             category = category_marker.args[0]
             if category != item.config.getoption("-C"):
@@ -60,7 +60,7 @@ def pytest_runtest_makereport(item, call):
     # execute all other hooks to obtain the report object
     outcome = yield
     report = outcome.get_result()
-    category = item.get_marker("category").args[0]
+    category = item.get_closest_marker("category").args[0]
 
     if report.when == "call":
         report.metadata = {
