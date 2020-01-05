@@ -1,6 +1,6 @@
 import time
 import pytest
-from chirc.tests.fixtures import channels1, channels2, channels3
+from chirc.tests.common.fixtures import channels1, channels2, channels3
 from chirc import replies
 
 @pytest.mark.category("LUSERS")
@@ -84,7 +84,8 @@ class TestConnectionWithLUSERSMOTD(object):
     def test_connect_lusers_motd_unknown(self, irc_session):
         """
         Test correct values in LUSERS with two clients connected,
-        one of which is "unknown" (hasn't completed its registration)
+        one of which is "unknown" (we don't yet know whether it is
+        a user or a server)
         """
                 
         unknown1 = irc_session.get_client()
@@ -98,46 +99,24 @@ class TestConnectionWithLUSERSMOTD(object):
 
         irc_session.verify_welcome_messages(client1, "user1")
         irc_session.verify_lusers(client1, "user1", 
-                                  expect_users = 1, 
-                                  expect_ops = 0, 
-                                  expect_unknown = 1, 
-                                  expect_channels = 0, 
-                                  expect_clients = 2)
-        irc_session.verify_motd(client1, "user1")       
-        
+                                  expect_users=1,
+                                  expect_ops=0,
+                                  expect_unknown=1,
+                                  expect_channels=0,
+                                  expect_clients=1)
+        irc_session.verify_motd(client1, "user1")
+
     def test_connect_lusers_motd_unknown2(self, irc_session):
         """
-        Test correct values in LUSERS with two clients connected,
-        one of which is "unknown" (hasn't completed its registration,
-        but has sent a NICK command)
-        """        
-        unknown1 = irc_session.get_client()
-        unknown1.send_cmd("NICK unknown1")
-        time.sleep(0.05)
-        
-        client1 = irc_session.get_client()
-        client1.send_cmd("NICK user1")
-        client1.send_cmd("USER user1 * * :User One")
-
-        irc_session.verify_welcome_messages(client1, "user1")
-        irc_session.verify_lusers(client1, "user1", 
-                                  expect_users = 1, 
-                                  expect_ops = 0, 
-                                  expect_unknown = 1, 
-                                  expect_channels = 0, 
-                                  expect_clients = 2)
-        irc_session.verify_motd(client1, "user1")           
-        
-    def test_connect_lusers_motd_unknown3(self, irc_session):
-        """
         Test correct values in LUSERS with five clients connected,
-        four of which are "unknown" (haven't completed its registration)
-        """        
+        four of which are "unknown" (we don't know whether they're
+        users or servers)
+        """
         unknown1 = irc_session.get_client()
         unknown2 = irc_session.get_client()
         unknown3 = irc_session.get_client()
         unknown4 = irc_session.get_client()
-        
+
         time.sleep(0.05)
 
         client1 = irc_session.get_client()
@@ -145,13 +124,38 @@ class TestConnectionWithLUSERSMOTD(object):
         client1.send_cmd("USER user1 * * :User One")
 
         irc_session.verify_welcome_messages(client1, "user1")
+        irc_session.verify_lusers(client1, "user1",
+                                  expect_users=1,
+                                  expect_ops=0,
+                                  expect_unknown=4,
+                                  expect_channels=0,
+                                  expect_clients=1)
+        irc_session.verify_motd(client1, "user1")
+
+    def test_connect_lusers_motd_unregistered(self, irc_session):
+        """
+        Test correct values in LUSERS with two clients connected,
+        one of which hasn't completed their registration
+        (so it will count as a client but not a user)
+        """        
+        unregistered = irc_session.get_client()
+        unregistered.send_cmd("NICK unregistered")
+        time.sleep(0.05)
+        
+        client1 = irc_session.get_client()
+        client1.send_cmd("NICK user1")
+        client1.send_cmd("USER user1 * * :User One")
+
+        irc_session.verify_welcome_messages(client1, "user1")
         irc_session.verify_lusers(client1, "user1", 
-                                  expect_users = 1, 
-                                  expect_ops = 0, 
-                                  expect_unknown = 4, 
-                                  expect_channels = 0, 
-                                  expect_clients = 5)
-        irc_session.verify_motd(client1, "user1")              
+                                  expect_users=1,
+                                  expect_ops=0,
+                                  expect_unknown=0,
+                                  expect_channels=0,
+                                  expect_clients=2)
+        irc_session.verify_motd(client1, "user1")           
+        
+
 
 
 

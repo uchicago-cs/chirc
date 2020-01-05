@@ -59,7 +59,7 @@ class TestPRIVMSG(object):
                         
                         relayed_privmsg = irc_session.get_message(client2, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                                                   expect_nparams = 2, expect_short_params = [nick2], 
-                                                                  long_param_re = "Message \d+ from user\d+ to user\d+")
+                                                                  long_param_re = r"Message \d+ from user\d+ to user\d+")
                         msgs_rcvd.append( (relayed_privmsg.prefix.nick, nick2, relayed_privmsg) )
 
         pairs_seen = dict([((nick1, nick2),0) for (nick1,nick2,msg) in msgs_sent])
@@ -154,7 +154,7 @@ class TestPRIVMSG(object):
         client1.send_cmd("PRIVMSG")
 
         irc_session.get_reply(client1, expect_code = replies.ERR_NORECIPIENT, expect_nick = "user1", 
-                              expect_nparams = 1, long_param_re = "No recipient given \(PRIVMSG\)")     
+                              expect_nparams = 1, long_param_re = r"No recipient given \(PRIVMSG\)")
         
 
 @pytest.mark.category("PRIVMSG_NOTICE")

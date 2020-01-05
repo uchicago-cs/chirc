@@ -1,0 +1,106 @@
+{
+  "categories": [
+    {
+      "points": 5,
+      "name": "JOIN",
+      "subcategories": [
+        {
+          "num_tests": 6,
+          "cid": "CHANNEL_JOIN"
+        }
+      ]
+    },
+    {
+      "points": 10,
+      "name": "PRIVMSG and NOTICE",
+      "subcategories": [
+        {
+          "num_tests": 6,
+          "cid": "CHANNEL_PRIVMSG_NOTICE"
+        }
+      ]
+    },
+    {
+      "points": 5,
+      "name": "PART",
+      "subcategories": [
+        {
+          "num_tests": 14,
+          "cid": "CHANNEL_PART"
+        }
+      ]
+    },
+    {
+      "points": 5,
+      "name": "TOPIC",
+      "subcategories": [
+        {
+          "num_tests": 11,
+          "cid": "CHANNEL_TOPIC"
+        }
+      ]
+    },
+    {
+      "points": 15,
+      "name": "User and channel modes",
+      "subcategories": [
+        {
+          "num_tests": 57,
+          "cid": "MODES"
+        }
+      ]
+    },
+    {
+      "points": 2,
+      "name": "AWAY",
+      "subcategories": [
+        {
+          "num_tests": 6,
+          "cid": "AWAY"
+        }
+      ]
+    },
+    {
+      "points": 2,
+      "name": "NAMES",
+      "subcategories": [
+        {
+          "num_tests": 11,
+          "cid": "NAMES"
+        }
+      ]
+    },
+    {
+      "points": 2,
+      "name": "LIST",
+      "subcategories": [
+        {
+          "num_tests": 5,
+          "cid": "LIST"
+        }
+      ]
+    },
+    {
+      "points": 2,
+      "name": "WHO",
+      "subcategories": [
+        {
+          "num_tests": 6,
+          "cid": "WHO"
+        }
+      ]
+    },
+    {
+      "points": 2,
+      "name": "Update Assignment 2",
+      "subcategories": [
+        {
+          "num_tests": 11,
+          "cid": "UPDATE_ASSIGNMENT2"
+        }
+      ]
+    }
+  ],
+  "name": "Assignment 2",
+  "total_points": 50
+}

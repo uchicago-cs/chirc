@@ -7,5 +7,8 @@
 .cache
 results
 report.html
-report.json
+tests.json
 alltests
+build/
+cmake-build*
+.idea

@@ -4,6 +4,7 @@ import random
 import os
 import shutil
 import re
+import string
 
 import chirc.replies as replies
 from chirc.client import ChircClient
@@ -12,28 +13,57 @@ import pytest
 import time
 
 
-class IRCSession():
-    
-    def __init__(self, chirc_exe = None, msg_timeout = 0.1, randomize_ports = False, 
-                 default_port = None, loglevel = -1, debug = False):
+
+class SingleIRCSession:
+    '''
+    Class used to manage an IRC session involving a single server.
+    At the start of the session, the server is started and we can connect
+    to it with one or more clients (which are constructed through this class).
+    The class also includes methods to perform common IRC actions (e.g.,
+    sending a message from one user to another, joining a channel, etc.)
+    and verifying that they were performed correctly.
+    '''
+
+    def __init__(self, chirc_exe = None, msg_timeout = 0.1,
+                 chirc_port = None, loglevel = -1, debug = False,
+                 irc_network = None, irc_network_server = None, external_chirc_port=None):
         if chirc_exe is None:
-            self.chirc_exe = "../chirc"
+            self.chirc_exe = "../build/chirc"
         else:            
             self.chirc_exe = chirc_exe
 
         if not (os.path.exists(self.chirc_exe) and os.path.isfile(self.chirc_exe) and os.access(self.chirc_exe, os.X_OK)):
             raise RuntimeError("{} does not exist or it is not executable".format(self.chirc_exe))
 
-        if default_port is None:
-            self.default_port = 7776
-        else:            
-            self.default_port = default_port
+        if irc_network is not None:
+            assert irc_network_server in irc_network
+
+            self.chirc_port = irc_network_server.port
+            self.randomize_ports = False
+            self.irc_network = irc_network
+            self.irc_network_server = irc_network_server
+        else:
+            if chirc_port is None:
+                self.chirc_port = 7776
+                self.randomize_ports = False
+            elif chirc_port == -1:
+                self.chirc_port = None
+                self.randomize_ports = True
+            else:
+                self.chirc_port = chirc_port
+                self.randomize_ports = False
+            self.irc_network = None
+            self.irc_network_server = None
 
         self.msg_timeout = msg_timeout
-        self.randomize_ports = randomize_ports
         self.loglevel = loglevel
         self.debug = debug
-        self.oper_password = "foobar"
+        self.external_chirc_port = external_chirc_port
+
+        random_str = "".join([random.choice(string.ascii_letters + string.digits) for _ in range(8)])
+        self.oper_password = "oper-{}".format(random_str)
+        self.started = False
+        self.clients = []
 
     # Testing functions
     
@@ -65,21 +95,43 @@ class IRCSession():
     # Start/end IRC session
 
     def start_session(self):
+        if self.external_chirc_port is not None:
+            self.started = True
+            return
+
         self.tmpdir = tempfile.mkdtemp()
         
         if self.randomize_ports:
             self.port = random.randint(10000,60000)
         else:
-            self.port = self.default_port
+            self.port = self.chirc_port
  
         if self.randomize_ports:
             tries = 10
         else:
             tries = 1
-                
+
+
         while tries > 0:
-            chirc_cmd = [os.path.abspath(self.chirc_exe), "-p", str(self.port), "-o", self.oper_password]
-            
+
+            if self.irc_network is not None:
+                network_file = self.tmpdir + "/network.txt"
+                with open(network_file, "w") as f:
+                    for server in self.irc_network:
+                        line = "{},{},{},{}".format(server.servername,
+                                                    server.hostname,
+                                                    server.port,
+                                                    server.passwd)
+                        print(line, file=f)
+
+                chirc_cmd = [os.path.abspath(self.chirc_exe), "-n", network_file,
+                             "-s", self.irc_network_server.servername]
+            else:
+                chirc_cmd = [os.path.abspath(self.chirc_exe), "-p", str(self.port)]
+
+            chirc_cmd += ["-o", self.oper_password]
+
+
             if self.loglevel == -1:
                 chirc_cmd.append("-q")
             elif self.loglevel == 1:
@@ -99,27 +151,37 @@ class IRCSession():
                         self.port = random.randint(10000,60000)
             else:
                 break        
-            
-        self.clients = []
+
+        self.started = True
         
     def end_session(self):
+        if not self.started:
+            return
+
         for c in self.clients:
             self.disconnect_client(c)
-        rc = self.chirc_proc.poll()
-        if rc is not None:
-            if rc != 0:
-                shutil.rmtree(self.tmpdir)
-                pytest.fail("chirc process failed during test. rc = %i" % rc)
-        else:
-            self.chirc_proc.kill()
-        self.chirc_proc.wait()
-        shutil.rmtree(self.tmpdir)
-        
+
+        if self.external_chirc_port is None:
+            rc = self.chirc_proc.poll()
+            if rc is not None:
+                if rc != 0:
+                    shutil.rmtree(self.tmpdir)
+                    pytest.fail("chirc process failed during test. rc = %i" % rc)
+            else:
+                self.chirc_proc.kill()
+            self.chirc_proc.wait()
+            shutil.rmtree(self.tmpdir)
+
+        self.started = False
 
     # Client connect/disconnect        
         
     def get_client(self, nodelay = False):
-        c = ChircClient(msg_timeout = self.msg_timeout, port=self.port, nodelay = nodelay)
+        if self.external_chirc_port is not None:
+            port = self.external_chirc_port
+        else:
+            port = self.port
+        c = ChircClient(msg_timeout = self.msg_timeout, port=port, nodelay = nodelay)
         self.clients.append(c)
         return c
         
@@ -651,7 +713,72 @@ class IRCSession():
             expect_short_params = None
             
         self.get_reply(client, expect_code = replies.RPL_ENDOFNAMES, expect_nick = nick,
-                       expect_short_params = expect_short_params, expect_nparams = 2)        
-    
-        
-   
+                       expect_short_params = expect_short_params, expect_nparams = 2)
+
+    def verify_server_registration(self, passive_server, active_server):
+        pass
+
+
+class IRCNetworkServer:
+
+    def __init__(self, servername, hostname, port, passwd):
+        self.servername = servername
+        self.hostname = hostname
+        self.port = port
+        self.passwd = passwd
+        self.irc_session = None
+
+
+
+class IRCNetworkSession:
+    '''
+    This class is used to manage multiple IRC sessions at the same time.
+    It creates one SingleIRCSession object per server.
+    '''
+
+    def __init__(self, chirc_exe=None, msg_timeout = 0.1, randomize_ports=False,
+                 default_start_port=7776, loglevel=-1, debug=False):
+
+        # We skip validating many of the parameters, because this will be done in
+        # the SingleIRCSession constructor
+
+        self.chirc_exe = chirc_exe
+        self.msg_timeout = msg_timeout
+        self.randomize_ports = randomize_ports
+        self.default_start_port = default_start_port
+        self.loglevel = loglevel
+        self.debug = debug
+        self.servers = []
+
+    def set_servers(self, num_servers):
+
+        if self.randomize_ports:
+            port = random.randint(10000,60000)
+        else:
+            port = self.default_start_port
+
+        for i in range(num_servers):
+            n = i+1
+            servername = "irc-{}.example.net".format(n)
+            hostname = "127.0.0.1"
+            port = port + i
+            passwd = "passwd{}".format(n)
+
+            server = IRCNetworkServer(servername, hostname, port, passwd)
+            self.servers.append(server)
+
+        for server in self.servers:
+            session =  SingleIRCSession(chirc_exe=self.chirc_exe,
+                                        loglevel=self.loglevel,
+                                        debug=self.debug,
+                                        irc_network=self.servers,
+                                        irc_network_server=server)
+            server.irc_session = session
+
+    def start_session(self, server_idx):
+        self.servers[server_idx].irc_session.start_session()
+
+    def end_sessions(self):
+        for server in self.servers:
+            server.irc_session.end_session()
+

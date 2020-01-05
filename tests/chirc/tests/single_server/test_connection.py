@@ -635,7 +635,7 @@ class TestQUIT(object):
         client1.send_cmd("QUIT :Goodbye!")
 
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(Goodbye!\)")
+                                long_param_re = r"Closing Link: .* \(Goodbye!\)")
 
     def test_quit_after_registration2(self, irc_session):      
         """
@@ -649,7 +649,7 @@ class TestQUIT(object):
         client1.send_cmd("QUIT :Goodbye!")
 
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(Goodbye!\)")      
+                                long_param_re = r"Closing Link: .* \(Goodbye!\)")
         
         irc_session.verify_disconnect(client1)
         
@@ -666,7 +666,7 @@ class TestQUIT(object):
         client1.send_cmd("QUIT")
 
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(Client Quit\)")      
+                                long_param_re = r"Closing Link: .* \(Client Quit\)")
         
         irc_session.verify_disconnect(client1)
 
@@ -684,12 +684,10 @@ class TestQUIT(object):
         client2.send_cmd("QUIT :Leaving")
 
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(See ya later!\)")      
+                                long_param_re = r"Closing Link: .* \(See ya later!\)")
 
         irc_session.get_message(client2, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(Leaving\)")      
+                                long_param_re = r"Closing Link: .* \(Leaving\)")
         
         irc_session.verify_disconnect(client1)
         irc_session.verify_disconnect(client2)
-         
-                       

@@ -1,59 +1,65 @@
+import json
+
 import pytest
 import os.path
-from chirc.tests.common import IRCSession
-    
+
 def pytest_addoption(parser):
-    parser.addoption("-C", action="store", metavar="CATEGORY_ID",
-        help="only run tests in category CATEGORY_ID.")    
-    parser.addoption("--chirc-exe", action="store", metavar="CHIRC_EXE",
+    parser.addoption("--chirc-category", action="store", metavar="CATEGORY_ID",
+        help="only run tests in category CATEGORY_ID.")
+    parser.addoption("--chirc-rubric", action="store", metavar="RUBRIC_FILE",
+                     help="only run the tests in this rubric file")
+    parser.addoption("--chirc-exe", action="store", metavar="CHIRC_EXE", default="../build/chirc",
         help="set location of chirc executable")       
-    parser.addoption("--chirc-loglevel", action="store", type=int, metavar="LOGLEVEL",
-        help="set log level in chirc to LOGLEVEL (-1: -q, 0: normal, 1: -v, 2: --v).")       
-    parser.addoption("--chirc-port", action="store", type=int,
-        help="port to run server on")       
-    parser.addoption("--randomize-ports", action="store_true",
-        help="randomize server's port when running tests")       
+    parser.addoption("--chirc-loglevel", action="store", type=int, default=0, metavar="LOGLEVEL",
+        help="set log level in chirc to LOGLEVEL (-1: -q, 0: normal, 1: -v, 2: -vv).")
+    parser.addoption("--chirc-port", action="store", type=int, default=-1,
+        help="port to run chirc on (use -1 to use a random port in each test)")
+    parser.addoption("--chirc-external-port", action="store", type=int,
+                     help="Do not launch chirc, and instead connect to chirc on this port")
+    parser.addoption("--generate-alltests-file", action="store", type=str, default=None,
+                     help="Generate file with all the test categories and names")
 
-@pytest.fixture
-def irc_session(request):   
-    chirc_exe = request.config.getoption("--chirc-exe")
-    chirc_loglevel = request.config.getoption("--chirc-loglevel")
-    chirc_port = request.config.getoption("--chirc-port")
-    randomize_ports = request.config.getoption("--randomize-ports")
-    
-    session = IRCSession(chirc_exe = chirc_exe, 
-                         loglevel = chirc_loglevel, 
-                         default_port = chirc_port,
-                         randomize_ports=randomize_ports)
-    
-    session.start_session()
-    
-    def fin():
-        session.end_session()
-        
-    request.addfinalizer(fin)    
-    
-    return session
 
-def pytest_configure(config):
-    f = open("alltests", "w")
-    f.close()
+def pytest_sessionstart(session):
+    session.rubric_categories = None
+    rubric_file = session.config.option.chirc_rubric
+    if rubric_file is not None:
+        if not os.path.exists(rubric_file):
+            pytest.exit("No such rubric file: {}".format(rubric_file))
 
-def pytest_itemcollected(item):
-    category_marker = item.get_closest_marker("category")
-    if category_marker is not None:
-        category = category_marker.args[0]
-        with open("alltests", "a") as f:
-            f.write("{},{}\n".format(category, item.nodeid))
+        session.rubric_categories = set()
+
+        with open(rubric_file) as f:
+            rubric = json.load(f)
+            for c in rubric["categories"]:
+                for sc in c["subcategories"]:
+                    session.rubric_categories.add(sc["cid"])
+
+def pytest_collection_finish(session):
+    if session.config.option.chirc_external_port is not None and len(session.items) > 1:
+        pytest.exit("Cannot use --use-external-chirc when running more than one test.")
+
+    if session.config.option.generate_alltests_file is not None:
+        with open(session.config.option.generate_alltests_file, "w") as f:
+            for item in session.items:
+                category_marker = item.get_closest_marker("category")
+                if category_marker is not None:
+                    category = category_marker.args[0]
+                    f.write("{},{}\n".format(category, item.nodeid))
+
 
 def pytest_runtest_setup(item):
-    only_category = item.config.getoption("-C")
-    if only_category is not None:    
+    rubric_categories = item.session.rubric_categories
+    only_category = item.config.getoption("--chirc-category")
+    if only_category is not None or rubric_categories is not None:
         category_marker = item.get_closest_marker("category")
         if category_marker is not None:
             category = category_marker.args[0]
-            if category != item.config.getoption("-C"):
+            if only_category is not None and category != only_category:
                 pytest.skip("Only running tests in category {}".format(only_category))
+            elif rubric_categories is not None and category not in rubric_categories:
+                pytest.skip("Only running tests in categories {}".format(", ".join(rubric_categories)))
+
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -62,10 +68,6 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
     category = item.get_closest_marker("category").args[0]
 
-    if report.when == "call":
-        report.metadata = {
-            'category': category
-        }        
-        report.test_metadata = {
-            'category': category
-        }
+    report.test_metadata = {
+        'category': category
+    }

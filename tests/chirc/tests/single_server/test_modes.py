@@ -1,5 +1,5 @@
 import pytest
-from chirc.tests.fixtures import channels1, channels2, channels3
+from chirc.tests.common.fixtures import channels1, channels2, channels3
 from chirc import replies
 
 @pytest.mark.category("OPER")

@@ -1,5 +1,5 @@
 import pytest
-from chirc.tests.fixtures import channels1, channels2, channels3, channels4
+from chirc.tests.common.fixtures import channels1, channels2, channels3, channels4
 from chirc import replies
 
 @pytest.mark.category("CHANNEL_JOIN")
@@ -1289,7 +1289,7 @@ class TestChannelUPDATEAssignment2(object):
             irc_session.verify_relayed_quit(client, from_nick=nick1, msg = "Client Quit")           
             
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(Client Quit\)")               
+                                long_param_re = r"Closing Link: .* \(Client Quit\)")
             
         irc_session.verify_disconnect(client1)
 
@@ -1309,7 +1309,7 @@ class TestChannelUPDATEAssignment2(object):
             irc_session.verify_relayed_quit(client, from_nick=nick1, msg = "I'm outta here")   
             
         irc_session.get_message(client1, expect_cmd = "ERROR", expect_nparams = 1,
-                                long_param_re = "Closing Link: .* \(I'm outta here\)")   
+                                long_param_re = r"Closing Link: .* \(I'm outta here\)")
                     
         irc_session.verify_disconnect(client1)
                                                                                                       

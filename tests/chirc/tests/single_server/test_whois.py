@@ -1,7 +1,7 @@
 import pytest
 
 from chirc import replies
-import chirc.tests.fixtures as fixtures
+import chirc.tests.common.fixtures as fixtures
 
 class TestWHOIS(object):
 
