@@ -27,7 +27,7 @@ foreach(AID ${ASSIGNMENTS})
 
 add_custom_target(tests-assignment-${AID}
         COMMAND pytest --chirc-rubric tests/rubrics/assignment-${AID}.json
-        DEPENDS chirc)
+        DEPENDS chirc link_tests)
 
 add_custom_target(grade-assignment-${AID}
         COMMAND tests/grade.py tests/rubrics/assignment-${AID}.json)
@@ -35,7 +35,7 @@ add_custom_target(grade-assignment-${AID}
 add_custom_target(assignment-${AID}
         COMMAND /bin/sh -c 'pytest --chirc-rubric tests/rubrics/assignment-${AID}.json\; exit 0'
         COMMAND tests/grade.py tests/rubrics/assignment-${AID}.json
-        DEPENDS chirc)
+        DEPENDS chirc link_tests)
 
 endforeach()
 
