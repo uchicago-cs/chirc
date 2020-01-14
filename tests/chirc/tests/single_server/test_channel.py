@@ -1258,9 +1258,10 @@ class TestWHO(object):
         self._test_who(irc_session, channels3, users["user1"], "user1", channel = "#test5", aways = aways, ircops = ircops)                            
                  
                  
-@pytest.mark.category("UPDATE_ASSIGNMENT2")                                 
+
 class TestChannelUPDATEAssignment2(object):
 
+    @pytest.mark.category("NICK_CHANNEL")
     def test_update1b_nick(self, irc_session):
         """
         Ensure that nick changes are relayed in a channel.
@@ -1272,9 +1273,9 @@ class TestChannelUPDATEAssignment2(object):
         client1.send_cmd("NICK userfoo")
                 
         for nick, client in clients:
-            irc_session.verify_relayed_nick(client, from_nick=nick1, newnick="userfoo")         
-            
+            irc_session.verify_relayed_nick(client, from_nick=nick1, newnick="userfoo")
 
+    @pytest.mark.category("QUIT_CHANNEL")
     def test_update1b_quit1(self, irc_session):
         """
         Ensure that a user's QUIT is relayed to the channels the user is in.
@@ -1293,7 +1294,7 @@ class TestChannelUPDATEAssignment2(object):
             
         irc_session.verify_disconnect(client1)
 
-
+    @pytest.mark.category("QUIT_CHANNEL")
     def test_update1b_quit2(self, irc_session):
         """
         Ensure that a user's QUIT (with a custom message) is relayed to the 

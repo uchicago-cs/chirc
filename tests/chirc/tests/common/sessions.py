@@ -527,18 +527,18 @@ class SingleIRCSession:
         reply = self.get_reply(client, expect_code = replies.RPL_LUSERCLIENT, expect_nick = nick, expect_nparams = 1)
         if expect_users is not None:
             self.verify_reply(reply,
-                             long_param_re = "There are (?P<users>\d+) users and 0 services on 1 servers", 
+                             long_param_re = r"There are (?P<users>\d+) users and 0 services on 1 servers",
                              long_param_values = {"users":expect_users})
         r.append(reply)
         
         reply = self.get_reply(client, expect_code = replies.RPL_LUSEROP, expect_nick = nick, 
-                               expect_nparams = 2, long_param_re = "operator\(s\) online")
+                               expect_nparams = 2, long_param_re = r"operator\(s\) online")
         if expect_ops is not None:
             self.verify_reply(reply, expect_short_params = [expect_ops])
         r.append(reply)
 
         reply = self.get_reply(client, expect_code = replies.RPL_LUSERUNKNOWN, expect_nick = nick, 
-                               expect_nparams = 2, long_param_re = "unknown connection\(s\)")
+                               expect_nparams = 2, long_param_re = r"unknown connection\(s\)")
         if expect_unknown is not None:
             self.verify_reply(reply, expect_short_params = [expect_unknown])
         r.append(reply)
@@ -552,7 +552,7 @@ class SingleIRCSession:
         reply = self.get_reply(client, expect_code = replies.RPL_LUSERME, expect_nick = nick, expect_nparams = 1)
         if expect_clients is not None:
             self.verify_reply(reply,
-                             long_param_re = "I have (?P<clients>\d+) clients and (?P<servers>\d+) servers", 
+                             long_param_re = r"I have (?P<clients>\d+) clients and (?P<servers>\d+) servers",
                              long_param_values = {"clients":expect_clients})            
         r.append(reply)
         

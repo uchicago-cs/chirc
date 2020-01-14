@@ -2,22 +2,290 @@ import pytest
 from chirc.tests.common.fixtures import channels1, channels2, channels3
 from chirc import replies
 
-@pytest.mark.category("OPER")
+class BaseTestPermissions(object):
+    """Base class for permission tests"""
+
+    def _join_and_mode(self, irc_session, numclients, channel, mode):
+        """
+        Have `numclients` connect to the server, and have them all join
+        the `channel` channel. The first user to join the channel (who
+        should get operator privileges) sets the channel mode to `mode`
+        and we check that everyone received the relay of the MODE.
+        """
+
+        clients = irc_session.connect_clients(numclients, join_channel = channel)
+
+        nick1, client1 = clients[0]
+
+        irc_session.set_channel_mode(client1, nick1, channel, mode)
+
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick1, channel=channel, mode=mode)
+
+        return clients
+
+    def _privmsg(self, irc_session, client, nick, channel, clients):
+        """
+        User `nick` sends a message to channel `channel` and we check
+        that everyone received the relay of the message
+        """
+
+        client.send_cmd("PRIVMSG %s :Hello from %s!" % (channel,nick))
+        for (nick2, client2) in clients:
+            if nick != nick2:
+                irc_session.verify_relayed_privmsg(client2, from_nick=nick, recip=channel, msg="Hello from %s!" % nick)
+
+    def _oper(self, irc_session, client, nick):
+        """
+        Gives user `nick` IRCop privileges
+        """
+
+        client.send_cmd("OPER %s %s" % (nick, irc_session.oper_password))
+
+        reply = irc_session.get_reply(client, expect_code = replies.RPL_YOUREOPER, expect_nick = nick,
+                                      expect_nparams = 1,
+                                      long_param_re = "You are now an IRC operator")
+
+
+@pytest.mark.category("BASIC_MODE")
+class TestBasicMODE(object):
+
+    def test_mode_params(self, irc_session):
+        """
+        Test ERR_NEEDMOREPARAMS reply
+        """
+
+        client1 = irc_session.connect_user("user1", "User One")
+
+        client1.send_cmd("MODE")
+
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1,
+                                                 expect_nick="user1", expect_cmd="MODE")
+
+    def test_channel_membership_errors01(self, irc_session):
+        """
+        A user tries to set another user's member status mode (in #test)
+        to +o. The user exists but the channel does not."""
+
+        client1 = irc_session.connect_user("user1", "User One")
+        _ = irc_session.connect_user("user2", "User Two")
+
+        irc_session.set_channel_mode(client1, "user1", "#test", "+o", "user2", expect_wrong_channel = True)
+
+    def test_channel_membership_errors02(self, irc_session):
+        """
+        A user tries to set another user's member status mode (in #test)
+        to +o. Neither the user nor the channel exist."""
+
+        client1 = irc_session.connect_user("user1", "User One")
+
+        irc_session.set_channel_mode(client1, "user1", "#test", "+v", "user2", expect_wrong_channel = True)
+
+    def test_channel_membership_errors03(self, irc_session):
+        """
+        Two users connect to the server and they both join the #test channel.
+
+        The first user tries to set the member status mode of a user that
+        is not in the server.
+        """
+
+        clients = irc_session.connect_clients(2, join_channel = "#test")
+
+        nick1, client1 = clients[0]
+        nick2, client2 = clients[1]
+
+        irc_session.set_channel_mode(client1, nick1, "#test", "+o", "user3", expect_not_on_channel = True)
+
+
+    def test_channel_membership_errors04(self, irc_session):
+        """
+        Two users connect to the server and the first one joins the #test channel.
+
+        The first user tries to set the member status mode of the second user
+        (who is not in the channel)
+        """
+
+        client1 = irc_session.connect_user("user1", "User One")
+
+        client1.send_cmd("JOIN #test")
+        irc_session.verify_join(client1, "user1", "#test")
+
+        client2 = irc_session.connect_user("user2", "User Two")
+
+        irc_session.set_channel_mode(client1, "user1", "#test", "+o", "user2", expect_not_on_channel = True)
+
+    def test_channel_membership_errors05(self, irc_session):
+        """
+        Two users connect to the server and they both join the #test channel.
+
+        The first user tries to set the second user's member status mode to
+        a mode that is not valid.
+        """
+
+        clients = irc_session.connect_clients(2, join_channel = "#test")
+
+        nick1, client1 = clients[0]
+        nick2, client2 = clients[1]
+
+        irc_session.set_channel_mode(client1, nick1, "#test", "+z", "user2", expect_wrong_mode = True)
+
+
+@pytest.mark.category("BASIC_CHANNEL_OPERATOR")
+class TestChannelOperator(object):
+    """
+    Basic tests for channel operator functionality (for Assignment 2.5)
+    """
+
+    def test_channel_operator01(self, irc_session):
+        """
+        Connects three users to the server, and has them join
+        channel #test. Checks that the first user (user1) is
+        granted operator privileges (by checking the NAMES
+        returned when joining the channel)
+        """
+        irc_session.connect_and_join_channels({"#test": ("@user1", "user2", "user3")})
+
+    def test_channel_operator02(self, irc_session):
+        """
+        Connects nine users to the server, and has them join
+        the following channels. Checks that the first user to
+        join is granted operator privileges.
+
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+        """
+        irc_session.connect_and_join_channels(channels1)
+
+    def test_channel_operator03(self, irc_session):
+        """
+        Connects elevel users to the server, and has nine of them join
+        the following channels. Checks that the first user to
+        join is granted operator privileges.
+
+        #test1: @user1, user2, user3
+        #test2: @user4, user5, user6
+        #test3: @user7, user8, user9
+
+        Not in a channel: user10, user11
+        """
+        irc_session.connect_and_join_channels(channels2)
+
+    def test_channel_operator04(self, irc_session):
+        """
+        Ten users connect to the server and they all join the #test channel.
+
+        The first user to join the channel (the operator) gives operator
+        privileges to user2 (+o)
+
+        We check that everyone in the channel receives the relay of the MODE
+        """
+
+        clients = irc_session.connect_clients(10, join_channel = "#test")
+
+        nick1, client1 = clients[0]
+
+        irc_session.set_channel_mode(client1, nick1, "#test", "+o", "user2")
+
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="+o", mode_nick="user2")
+
+    def test_channel_operator05(self, irc_session):
+        """
+        Ten users connect to the server and they all join the #test channel.
+
+        The second user to join the channel (who should not have operator
+        privileges) tries to give operator privileges to user3, but is denied.
+
+        We check that no one in the channel receives a relay of the MODE
+        """
+
+        clients = irc_session.connect_clients(10, join_channel = "#test")
+
+        nick2, client2 = clients[1]
+
+        irc_session.set_channel_mode(client2, nick2, "#test", "+o", "user3", expect_ops_needed=True)
+
+        for nick, client in clients:
+            irc_session.get_reply(client, expect_timeout = True)
+
+    def test_channel_operator06(self, irc_session):
+        """
+        Ten users connect to the server and they all join the #test channel.
+
+        The second user to join the channel (who should not have operator
+        privileges) tries to take operator privileges away from the operator,
+        but is denied.
+
+        We check that no one in the channel receives a relay of the MODE
+        """
+
+        clients = irc_session.connect_clients(10, join_channel = "#test")
+
+        nick2, client2 = clients[1]
+
+        irc_session.set_channel_mode(client2, nick2, "#test", "-o", "user1", expect_ops_needed=True)
+
+        for nick, client in clients:
+            irc_session.get_reply(client, expect_timeout = True)
+
+
+    def test_channel_operator07(self, irc_session):
+        """
+        Ten users connect to the server and they all join the #test channel.
+
+        The following happens:
+
+        - user1 gives user2 operator privileges in the channel. We check
+          that everyone receives the relay.
+        - user2 gives user3 operator privileges in the channel. We check
+          that everyone receives the relay.
+        - user1 takes away the operator privileges from user2. We check
+          that everyone receives the relay.
+        - user2 (who is no longer an operator) tries to give operator privileges
+          to user4, but is denied. We check that no one receives a MODE relay
+        """
+
+        clients = irc_session.connect_clients(5, join_channel = "#test")
+
+        nick1, client1 = clients[0]
+        nick2, client2 = clients[1]
+
+        irc_session.set_channel_mode(client1, nick1, "#test", "+o", "user2")
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="+o", mode_nick="user2")
+
+        irc_session.set_channel_mode(client2, nick2, "#test", "+o", "user3")
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+o", mode_nick="user3")
+
+        irc_session.set_channel_mode(client1, nick1, "#test", "-o", "user2")
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="-o", mode_nick="user2")
+
+        irc_session.set_channel_mode(client2, nick2, "#test", "+o", "user4", expect_ops_needed=True)
+
+        for nick, client in clients:
+            irc_session.get_reply(client, expect_timeout = True)
+
+
+
+@pytest.mark.category("BASIC_IRC_OPERATOR")
 class TestOPER(object):
 
     def test_oper1(self, irc_session):
         """
         Tests giving a user (user1) IRCop privileges.
         """
-        
+
         client1 = irc_session.connect_user("user1", "User One")
-        
+
         client1.send_cmd("OPER user1 %s" % irc_session.oper_password)
-        
-        reply = irc_session.get_reply(client1, expect_code = replies.RPL_YOUREOPER, expect_nick = "user1", 
-                               expect_nparams = 1,
-                               long_param_re = "You are now an IRC operator")      
-        
+
+        reply = irc_session.get_reply(client1, expect_code = replies.RPL_YOUREOPER, expect_nick = "user1",
+                                      expect_nparams = 1,
+                                      long_param_re = "You are now an IRC operator")
+
     def test_oper2(self, irc_session):
         """
         Tests giving a user (user1) IRCop privileges, but providing
@@ -25,27 +293,48 @@ class TestOPER(object):
         """
 
         client1 = irc_session.connect_user("user1", "User One")
-        
+
         client1.send_cmd("OPER user1 BAD%s" % irc_session.oper_password)
-        
-        reply = irc_session.get_reply(client1, expect_code = replies.ERR_PASSWDMISMATCH, expect_nick = "user1", 
-                               expect_nparams = 1,
-                               long_param_re = "Password incorrect")
-        
+
+        reply = irc_session.get_reply(client1, expect_code = replies.ERR_PASSWDMISMATCH, expect_nick = "user1",
+                                      expect_nparams = 1,
+                                      long_param_re = "Password incorrect")
+
     def test_oper_params(self, irc_session):
         """
         Test ERR_NEEDMOREPARAMS reply
         """
-        
-        client1 = irc_session.connect_user("user1", "User One")
-        
-        client1.send_cmd("OPER")
-        
-        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
-                                                 expect_nick="user1", expect_cmd="OPER")          
 
-@pytest.mark.category("MODES")        
-class TestMODE(object):       
+        client1 = irc_session.connect_user("user1", "User One")
+
+        client1.send_cmd("OPER")
+
+        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1,
+                                                 expect_nick="user1", expect_cmd="OPER")
+
+
+@pytest.mark.category("BASIC_IRC_OPERATOR")
+class TestPermissionsOPERBasic(BaseTestPermissions):
+
+    def test_permissions_oper_basic1(self, irc_session):
+        """
+        Check that an IRCop can grant operator privileges to someone on a channel
+        despite not being a channel operator.
+        """
+
+        clients = irc_session.connect_clients(3, join_channel = "#test")
+
+        nick2, client2 = clients[1]
+
+        self._oper(irc_session, client2, nick2)
+
+        irc_session.set_channel_mode(client2, nick2, "#test", "+o", "user3")
+
+        for nick, client in clients:
+            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+o", mode_nick="user3")
+
+@pytest.mark.category("MODES")
+class TestUserMODE(object):
      
     def test_user_mode01(self, irc_session):
         """
@@ -174,7 +463,11 @@ class TestMODE(object):
 
         client1 = irc_session.connect_user("user1", "User One")
         
-        irc_session.set_user_mode(client1, "user1", "user2", "-z")           
+        irc_session.set_user_mode(client1, "user1", "user2", "-z")
+
+
+@pytest.mark.category("MODES")
+class TestChannelMODE(object):
 
     def test_channel_mode01(self, irc_session):
         """
@@ -458,20 +751,12 @@ class TestMODE(object):
         nick2, client2 = clients[1]  
         
         irc_session.set_channel_mode(client2, nick2, "#test", "+m", expect_ops_needed = True)
-        
-    
-
-    def test_channeluser_mode01(self, irc_session):
-        """
-        A user tries to set another user's member status mode (in #test)
-        to +v. Neither the user nor the channel exist."""
-        
-        client1 = irc_session.connect_user("user1", "User One")
-        
-        irc_session.set_channel_mode(client1, "user1", "#test", "+v", "user2", expect_wrong_channel = True)       
 
 
-    def test_channeluser_mode02(self, irc_session):
+@pytest.mark.category("MODES")
+class TestChannelMembershipMODE(object):
+
+    def test_channel_membership_mode01(self, irc_session):
         """
         Two users connect to the server. The first one joins #test, the second
         one does not.
@@ -490,9 +775,8 @@ class TestMODE(object):
         client2 = irc_session.connect_user("user2", "User Two")
         
         irc_session.set_channel_mode(client2, "user2", "#test", "+v", "user1", expect_ops_needed = True)      
-        
 
-    def test_channeluser_mode03(self, irc_session):
+    def test_channel_membership_mode02(self, irc_session):
         """
         Two users connect to the server and they both join the #test channel.
         
@@ -506,76 +790,9 @@ class TestMODE(object):
         nick1, client1 = clients[0]  
         nick2, client2 = clients[1]  
         
-        irc_session.set_channel_mode(client2, nick2, "#test", "+v", "user1", expect_ops_needed = True)    
-        
+        irc_session.set_channel_mode(client2, nick2, "#test", "+v", "user1", expect_ops_needed = True)
 
-    def test_channeluser_mode04(self, irc_session):
-        """
-        Two users connect to the server and they both join the #test channel.
-        
-        The first user tries to set the member status mode of a user that
-        is not in the server.
-        """
-
-        clients = irc_session.connect_clients(2, join_channel = "#test")
-        
-        nick1, client1 = clients[0]  
-        nick2, client2 = clients[1]  
-        
-        irc_session.set_channel_mode(client1, nick1, "#test", "+v", "user3", expect_not_on_channel = True)      
-        
-
-    def test_channeluser_mode05(self, irc_session):
-        """
-        Two users connect to the server and the first one joins the #test channel.
-        
-        The first user tries to set the member status mode of the second user
-        (who is not in the channel)
-        """
-
-        client1 = irc_session.connect_user("user1", "User One")
-
-        client1.send_cmd("JOIN #test")
-        irc_session.verify_join(client1, "user1", "#test")  
-
-        client2 = irc_session.connect_user("user2", "User Two")
-        
-        irc_session.set_channel_mode(client1, "user1", "#test", "+v", "user2", expect_not_on_channel = True)   
-        
-
-    def test_channeluser_mode06(self, irc_session):
-        """
-        Two users connect to the server and they both join the #test channel.
-        
-        The first user tries to set the second user's member status mode to
-        a mode that is not valid.
-        """
-                
-        clients = irc_session.connect_clients(2, join_channel = "#test")
-        
-        nick1, client1 = clients[0]  
-        nick2, client2 = clients[1]  
-        
-        irc_session.set_channel_mode(client1, nick1, "#test", "+t", "user2", expect_wrong_mode = True)                             
-         
-
-    def test_channeluser_mode07(self, irc_session):
-        """
-        Two users connect to the server and they both join the #test channel.
-        
-        The first user tries to set the second user's member status mode to
-        a mode that is not valid.
-        """
-                
-        clients = irc_session.connect_clients(2, join_channel = "#test")
-        
-        nick1, client1 = clients[0]  
-        nick2, client2 = clients[1]  
-        
-        irc_session.set_channel_mode(client1, nick1, "#test", "+m", "user2", expect_wrong_mode = True)     
-        
-
-    def test_channeluser_mode08(self, irc_session):
+    def test_channel_membership_mode03(self, irc_session):
         """
         Ten users connect to the server and they all join the #test channel.
         
@@ -592,30 +809,10 @@ class TestMODE(object):
         irc_session.set_channel_mode(client1, nick1, "#test", "+v", "user2")
                 
         for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="+v", mode_nick="user2")                                   
-        
-
-    def test_channeluser_mode09(self, irc_session):
-        """
-        Ten users connect to the server and they all join the #test channel.
-        
-        The first user to join the channel (the operator) gives operator
-        privileges to user2 (+o)
-        
-        We check that everyone in the channel receives the relay of the MODE
-        """  
-        
-        clients = irc_session.connect_clients(10, join_channel = "#test")
-        
-        nick1, client1 = clients[0]  
-        
-        irc_session.set_channel_mode(client1, nick1, "#test", "+o", "user2")
-                
-        for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="+o", mode_nick="user2")                                   
+            irc_session.verify_relayed_mode(client, from_nick=nick1, channel="#test", mode="+v", mode_nick="user2")
 
 
-    def test_channeluser_mode10(self, irc_session):
+    def test_channel_membership_mode04(self, irc_session):
         """
         Ten users connect to the server and they all join the #test channel.
         
@@ -650,49 +847,8 @@ class TestMODE(object):
 
         irc_session.set_channel_mode(client2, nick2, "#test", "+v", "user4", expect_ops_needed=True)
 
-    
-    def test_mode_params(self, irc_session):
-        """
-        Test ERR_NEEDMOREPARAMS reply
-        """
-        
-        client1 = irc_session.connect_user("user1", "User One")
-        
-        client1.send_cmd("MODE")
-        
-        irc_session.get_ERR_NEEDMOREPARAMS_reply(client1, 
-                                                 expect_nick="user1", expect_cmd="MODE")           
-    
 
-    def test_connect_channels01(self, irc_session):
-        """
-        Connects nine users to the server, and has them join
-        the following channels, and set the following privileges:
-        (@ denotes channel operators):
-        
-        #test1: @user1, user2, user3
-        #test2: @user4, user5, user6
-        #test3: @user7, user8, user9
-        """
-        irc_session.connect_and_join_channels(channels1)
-        
-
-    def test_connect_channels02(self, irc_session):
-        """
-        Connects eleven users to the server, and has them join
-        the following channels, and set the following privileges:
-        (@ denotes channel operators):
-        
-        #test1: @user1, user2, user3
-        #test2: @user4, user5, user6
-        #test3: @user7, user8, user9
-        
-        Not in a channel: user10, user11  
-        """
-        irc_session.connect_and_join_channels(channels2)
-
-
-    def test_connect_channels03(self, irc_session):
+    def test_channel_membership_mode05(self, irc_session):
         """
         Connects eleven users to the server, and has them join
         the following channels, and set the following privileges:
@@ -708,50 +864,9 @@ class TestMODE(object):
         """
         irc_session.connect_and_join_channels(channels3)
 
-@pytest.mark.category("MODES")        
-class TestPermissions(object):
-                        
-    def _join_and_mode(self, irc_session, numclients, channel, mode):
-        """
-        Have `numclients` connect to the server, and have them all join
-        the `channel` channel. The first user to join the channel (who
-        should operator privileges) sets the channel mode to `mode`
-        and we check that everyone received the relay of the MODE.
-        """
-        
-        clients = irc_session.connect_clients(numclients, join_channel = channel)
-        
-        nick1, client1 = clients[0]  
-        
-        irc_session.set_channel_mode(client1, nick1, channel, mode)        
 
-        for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick1, channel=channel, mode=mode)   
-            
-        return clients  
-    
-    def _privmsg(self, irc_session, client, nick, channel, clients):
-        """
-        User `nick` sends a message to channel `channel` and we check
-        that everyone received the relay of the message
-        """
-        
-        client.send_cmd("PRIVMSG %s :Hello from %s!" % (channel,nick))
-        for (nick2, client2) in clients:
-            if nick != nick2:
-                irc_session.verify_relayed_privmsg(client2, from_nick=nick, recip=channel, msg="Hello from %s!" % nick)  
-                  
-    def _oper(self, irc_session, client, nick):
-        """
-        Gives user `nick` IRCop privileges
-        """
-        
-        client.send_cmd("OPER %s %s" % (nick, irc_session.oper_password))
-        
-        reply = irc_session.get_reply(client, expect_code = replies.RPL_YOUREOPER, expect_nick = nick, 
-                               expect_nparams = 1,
-                               long_param_re = "You are now an IRC operator")                                 
-                        
+@pytest.mark.category("MODES")
+class TestPermissionsPRIVMSG(BaseTestPermissions):
 
     def test_permissions_privmsg1(self, irc_session):
         """
@@ -863,7 +978,10 @@ class TestPermissions(object):
         client2.send_cmd("NOTICE #test :Hello from %s!" % nick2)
         
         irc_session.get_reply(client2, expect_timeout = True)
-        
+
+
+@pytest.mark.category("MODES")
+class TestPermissionsTOPIC(BaseTestPermissions):
 
     def test_permissions_topic1(self, irc_session):
         """
@@ -900,9 +1018,11 @@ class TestPermissions(object):
         
         client2.send_cmd("TOPIC #test :Hello")
         for nick, client in clients:
-            irc_session.verify_relayed_topic(client, from_nick=nick2, channel="#test", topic="Hello")            
+            irc_session.verify_relayed_topic(client, from_nick=nick2, channel="#test", topic="Hello")
 
-           
+
+@pytest.mark.category("OPER")
+class TestPermissionsOPER(BaseTestPermissions):
 
     def test_permissions_oper1(self, irc_session):
         """
@@ -938,28 +1058,9 @@ class TestPermissions(object):
         irc_session.set_channel_mode(client2, nick2, "#test", "+v", "user3")
                 
         for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+v", mode_nick="user3")                                   
-        
+            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+v", mode_nick="user3")
 
     def test_permissions_oper3(self, irc_session):
-        """
-        Check that an IRCop can grant operator privileges to someone on a channel
-        despite not being a channel operator.
-        """
-
-        clients = irc_session.connect_clients(3, join_channel = "#test")
-        
-        nick2, client2 = clients[1] 
-        
-        self._oper(irc_session, client2, nick2)
-        
-        irc_session.set_channel_mode(client2, nick2, "#test", "+o", "user3")
-                
-        for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+o", mode_nick="user3")                                   
-        
-
-    def test_permissions_oper4(self, irc_session):
         """
         Check that an IRCop can send messages to a moderated channel despite
         not being a channel operator.
@@ -973,7 +1074,7 @@ class TestPermissions(object):
 
         self._privmsg(irc_session, client2, nick2, "#test", clients)
 
-    def test_permissions_oper5(self, irc_session):
+    def test_permissions_oper4(self, irc_session):
         """
         Check that an IRCop can change the topic in a channel with +t despite
         not being a channel operator.
@@ -987,8 +1088,10 @@ class TestPermissions(object):
                 
         client2.send_cmd("TOPIC #test :Hello")
         for nick, client in clients:
-            irc_session.verify_relayed_topic(client, from_nick=nick2, channel="#test", topic="Hello")        
-            
+            irc_session.verify_relayed_topic(client, from_nick=nick2, channel="#test", topic="Hello")
+
+
+
 
 @pytest.mark.category("AWAY")
 class TestAWAY(object):       

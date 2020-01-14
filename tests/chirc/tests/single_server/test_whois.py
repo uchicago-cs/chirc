@@ -74,7 +74,7 @@ class TestWHOIS(object):
             pytest.fail("You may want to *very carefully* reread the specification for RPL_WHOISCHANNELS...")
         
         
-    @pytest.mark.category("UPDATE_ASSIGNMENT2")
+    @pytest.mark.category("WHOIS_CHANNEL")
     def test_whois2(self, irc_session):
         """
         Given the following users and channels (@ denotes channel
@@ -109,7 +109,7 @@ class TestWHOIS(object):
         reply = irc_session.get_reply(users["user1"], expect_code = replies.RPL_ENDOFWHOIS, 
                            expect_nparams = 2, long_param_re = "End of WHOIS list")           
         
-    @pytest.mark.category("UPDATE_ASSIGNMENT2")
+    @pytest.mark.category("WHOIS_CHANNEL")
     def test_whois3(self, irc_session):
         """
         Given the following users and channels (@ denotes channel

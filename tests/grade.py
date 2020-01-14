@@ -5,6 +5,15 @@ import sys
 import click
 from collections import OrderedDict
 
+
+def print_empty_gradescope():
+    gradescope_json = {}
+    gradescope_json["score"] = 0.0
+    gradescope_json["output"] = "We were unable to run the tests due to an error in your code."
+    gradescope_json["visibility"] = "after_published"
+    gradescope_json["stdout_visibility"] = "after_published"
+    print(json.dumps(gradescope_json, indent=2))
+
 class Subcategory:
     def __init__(self, cid, expected_num_tests):
         self.cid = cid
@@ -44,23 +53,20 @@ class Assignment:
         return sum(c.points_obtained for c in self.categories.values())
         
 
-"""    
-ASSIGNMENT_3.add_category("CHANNEL_JOIN", "JOIN", 5)
-ASSIGNMENT_3.add_category("CHANNEL_PRIVMSG_NOTICE", "PRIVMSG and NOTICE to channels", 10)
-ASSIGNMENT_3.add_category("CHANNEL_PART", "PART", 5)
-ASSIGNMENT_3.add_category("CHANNEL_TOPIC", "TOPIC", 5)
-ASSIGNMENT_3.add_category("MODES", "User and channel modes", 15)
-ASSIGNMENT_3.add_category("AWAY", "AWAY", 2)
-ASSIGNMENT_3.add_category("NAMES", "NAMES", 2)
-ASSIGNMENT_3.add_category("LIST", "LIST", 2)
-ASSIGNMENT_3.add_category("WHO", "WHO", 2)
-ASSIGNMENT_3.add_category("UPDATE_ASSIGNMENT2", "Update Assignment 2", 2)
-"""
-
 @click.command(name="grade")
 @click.argument('rubric_file', type=click.File())
 @click.option("--report-file", type=click.File(), default="tests.json")
-def cmd(rubric_file, report_file):
+@click.option("--gradescope", is_flag=True)
+def cmd(rubric_file, report_file, gradescope):
+
+    def fail(msg):
+        print(msg, file=sys.stderr)
+
+        if gradescope:
+            print_empty_gradescope()
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
     rubric = json.load(rubric_file)
     assignment = Assignment(rubric["name"], rubric["total_points"])
@@ -75,20 +81,20 @@ def cmd(rubric_file, report_file):
 
         assignment.categories[category.name] = category
 
-    results = json.load(report_file)
+    try:
+        results = json.load(report_file)
+    except:
+        fail("Error reading test results!")
 
     for test in results["included"]:
         if test.get("type") == "test":
             test_id = test["attributes"]["name"]
             outcome = test["attributes"]["outcome"]
 
-            #import pprint
-            #pprint.pprint(test)
             if "metadata" in test["attributes"]:
                 cid = test["attributes"]["metadata"][0]["category"]
             else:
-                print("ERROR: Incorrect JSON report file (missing metadata)")
-                sys.exit(1)
+                fail("ERROR: Incorrect JSON report file (missing metadata)")
 
             if cid in assignment.subcategories:
                 assignment.subcategories[cid].actual_num_tests += 1
@@ -96,16 +102,34 @@ def cmd(rubric_file, report_file):
                 if outcome == "passed":
                     assignment.subcategories[cid].passed_tests += 1
 
-    print(assignment.name)
-    print("=" * 73)
-    print("%-35s %-6s / %-10s  %-6s / %-10s" % ("Category", "Passed", "Total", "Score", "Points"))
-    print("-" * 73)
-    for c in assignment.categories.values():
-        print("%-35s %-6i / %-10i  %-6.2f / %-10.2f" % (c.name, c.passed_tests, c.num_tests, c.points_obtained, c.points))
-    print("-" * 73)
-    print("%54s = %-6.2f / %-10i" % ("TOTAL", assignment.points_obtained, assignment.points))
-    print("=" * 73)
-    print()
+    if gradescope:
+        gradescope_json = {}
+        gradescope_json["tests"] = []
+
+        for c in assignment.categories.values():
+            gs_test = {}
+            gs_test["score"] = c.points_obtained
+            gs_test["max_score"] = c.points
+            gs_test["name"] = c.name
+
+            gradescope_json["tests"].append(gs_test)
+
+        gradescope_json["score"] = assignment.points_obtained
+        gradescope_json["visibility"] = "after_published"
+        gradescope_json["stdout_visibility"] = "after_published"
+
+        print(json.dumps(gradescope_json, indent=2))
+    else:
+        print(assignment.name)
+        print("=" * 73)
+        print("%-35s %-6s / %-10s  %-6s / %-10s" % ("Category", "Passed", "Total", "Score", "Points"))
+        print("-" * 73)
+        for c in assignment.categories.values():
+            print("%-35s %-6i / %-10i  %-6.2f / %-10.2f" % (c.name, c.passed_tests, c.num_tests, c.points_obtained, c.points))
+        print("-" * 73)
+        print("%54s = %-6.2f / %-10i" % ("TOTAL", assignment.points_obtained, assignment.points))
+        print("=" * 73)
+        print()
 
 if __name__ == "__main__":
     cmd()

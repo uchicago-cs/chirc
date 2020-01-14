@@ -64,7 +64,7 @@ class TestPRIVMSG(object):
 
         pairs_seen = dict([((nick1, nick2),0) for (nick1,nick2,msg) in msgs_sent])
         for (from_nick, to_nick, msg) in msgs_rcvd:
-            match = re.match(":Message (?P<msgnum>\d+) from (?P<from>user\d+) to (?P<to>user\d+)", msg.params[-1])
+            match = re.match(r":Message (?P<msgnum>\d+) from (?P<from>user\d+) to (?P<to>user\d+)", msg.params[-1])
             
             irc_session._assert_is_not_none(match, 
                                             "Received unexpected message (expected something of the form 'Message X from userN to userM')", 

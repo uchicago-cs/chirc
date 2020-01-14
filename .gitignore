@@ -5,6 +5,7 @@
 *.pyc
 /chirc
 .cache
+__pycache__
 results
 report.html
 tests.json
