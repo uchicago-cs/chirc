@@ -1,4 +1,6 @@
 {
+  "total_points": 50,
+  "name": "Assignment 2",
   "categories": [
     {
       "subcategories": [
@@ -7,8 +9,8 @@
           "num_tests": 6
         }
       ],
-      "points": 5,
-      "name": "JOIN"
+      "name": "JOIN",
+      "points": 5
     },
     {
       "subcategories": [
@@ -17,8 +19,8 @@
           "num_tests": 6
         }
       ],
-      "points": 10,
-      "name": "PRIVMSG and NOTICE"
+      "name": "PRIVMSG and NOTICE",
+      "points": 10
     },
     {
       "subcategories": [
@@ -27,8 +29,8 @@
           "num_tests": 14
         }
       ],
-      "points": 5,
-      "name": "PART"
+      "name": "PART",
+      "points": 5
     },
     {
       "subcategories": [
@@ -37,8 +39,8 @@
           "num_tests": 11
         }
       ],
-      "points": 5,
-      "name": "TOPIC"
+      "name": "TOPIC",
+      "points": 5
     },
     {
       "subcategories": [
@@ -55,8 +57,8 @@
           "num_tests": 43
         }
       ],
-      "points": 10,
-      "name": "User and channel modes"
+      "name": "User and channel modes",
+      "points": 10
     },
     {
       "subcategories": [
@@ -69,8 +71,8 @@
           "num_tests": 4
         }
       ],
-      "points": 5,
-      "name": "OPER"
+      "name": "OPER",
+      "points": 5
     },
     {
       "subcategories": [
@@ -79,8 +81,8 @@
           "num_tests": 6
         }
       ],
-      "points": 2,
-      "name": "AWAY"
+      "name": "AWAY",
+      "points": 2
     },
     {
       "subcategories": [
@@ -89,18 +91,22 @@
           "num_tests": 11
         }
       ],
-      "points": 2,
-      "name": "NAMES"
+      "name": "NAMES",
+      "points": 2
     },
     {
       "subcategories": [
         {
           "cid": "LIST",
-          "num_tests": 5
+          "num_tests": 4
+        },
+        {
+          "cid": "LIST_TOPIC",
+          "num_tests": 1
         }
       ],
-      "points": 2,
-      "name": "LIST"
+      "name": "LIST",
+      "points": 2
     },
     {
       "subcategories": [
@@ -109,8 +115,8 @@
           "num_tests": 6
         }
       ],
-      "points": 2,
-      "name": "WHO"
+      "name": "WHO",
+      "points": 2
     },
     {
       "subcategories": [
@@ -127,10 +133,8 @@
           "num_tests": 2
         }
       ],
-      "points": 2,
-      "name": "Update Assignment 2"
+      "name": "Update Assignment 2",
+      "points": 2
     }
-  ],
-  "total_points": 50,
-  "name": "Assignment 2"
+  ]
 }
