@@ -1,138 +1,138 @@
 {
-  "name": "Assignment 4",
-  "total_points": 50,
   "categories": [
     {
       "points": 8,
-      "name": "Connection Registration",
       "subcategories": [
         {
-          "num_tests": 21,
-          "cid": "CONNECTION_REGISTRATION"
+          "cid": "CONNECTION_REGISTRATION",
+          "num_tests": 21
         },
         {
-          "num_tests": 1,
-          "cid": "NICK_CHANNEL"
+          "cid": "NICK_CHANNEL",
+          "num_tests": 1
         },
         {
-          "num_tests": 2,
-          "cid": "QUIT_CHANNEL"
+          "cid": "QUIT_CHANNEL",
+          "num_tests": 2
         }
-      ]
+      ],
+      "name": "Connection Registration"
     },
     {
       "points": 7,
-      "name": "PRIVMSG and NOTICE (between users)",
       "subcategories": [
         {
-          "num_tests": 14,
-          "cid": "PRIVMSG_NOTICE"
+          "cid": "PRIVMSG_NOTICE",
+          "num_tests": 14
         }
-      ]
+      ],
+      "name": "PRIVMSG and NOTICE (between users)"
     },
     {
       "points": 2,
-      "name": "PING and PONG",
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "PING_PONG"
+          "cid": "PING_PONG",
+          "num_tests": 6
         }
-      ]
+      ],
+      "name": "PING and PONG"
     },
     {
       "points": 5,
-      "name": "LUSERS",
       "subcategories": [
         {
-          "num_tests": 8,
-          "cid": "LUSERS"
+          "cid": "LUSERS",
+          "num_tests": 8
         }
-      ]
+      ],
+      "name": "LUSERS"
     },
     {
       "points": 5,
-      "name": "WHOIS",
       "subcategories": [
         {
-          "num_tests": 3,
-          "cid": "WHOIS"
+          "cid": "WHOIS",
+          "num_tests": 3
         },
         {
-          "num_tests": 2,
-          "cid": "WHOIS_CHANNEL"
+          "cid": "WHOIS_CHANNEL",
+          "num_tests": 1
         }
-      ]
+      ],
+      "name": "WHOIS"
     },
     {
       "points": 5,
-      "name": "JOIN",
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "CHANNEL_JOIN"
+          "cid": "CHANNEL_JOIN",
+          "num_tests": 6
         }
-      ]
+      ],
+      "name": "JOIN"
     },
     {
       "points": 5,
-      "name": "PRIVMSG and NOTICE (to channels)",
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "CHANNEL_PRIVMSG_NOTICE"
+          "cid": "CHANNEL_PRIVMSG_NOTICE",
+          "num_tests": 6
         }
-      ]
+      ],
+      "name": "PRIVMSG and NOTICE (to channels)"
     },
     {
       "points": 5,
-      "name": "PART",
       "subcategories": [
         {
-          "num_tests": 14,
-          "cid": "CHANNEL_PART"
+          "cid": "CHANNEL_PART",
+          "num_tests": 14
         }
-      ]
+      ],
+      "name": "PART"
     },
     {
       "points": 3,
-      "name": "Channel Operator",
       "subcategories": [
         {
-          "num_tests": 7,
-          "cid": "BASIC_CHANNEL_OPERATOR"
+          "cid": "BASIC_CHANNEL_OPERATOR",
+          "num_tests": 7
         }
-      ]
+      ],
+      "name": "Channel Operator"
     },
     {
       "points": 2,
-      "name": "IRC Operator",
       "subcategories": [
         {
-          "num_tests": 4,
-          "cid": "BASIC_IRC_OPERATOR"
+          "cid": "BASIC_IRC_OPERATOR",
+          "num_tests": 4
         }
-      ]
+      ],
+      "name": "IRC Operator"
     },
     {
       "points": 2,
-      "name": "LIST",
       "subcategories": [
         {
-          "num_tests": 4,
-          "cid": "LIST"
+          "cid": "LIST",
+          "num_tests": 4
         }
-      ]
+      ],
+      "name": "LIST"
     },
     {
       "points": 1,
-      "name": "ERR_UNKNOWN",
       "subcategories": [
         {
-          "num_tests": 3,
-          "cid": "ERR_UNKNOWN"
+          "cid": "ERR_UNKNOWN",
+          "num_tests": 3
         }
-      ]
+      ],
+      "name": "ERR_UNKNOWN"
     }
-  ]
+  ],
+  "total_points": 50,
+  "name": "Assignment 4"
 }

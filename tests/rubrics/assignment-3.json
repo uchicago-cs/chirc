@@ -1,6 +1,5 @@
 {
   "total_points": 50,
-  "name": "Assignment 2",
   "categories": [
     {
       "subcategories": [
@@ -9,8 +8,8 @@
           "num_tests": 6
         }
       ],
-      "name": "JOIN",
-      "points": 5
+      "points": 5,
+      "name": "JOIN"
     },
     {
       "subcategories": [
@@ -19,8 +18,8 @@
           "num_tests": 6
         }
       ],
-      "name": "PRIVMSG and NOTICE",
-      "points": 10
+      "points": 10,
+      "name": "PRIVMSG and NOTICE"
     },
     {
       "subcategories": [
@@ -29,8 +28,8 @@
           "num_tests": 14
         }
       ],
-      "name": "PART",
-      "points": 5
+      "points": 5,
+      "name": "PART"
     },
     {
       "subcategories": [
@@ -39,8 +38,8 @@
           "num_tests": 11
         }
       ],
-      "name": "TOPIC",
-      "points": 5
+      "points": 5,
+      "name": "TOPIC"
     },
     {
       "subcategories": [
@@ -57,8 +56,8 @@
           "num_tests": 43
         }
       ],
-      "name": "User and channel modes",
-      "points": 10
+      "points": 10,
+      "name": "User and channel modes"
     },
     {
       "subcategories": [
@@ -71,8 +70,8 @@
           "num_tests": 4
         }
       ],
-      "name": "OPER",
-      "points": 5
+      "points": 5,
+      "name": "OPER"
     },
     {
       "subcategories": [
@@ -81,8 +80,8 @@
           "num_tests": 6
         }
       ],
-      "name": "AWAY",
-      "points": 2
+      "points": 2,
+      "name": "AWAY"
     },
     {
       "subcategories": [
@@ -91,8 +90,8 @@
           "num_tests": 11
         }
       ],
-      "name": "NAMES",
-      "points": 2
+      "points": 2,
+      "name": "NAMES"
     },
     {
       "subcategories": [
@@ -105,8 +104,8 @@
           "num_tests": 1
         }
       ],
-      "name": "LIST",
-      "points": 2
+      "points": 2,
+      "name": "LIST"
     },
     {
       "subcategories": [
@@ -115,8 +114,8 @@
           "num_tests": 6
         }
       ],
-      "name": "WHO",
-      "points": 2
+      "points": 2,
+      "name": "WHO"
     },
     {
       "subcategories": [
@@ -130,11 +129,16 @@
         },
         {
           "cid": "WHOIS_CHANNEL",
-          "num_tests": 2
+          "num_tests": 1
+        },
+        {
+          "cid": "WHOIS_CHANNEL_AWAY",
+          "num_tests": 1
         }
       ],
-      "name": "Update Assignment 2",
-      "points": 2
+      "points": 2,
+      "name": "Update Assignment 2"
     }
-  ]
+  ],
+  "name": "Assignment 2"
 }

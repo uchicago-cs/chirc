@@ -109,7 +109,7 @@ class TestWHOIS(object):
         reply = irc_session.get_reply(users["user1"], expect_code = replies.RPL_ENDOFWHOIS, 
                            expect_nparams = 2, long_param_re = "End of WHOIS list")           
         
-    @pytest.mark.category("WHOIS_CHANNEL")
+    @pytest.mark.category("WHOIS_CHANNEL_AWAY")
     def test_whois3(self, irc_session):
         """
         Given the following users and channels (@ denotes channel
