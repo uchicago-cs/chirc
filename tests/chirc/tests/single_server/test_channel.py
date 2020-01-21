@@ -976,10 +976,10 @@ class TestLIST(object):
         """      
         users = irc_session.connect_and_join_channels(channels4)
         
-        self._test_list(irc_session, channels4, users["user1"], "user1")        
-        
-  
+        self._test_list(irc_session, channels4, users["user1"], "user1")
 
+
+    @pytest.mark.category("LIST_TOPIC")
     def test_list5(self, irc_session):
         """
         Connects eleven users to the server, and has them join
