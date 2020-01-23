@@ -521,14 +521,20 @@ class SingleIRCSession:
         
         return r
     
-    def verify_lusers(self, client, nick, expect_users = None, expect_ops = None, expect_unknown = None, expect_channels = None, expect_clients = None):
+    def verify_lusers(self, client, nick, expect_users = None, expect_servers=None,
+                      expect_ops = None, expect_unknown = None, expect_channels = None,
+                      expect_clients = None, expect_direct_servers=None):
         r = []
              
         reply = self.get_reply(client, expect_code = replies.RPL_LUSERCLIENT, expect_nick = nick, expect_nparams = 1)
         if expect_users is not None:
             self.verify_reply(reply,
-                             long_param_re = r"There are (?P<users>\d+) users and 0 services on 1 servers",
+                             long_param_re = r"There are (?P<users>\d+) users and 0 services on \d+ servers",
                              long_param_values = {"users":expect_users})
+        if expect_servers is not None:
+            self.verify_reply(reply,
+                              long_param_re = r"There are \d+ users and 0 services on (?P<servers>\d+) servers",
+                              long_param_values = {"servers":expect_servers})
         r.append(reply)
         
         reply = self.get_reply(client, expect_code = replies.RPL_LUSEROP, expect_nick = nick, 
@@ -552,8 +558,12 @@ class SingleIRCSession:
         reply = self.get_reply(client, expect_code = replies.RPL_LUSERME, expect_nick = nick, expect_nparams = 1)
         if expect_clients is not None:
             self.verify_reply(reply,
-                             long_param_re = r"I have (?P<clients>\d+) clients and (?P<servers>\d+) servers",
-                             long_param_values = {"clients":expect_clients})            
+                             long_param_re = r"I have (?P<clients>\d+) clients and \d+ servers",
+                             long_param_values = {"clients":expect_clients})
+        if expect_direct_servers is not None:
+            self.verify_reply(reply,
+                              long_param_re = r"I have \d+ clients and (?P<servers>\d+) servers",
+                              long_param_values = {"servers":expect_direct_servers})
         r.append(reply)
         
         return r
@@ -715,9 +725,72 @@ class SingleIRCSession:
         self.get_reply(client, expect_code = replies.RPL_ENDOFNAMES, expect_nick = nick,
                        expect_short_params = expect_short_params, expect_nparams = 2)
 
-    def verify_server_registration(self, passive_server, active_server):
-        pass
+    def verify_list(self, channels, client, nick, expect_topics = None):
+        """
+        User `nick` sends a LIST command and we verify the replies.
+        `channels` is a dictionary mapping channel names to users in each channel.
+        `expect_topics` is a dictionary mapping channel names to their topics
+        """
 
+        client.send_cmd("LIST")
+
+        channelsl = set([k for k in channels.keys() if k is not None])
+        numchannels = len(channelsl)
+
+        for i in range(numchannels):
+            reply = self.get_reply(client, expect_code = replies.RPL_LIST, expect_nick = nick,
+                                          expect_nparams = 3)
+
+            channel = reply.params[1]
+            self._assert_in(channel, channelsl,
+                                   explanation = "Received unexpected RPL_LIST for {}".format(channel),
+                                   irc_msg = reply)
+
+            numusers = int(reply.params[2])
+            expect_numusers = len(channels[channel])
+            self._assert_equals(numusers, expect_numusers,
+                                       explanation = "Expected {} users in {}, got {}".format(expect_numusers, channel, numusers),
+                                       irc_msg = reply)
+
+            if expect_topics is not None:
+                expect_topic = expect_topics[channel]
+                topic = reply.params[3][1:]
+                self._assert_equals(topic, expect_topic,
+                                           explanation = "Expected topic for {} to be '{}', got '{}' instead".format(channel, expect_topic, topic),
+                                           irc_msg = reply)
+
+            channelsl.remove(channel)
+
+        assert len(channelsl) == 0, "Did not receive RPL_LIST for these channels: {}".format(", ".join(channelsl))
+
+        self.get_reply(client, expect_code = replies.RPL_LISTEND, expect_nick = nick,
+                               expect_nparams = 1, long_param_re = "End of LIST")
+
+    def verify_server_registration(self, client, passive_server, active_server):
+        expect_short_params = [active_server.passwd, "0210"]
+        reply = self.get_message(client, expect_prefix = True, expect_cmd = "PASS",
+                                 expect_short_params = expect_short_params, expect_nparams = 3)
+
+        self._assert_equals(reply.prefix.hostname, passive_server.servername,
+                            explanation = "Expected prefix to be '{}'".format(passive_server.servername),
+                            irc_msg = reply)
+
+        expect_short_params = [passive_server.servername]
+        reply = self.get_message(client, expect_prefix = True, expect_cmd = "SERVER",
+                                 expect_short_params = expect_short_params, expect_nparams = 3)
+
+        self._assert_equals(reply.prefix.hostname, passive_server.servername,
+                            explanation = "Expected prefix to be '{}'".format(passive_server.servername),
+                            irc_msg = reply)
+
+    def verify_relayed_network_nick(self, client, from_server, expect_nick, expect_hopcount, expect_username,
+                                    expect_servertoken, expect_mode, expect_fullname):
+        expect_short_params = [expect_nick, expect_hopcount, expect_username]
+        reply = self.get_message(client, expect_prefix = True, expect_cmd = "NICK",
+                                 expect_short_params=expect_short_params, expect_nparams = 7)
+        self._assert_equals(reply.prefix.hostname, from_server.servername,
+                            explanation = "Expected NICK's prefix to be servername '{}'".format(from_server.servername),
+                            irc_msg = reply)
 
 class IRCNetworkServer:
 
@@ -736,7 +809,7 @@ class IRCNetworkSession:
     It creates one SingleIRCSession object per server.
     '''
 
-    def __init__(self, chirc_exe=None, msg_timeout = 0.1, randomize_ports=False,
+    def __init__(self, chirc_exe=None, msg_timeout = 0.1,
                  default_start_port=7776, loglevel=-1, debug=False):
 
         # We skip validating many of the parameters, because this will be done in
@@ -744,7 +817,6 @@ class IRCNetworkSession:
 
         self.chirc_exe = chirc_exe
         self.msg_timeout = msg_timeout
-        self.randomize_ports = randomize_ports
         self.default_start_port = default_start_port
         self.loglevel = loglevel
         self.debug = debug
@@ -752,7 +824,7 @@ class IRCNetworkSession:
 
     def set_servers(self, num_servers):
 
-        if self.randomize_ports:
+        if self.default_start_port == -1:
             port = random.randint(10000,60000)
         else:
             port = self.default_start_port

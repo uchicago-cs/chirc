@@ -1,16 +1,16 @@
 {
+  "total_points": 50,
   "name": "Assignment 1",
   "categories": [
     {
+      "name": "Basic Connection",
       "subcategories": [
         {
           "cid": "BASIC_CONNECTION",
           "num_tests": 22
         }
       ],
-      "name": "Basic Connection",
       "points": 50
     }
-  ],
-  "total_points": 50
+  ]
 }

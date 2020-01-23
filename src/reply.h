@@ -83,6 +83,7 @@
 #define RPL_YOUREOPER           "381"
 
 #define ERR_NOSUCHNICK          "401"
+#define ERR_NOSUCHSERVER        "402"
 #define ERR_NOSUCHCHANNEL       "403"
 #define ERR_CANNOTSENDTOCHAN    "404"
 #define ERR_NORECIPIENT         "411"
@@ -98,6 +99,7 @@
 #define ERR_ALREADYREGISTRED    "462"
 #define ERR_PASSWDMISMATCH      "464"
 #define ERR_UNKNOWNMODE         "472"
+#define ERR_NOPRIVILEGES        "481"
 #define ERR_CHANOPRIVSNEEDED    "482"
 #define ERR_UMODEUNKNOWNFLAG    "501"
 #define ERR_USERSDONTMATCH      "502"

@@ -1,148 +1,148 @@
 {
+  "total_points": 50,
   "categories": [
     {
-      "points": 5,
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "CHANNEL_JOIN"
+          "cid": "CHANNEL_JOIN",
+          "num_tests": 6
         }
       ],
-      "name": "JOIN"
+      "name": "JOIN",
+      "points": 5
     },
     {
-      "points": 10,
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "CHANNEL_PRIVMSG_NOTICE"
+          "cid": "CHANNEL_PRIVMSG_NOTICE",
+          "num_tests": 6
         }
       ],
-      "name": "PRIVMSG and NOTICE"
+      "name": "PRIVMSG and NOTICE",
+      "points": 10
     },
     {
-      "points": 5,
       "subcategories": [
         {
-          "num_tests": 14,
-          "cid": "CHANNEL_PART"
+          "cid": "CHANNEL_PART",
+          "num_tests": 14
         }
       ],
-      "name": "PART"
+      "name": "PART",
+      "points": 5
     },
     {
-      "points": 5,
       "subcategories": [
         {
-          "num_tests": 11,
-          "cid": "CHANNEL_TOPIC"
+          "cid": "CHANNEL_TOPIC",
+          "num_tests": 11
         }
       ],
-      "name": "TOPIC"
+      "name": "TOPIC",
+      "points": 5
     },
     {
-      "points": 10,
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "BASIC_MODE"
+          "cid": "BASIC_MODE",
+          "num_tests": 6
         },
         {
-          "num_tests": 7,
-          "cid": "BASIC_CHANNEL_OPERATOR"
+          "cid": "BASIC_CHANNEL_OPERATOR",
+          "num_tests": 7
         },
         {
-          "num_tests": 43,
-          "cid": "MODES"
+          "cid": "MODES",
+          "num_tests": 43
         }
       ],
-      "name": "User and channel modes"
+      "name": "User and channel modes",
+      "points": 10
     },
     {
-      "points": 5,
       "subcategories": [
         {
-          "num_tests": 4,
-          "cid": "BASIC_IRC_OPERATOR"
+          "cid": "BASIC_IRC_OPERATOR",
+          "num_tests": 4
         },
         {
-          "num_tests": 4,
-          "cid": "OPER"
+          "cid": "OPER",
+          "num_tests": 4
         }
       ],
-      "name": "OPER"
+      "name": "OPER",
+      "points": 5
     },
     {
-      "points": 2,
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "AWAY"
+          "cid": "AWAY",
+          "num_tests": 6
         }
       ],
-      "name": "AWAY"
+      "name": "AWAY",
+      "points": 2
     },
     {
-      "points": 2,
       "subcategories": [
         {
-          "num_tests": 11,
-          "cid": "NAMES"
+          "cid": "NAMES",
+          "num_tests": 11
         }
       ],
-      "name": "NAMES"
+      "name": "NAMES",
+      "points": 2
     },
     {
-      "points": 2,
       "subcategories": [
         {
-          "num_tests": 3,
-          "cid": "LIST"
+          "cid": "LIST",
+          "num_tests": 3
         },
         {
-          "num_tests": 1,
-          "cid": "LIST_TOPIC"
+          "cid": "LIST_TOPIC",
+          "num_tests": 1
         },
         {
-          "num_tests": 1,
-          "cid": "LIST_VOICE"
+          "cid": "LIST_VOICE",
+          "num_tests": 1
         }
       ],
-      "name": "LIST"
+      "name": "LIST",
+      "points": 2
     },
     {
-      "points": 2,
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "WHO"
+          "cid": "WHO",
+          "num_tests": 6
         }
       ],
-      "name": "WHO"
+      "name": "WHO",
+      "points": 2
     },
     {
-      "points": 2,
       "subcategories": [
         {
-          "num_tests": 1,
-          "cid": "NICK_CHANNEL"
+          "cid": "NICK_CHANNEL",
+          "num_tests": 1
         },
         {
-          "num_tests": 2,
-          "cid": "QUIT_CHANNEL"
+          "cid": "QUIT_CHANNEL",
+          "num_tests": 2
         },
         {
-          "num_tests": 1,
-          "cid": "WHOIS_CHANNEL"
+          "cid": "WHOIS_CHANNEL",
+          "num_tests": 1
         },
         {
-          "num_tests": 1,
-          "cid": "WHOIS_CHANNEL_AWAY"
+          "cid": "WHOIS_CHANNEL_AWAY",
+          "num_tests": 1
         }
       ],
-      "name": "Update Assignment 2"
+      "name": "Update Assignment 2",
+      "points": 2
     }
   ],
-  "name": "Assignment 2",
-  "total_points": 50
+  "name": "Assignment 2"
 }

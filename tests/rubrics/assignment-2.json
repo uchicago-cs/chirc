@@ -1,85 +1,85 @@
 {
-  "name": "Assignment 2",
   "total_points": 50,
+  "name": "Assignment 2",
   "categories": [
     {
+      "subcategories": [
+        {
+          "cid": "CONNECTION_REGISTRATION",
+          "num_tests": 21
+        }
+      ],
       "name": "Connection Registration",
-      "subcategories": [
-        {
-          "num_tests": 21,
-          "cid": "CONNECTION_REGISTRATION"
-        }
-      ],
       "points": 15
     },
     {
+      "subcategories": [
+        {
+          "cid": "PRIVMSG_NOTICE",
+          "num_tests": 14
+        }
+      ],
       "name": "PRIVMSG and NOTICE",
-      "subcategories": [
-        {
-          "num_tests": 14,
-          "cid": "PRIVMSG_NOTICE"
-        }
-      ],
       "points": 15
     },
     {
-      "name": "PING and PONG",
       "subcategories": [
         {
-          "num_tests": 6,
-          "cid": "PING_PONG"
+          "cid": "PING_PONG",
+          "num_tests": 6
         }
       ],
+      "name": "PING and PONG",
       "points": 2
     },
     {
-      "name": "MOTD",
       "subcategories": [
         {
-          "num_tests": 2,
-          "cid": "MOTD"
+          "cid": "MOTD",
+          "num_tests": 2
         }
       ],
+      "name": "MOTD",
       "points": 3
     },
     {
+      "subcategories": [
+        {
+          "cid": "LUSERS",
+          "num_tests": 8
+        }
+      ],
       "name": "LUSERS",
-      "subcategories": [
-        {
-          "num_tests": 8,
-          "cid": "LUSERS"
-        }
-      ],
       "points": 5
     },
     {
+      "subcategories": [
+        {
+          "cid": "WHOIS",
+          "num_tests": 3
+        }
+      ],
       "name": "WHOIS",
-      "subcategories": [
-        {
-          "num_tests": 3,
-          "cid": "WHOIS"
-        }
-      ],
       "points": 5
     },
     {
-      "name": "ERR_UNKNOWN",
       "subcategories": [
         {
-          "num_tests": 3,
-          "cid": "ERR_UNKNOWN"
+          "cid": "ERR_UNKNOWN",
+          "num_tests": 3
         }
       ],
+      "name": "ERR_UNKNOWN",
       "points": 2
     },
     {
-      "name": "Robustness",
       "subcategories": [
         {
-          "num_tests": 9,
-          "cid": "ROBUST"
+          "cid": "ROBUST",
+          "num_tests": 9
         }
       ],
+      "name": "Robustness",
       "points": 3
     }
   ]

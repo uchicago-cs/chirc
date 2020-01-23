@@ -33,6 +33,7 @@ class IRCPrefix(object):
         self.nick = self.username = self.hostname = None
         
         if not "@" in s and not "!" in s:
+            self.nick = s[1:]
             self.hostname = s[1:]
         elif "@" in s and "!" in s:
             match = re.match("^:(?P<nick>[^!@]+)!(?P<username>[^!@]+)@(?P<hostname>[^!@]+)$", s)

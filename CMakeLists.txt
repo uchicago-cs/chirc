@@ -21,7 +21,7 @@ add_custom_target(link_tests ALL
         COMMAND ${CMAKE_COMMAND} -E create_symlink ../tests/pytest.ini pytest.ini)
 
 set(ASSIGNMENTS
-    1 2 3 4)
+    1 2 3 4 5)
 
 foreach(AID ${ASSIGNMENTS})
 

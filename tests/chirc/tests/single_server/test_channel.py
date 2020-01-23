@@ -867,48 +867,6 @@ class TestNAMES(object):
 
 @pytest.mark.category("LIST")                
 class TestLIST(object):
-            
-    def _test_list(self, irc_session, channels, client, nick, expect_topics = None):
-        """
-        User `nick` sends a LIST command and we verify the replies.
-        `channels` is a dictionary mapping channel names to users in each channel.
-        `expect_topics` is a dictionary mapping channel names to their topics
-        """
-        
-        client.send_cmd("LIST")
-
-        channelsl = set([k for k in channels.keys() if k is not None])
-        numchannels = len(channelsl)
-        
-        for i in range(numchannels):
-            reply = irc_session.get_reply(client, expect_code = replies.RPL_LIST, expect_nick = nick,
-                           expect_nparams = 3)    
-
-            channel = reply.params[1]
-            irc_session._assert_in(channel, channelsl, 
-                                   explanation = "Received unexpected RPL_LIST for {}".format(channel),
-                                   irc_msg = reply)            
-            
-            numusers = int(reply.params[2])
-            expect_numusers = len(channels[channel])
-            irc_session._assert_equals(numusers, expect_numusers, 
-                                       explanation = "Expected {} users in {}, got {}".format(expect_numusers, channel, numusers),
-                                       irc_msg = reply)            
-                        
-            if expect_topics is not None:
-                expect_topic = expect_topics[channel]
-                topic = reply.params[3][1:]
-                irc_session._assert_equals(topic, expect_topic, 
-                                           explanation = "Expected topic for {} to be '{}', got '{}' instead".format(channel, expect_topic, topic),
-                                           irc_msg = reply)    
-                
-            channelsl.remove(channel)
-            
-        assert len(channelsl) == 0, "Did not receive RPL_LIST for these channels: {}".format(", ".join(channelsl))
-                
-        irc_session.get_reply(client, expect_code = replies.RPL_LISTEND, expect_nick = nick,
-                       expect_nparams = 1, long_param_re = "End of LIST")    
-        
 
 
     def test_list1(self, irc_session):
@@ -924,8 +882,8 @@ class TestLIST(object):
         user1 then sends a LIST command.
         """        
         users = irc_session.connect_and_join_channels(channels1)
-        
-        self._test_list(irc_session, channels1, users["user1"], "user1")
+
+        irc_session.verify_list(channels1, users["user1"], "user1")
         
 
     def test_list2(self, irc_session):
@@ -943,9 +901,9 @@ class TestLIST(object):
         user1 then sends a LIST command.
         """        
         users = irc_session.connect_and_join_channels(channels2)
-        
-        self._test_list(irc_session, channels2, users["user1"], "user1")
-        
+
+        irc_session.verify_list(channels2, users["user1"], "user1")
+
     @pytest.mark.category("LIST_VOICE")
     def test_list3(self, irc_session):
         """
@@ -964,8 +922,8 @@ class TestLIST(object):
         user1 then sends a LIST command.
         """      
         users = irc_session.connect_and_join_channels(channels3)
-        
-        self._test_list(irc_session, channels3, users["user1"], "user1")
+
+        irc_session.verify_list(channels3, users["user1"], "user1")
         
 
     def test_list4(self, irc_session):
@@ -975,8 +933,8 @@ class TestLIST(object):
         user1 then sends a LIST command.
         """      
         users = irc_session.connect_and_join_channels(channels4)
-        
-        self._test_list(irc_session, channels4, users["user1"], "user1")
+
+        irc_session.verify_list(channels4, users["user1"], "user1")
 
 
     @pytest.mark.category("LIST_TOPIC")
@@ -1007,12 +965,13 @@ class TestLIST(object):
         users["user7"].send_cmd("TOPIC #test3 :Topic Three")
         irc_session.verify_relayed_topic(users["user7"], from_nick="user7", channel="#test3", topic="Topic Three")
 
-        self._test_list(irc_session, channels2, users["user10"], "user10",
+        irc_session.verify_list(channels2, users["user10"], "user10",
                         expect_topics = {"#test1": "Topic One",
                                          "#test2": "Topic Two",
                                          "#test3": "Topic Three"})      
-        
-@pytest.mark.category("WHO")                        
+
+
+@pytest.mark.category("WHO")
 class TestWHO(object):
             
     def _test_who(self, irc_session, channels, client, nick, channel, aways = None, ircops = None):

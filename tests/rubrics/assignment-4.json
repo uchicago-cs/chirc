@@ -1,8 +1,9 @@
 {
+  "name": "Assignment 4",
   "categories": [
     {
-      "points": 8,
       "name": "Connection Registration",
+      "points": 8,
       "subcategories": [
         {
           "cid": "CONNECTION_REGISTRATION",
@@ -19,8 +20,8 @@
       ]
     },
     {
-      "points": 7,
       "name": "PRIVMSG and NOTICE (between users)",
+      "points": 7,
       "subcategories": [
         {
           "cid": "PRIVMSG_NOTICE",
@@ -29,8 +30,8 @@
       ]
     },
     {
-      "points": 2,
       "name": "PING and PONG",
+      "points": 2,
       "subcategories": [
         {
           "cid": "PING_PONG",
@@ -39,8 +40,8 @@
       ]
     },
     {
-      "points": 5,
       "name": "LUSERS",
+      "points": 5,
       "subcategories": [
         {
           "cid": "LUSERS",
@@ -49,8 +50,8 @@
       ]
     },
     {
-      "points": 5,
       "name": "WHOIS",
+      "points": 5,
       "subcategories": [
         {
           "cid": "WHOIS",
@@ -59,8 +60,8 @@
       ]
     },
     {
-      "points": 5,
       "name": "JOIN",
+      "points": 5,
       "subcategories": [
         {
           "cid": "CHANNEL_JOIN",
@@ -69,8 +70,8 @@
       ]
     },
     {
-      "points": 5,
       "name": "PRIVMSG and NOTICE (to channels)",
+      "points": 5,
       "subcategories": [
         {
           "cid": "CHANNEL_PRIVMSG_NOTICE",
@@ -79,8 +80,8 @@
       ]
     },
     {
-      "points": 5,
       "name": "PART",
+      "points": 5,
       "subcategories": [
         {
           "cid": "CHANNEL_PART",
@@ -89,8 +90,8 @@
       ]
     },
     {
-      "points": 3,
       "name": "Channel Operator",
+      "points": 3,
       "subcategories": [
         {
           "cid": "BASIC_CHANNEL_OPERATOR",
@@ -99,8 +100,8 @@
       ]
     },
     {
-      "points": 2,
       "name": "IRC Operator",
+      "points": 2,
       "subcategories": [
         {
           "cid": "BASIC_IRC_OPERATOR",
@@ -109,8 +110,8 @@
       ]
     },
     {
-      "points": 2,
       "name": "LIST",
+      "points": 2,
       "subcategories": [
         {
           "cid": "LIST",
@@ -119,8 +120,8 @@
       ]
     },
     {
-      "points": 1,
       "name": "ERR_UNKNOWN",
+      "points": 1,
       "subcategories": [
         {
           "cid": "ERR_UNKNOWN",
@@ -129,6 +130,5 @@
       ]
     }
   ],
-  "name": "Assignment 4",
   "total_points": 50
 }
