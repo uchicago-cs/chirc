@@ -50,7 +50,7 @@
 int main(int argc, char *argv[])
 {
     int opt;
-    char *port = NULL, *passwd = NULL, *servername = NULL, *network_file = NULL;
+    char *port = "6667", *passwd = NULL, *servername = NULL, *network_file = NULL;
     int verbosity = 0;
 
     while ((opt = getopt(argc, argv, "p:o:s:n:vqh")) != -1)
