@@ -22,14 +22,14 @@ set(ASSIGNMENTS
 foreach(AID ${ASSIGNMENTS})
 
     add_custom_target(categories-assignment-${AID}
-                COMMAND tests/print-categories.py ../tests/rubrics/assignment-${AID}.json)
+            COMMAND ../tests/print-categories.py ../tests/rubrics/assignment-${AID}.json)
 
     add_custom_target(tests-assignment-${AID}
             COMMAND pytest --chirc-rubric ../tests/rubrics/assignment-${AID}.json ../tests/
             DEPENDS chirc)
 
     add_custom_target(grade-assignment-${AID}
-            COMMAND tests/grade.py ../tests/rubrics/assignment-${AID}.json)
+            COMMAND ../tests/grade.py ../tests/rubrics/assignment-${AID}.json)
 
     add_custom_target(assignment-${AID}
             COMMAND /bin/sh -c 'pytest --chirc-rubric ../tests/rubrics/assignment-${AID}.json ../tests/\; exit 0'
