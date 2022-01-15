@@ -13,11 +13,10 @@ include_directories(src
 add_executable(chirc
     src/main.c
     src/log.c)
-
 target_link_libraries(chirc pthread)
 
 set(ASSIGNMENTS
-    1 2 3 4 5)
+    1 2 3 4 1+4 5)
 
 foreach(AID ${ASSIGNMENTS})
 

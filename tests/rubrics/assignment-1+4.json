@@ -1,0 +1,144 @@
+{
+  "name": "Assignments 1 + 4",
+  "total_points": 100,
+  "categories": [
+    {
+      "name": "Basic Connection",
+      "subcategories": [
+        {
+          "cid": "BASIC_CONNECTION",
+          "num_tests": 22
+        }
+      ],
+      "points": 50
+    },
+    {
+      "name": "Connection Registration",
+      "subcategories": [
+        {
+          "cid": "CONNECTION_REGISTRATION",
+          "num_tests": 21
+        },
+        {
+          "cid": "NICK_CHANNEL",
+          "num_tests": 1
+        },
+        {
+          "cid": "QUIT_CHANNEL",
+          "num_tests": 2
+        }
+      ],
+      "points": 8
+    },
+    {
+      "name": "PRIVMSG and NOTICE (between users)",
+      "subcategories": [
+        {
+          "cid": "PRIVMSG_NOTICE",
+          "num_tests": 14
+        }
+      ],
+      "points": 7
+    },
+    {
+      "name": "PING and PONG",
+      "subcategories": [
+        {
+          "cid": "PING_PONG",
+          "num_tests": 6
+        }
+      ],
+      "points": 2
+    },
+    {
+      "name": "LUSERS",
+      "subcategories": [
+        {
+          "cid": "LUSERS",
+          "num_tests": 8
+        }
+      ],
+      "points": 5
+    },
+    {
+      "name": "WHOIS",
+      "subcategories": [
+        {
+          "cid": "WHOIS",
+          "num_tests": 3
+        }
+      ],
+      "points": 5
+    },
+    {
+      "name": "JOIN",
+      "subcategories": [
+        {
+          "cid": "CHANNEL_JOIN",
+          "num_tests": 6
+        }
+      ],
+      "points": 5
+    },
+    {
+      "name": "PRIVMSG and NOTICE (to channels)",
+      "subcategories": [
+        {
+          "cid": "CHANNEL_PRIVMSG_NOTICE",
+          "num_tests": 6
+        }
+      ],
+      "points": 5
+    },
+    {
+      "name": "PART",
+      "subcategories": [
+        {
+          "cid": "CHANNEL_PART",
+          "num_tests": 14
+        }
+      ],
+      "points": 5
+    },
+    {
+      "name": "Channel Operator",
+      "subcategories": [
+        {
+          "cid": "BASIC_CHANNEL_OPERATOR",
+          "num_tests": 7
+        }
+      ],
+      "points": 3
+    },
+    {
+      "name": "IRC Operator",
+      "subcategories": [
+        {
+          "cid": "BASIC_IRC_OPERATOR",
+          "num_tests": 4
+        }
+      ],
+      "points": 2
+    },
+    {
+      "name": "LIST",
+      "subcategories": [
+        {
+          "cid": "LIST",
+          "num_tests": 3
+        }
+      ],
+      "points": 2
+    },
+    {
+      "name": "ERR_UNKNOWN",
+      "subcategories": [
+        {
+          "cid": "ERR_UNKNOWN",
+          "num_tests": 3
+        }
+      ],
+      "points": 1
+    }
+  ]
+}
