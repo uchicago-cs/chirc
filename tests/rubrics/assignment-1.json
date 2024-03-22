@@ -1,6 +1,6 @@
 {
-  "total_points": 50,
   "name": "Assignment 1",
+  "total_points": 100,
   "categories": [
     {
       "name": "Basic Connection",
@@ -10,7 +10,7 @@
           "num_tests": 22
         }
       ],
-      "points": 50
+      "points": 100
     }
   ]
 }

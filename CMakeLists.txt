@@ -4,15 +4,21 @@ project(chirc C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_BUILD_TYPE Debug)
 
-include_directories(src
-
-    # External libraries: Add lib/ directories here
-
-    )
+include_directories(src lib/uthash/include lib/sds)
 
 add_executable(chirc
-    src/main.c
-    src/log.c)
+        src/channel.c
+        src/channeluser.c
+        src/connection.c
+        src/ctx.c
+        src/handlers.c
+        src/log.c
+        src/main.c
+        src/message.c
+        src/server.c
+        src/user.c
+        src/utils.c
+        lib/sds/sds.c)
 target_link_libraries(chirc pthread)
 
 set(ASSIGNMENTS

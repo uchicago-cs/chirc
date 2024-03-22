@@ -1,44 +1,4 @@
-/*
- *  chirc: a simple multi-threaded IRC server
- *
- *  Logging functions
- *
- *  see log.h for descriptions of functions, parameters, and return values.
- *
- */
-
-/*
- *  Copyright (c) 2011-2020, The University of Chicago
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or withsend
- *  modification, are permitted provided that the following conditions are met:
- *
- *  - Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *
- *  - Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- *  - Neither the name of The University of Chicago nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software withsend specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY send OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *
- */
-
+/* See log.h for details about the functions in this module */
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -46,6 +6,7 @@
 #include <time.h>
 
 #include "log.h"
+
 
 /* Logging level. Set by default to print just informational messages */
 static int loglevel = INFO;
@@ -103,6 +64,7 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
     fflush(stdout);
 }
 
+/* See log.h */
 void chilog(loglevel_t level, char *fmt, ...)
 {
     va_list argptr;
@@ -112,3 +74,38 @@ void chilog(loglevel_t level, char *fmt, ...)
     va_end(argptr);
 }
 
+/* See log.h */
+void serverlog(loglevel_t level, chirc_connection_t *conn, char *fmt, ...)
+{
+    char buf[256];
+
+    if (conn)
+    {
+        if(conn->type == CONN_TYPE_UNKNOWN)
+        {
+            sprintf(buf, "%s -- ", conn->hostname);
+        }
+        else if(conn->type == CONN_TYPE_USER)
+        {
+            chirc_user_t *user = conn->peer.user;
+            if(user->nick)
+                sprintf(buf, "%s!%s@%s -- ", user->nick, user->username, conn->hostname);
+            else
+                sprintf(buf, "unknown!unknown@%s -- ", conn->hostname);
+        }
+        else if (conn->type == CONN_TYPE_SERVER)
+        {
+            sprintf(buf, "%s -- ", conn->peer.server->servername);
+        }
+    }
+    else
+        buf[0] = '\0';
+
+    strncat(buf, fmt, 256 - strlen(buf) - 1);
+
+    va_list argptr;
+
+    va_start(argptr, fmt);
+    __chilog(level, buf, argptr);
+    va_end(argptr);
+}

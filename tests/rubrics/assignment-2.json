@@ -1,85 +1,85 @@
 {
-  "total_points": 50,
   "name": "Assignment 2",
+  "total_points": 50,
   "categories": [
     {
+      "name": "Connection Registration",
       "subcategories": [
         {
           "cid": "CONNECTION_REGISTRATION",
           "num_tests": 21
         }
       ],
-      "name": "Connection Registration",
       "points": 15
     },
     {
+      "name": "PRIVMSG and NOTICE",
       "subcategories": [
         {
           "cid": "PRIVMSG_NOTICE",
           "num_tests": 14
         }
       ],
-      "name": "PRIVMSG and NOTICE",
       "points": 15
     },
     {
+      "name": "PING and PONG",
       "subcategories": [
         {
           "cid": "PING_PONG",
           "num_tests": 6
         }
       ],
-      "name": "PING and PONG",
       "points": 2
     },
     {
+      "name": "MOTD",
       "subcategories": [
         {
           "cid": "MOTD",
           "num_tests": 2
         }
       ],
-      "name": "MOTD",
       "points": 3
     },
     {
+      "name": "LUSERS",
       "subcategories": [
         {
           "cid": "LUSERS",
           "num_tests": 8
         }
       ],
-      "name": "LUSERS",
       "points": 5
     },
     {
+      "name": "WHOIS",
       "subcategories": [
         {
           "cid": "WHOIS",
           "num_tests": 3
         }
       ],
-      "name": "WHOIS",
       "points": 5
     },
     {
+      "name": "ERR_UNKNOWN",
       "subcategories": [
         {
           "cid": "ERR_UNKNOWN",
           "num_tests": 3
         }
       ],
-      "name": "ERR_UNKNOWN",
       "points": 2
     },
     {
+      "name": "Robustness",
       "subcategories": [
         {
           "cid": "ROBUST",
           "num_tests": 9
         }
       ],
-      "name": "Robustness",
       "points": 3
     }
   ]

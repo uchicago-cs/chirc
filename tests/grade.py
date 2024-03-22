@@ -10,8 +10,8 @@ def print_empty_gradescope():
     gradescope_json = {}
     gradescope_json["score"] = 0.0
     gradescope_json["output"] = "We were unable to run the tests due to an error in your code."
-    gradescope_json["visibility"] = "after_published"
-    gradescope_json["stdout_visibility"] = "after_published"
+    gradescope_json["visibility"] = "visible"
+    gradescope_json["stdout_visibility"] = "visible"
     print(json.dumps(gradescope_json, indent=2))
 
 class Subcategory:
@@ -115,8 +115,8 @@ def cmd(rubric_file, report_file, gradescope):
             gradescope_json["tests"].append(gs_test)
 
         gradescope_json["score"] = assignment.points_obtained
-        gradescope_json["visibility"] = "after_published"
-        gradescope_json["stdout_visibility"] = "after_published"
+        gradescope_json["visibility"] = "visible"
+        gradescope_json["stdout_visibility"] = "visible"
 
         print(json.dumps(gradescope_json, indent=2))
     else:

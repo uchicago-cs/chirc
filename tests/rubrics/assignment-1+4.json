@@ -10,7 +10,7 @@
           "num_tests": 22
         }
       ],
-      "points": 50
+      "points": 25
     },
     {
       "name": "Connection Registration",
@@ -28,7 +28,7 @@
           "num_tests": 2
         }
       ],
-      "points": 8
+      "points": 12
     },
     {
       "name": "PRIVMSG and NOTICE (between users)",
@@ -38,7 +38,7 @@
           "num_tests": 14
         }
       ],
-      "points": 7
+      "points": 10
     },
     {
       "name": "PING and PONG",
@@ -48,7 +48,7 @@
           "num_tests": 6
         }
       ],
-      "points": 2
+      "points": 3
     },
     {
       "name": "LUSERS",
@@ -58,7 +58,7 @@
           "num_tests": 8
         }
       ],
-      "points": 5
+      "points": 7
     },
     {
       "name": "WHOIS",
@@ -68,7 +68,7 @@
           "num_tests": 3
         }
       ],
-      "points": 5
+      "points": 7
     },
     {
       "name": "JOIN",
@@ -78,7 +78,7 @@
           "num_tests": 6
         }
       ],
-      "points": 5
+      "points": 8
     },
     {
       "name": "PRIVMSG and NOTICE (to channels)",
@@ -88,7 +88,7 @@
           "num_tests": 6
         }
       ],
-      "points": 5
+      "points": 8
     },
     {
       "name": "PART",
@@ -98,7 +98,7 @@
           "num_tests": 14
         }
       ],
-      "points": 5
+      "points": 7
     },
     {
       "name": "Channel Operator",
@@ -108,7 +108,7 @@
           "num_tests": 7
         }
       ],
-      "points": 3
+      "points": 5
     },
     {
       "name": "IRC Operator",
@@ -118,7 +118,7 @@
           "num_tests": 4
         }
       ],
-      "points": 2
+      "points": 3
     },
     {
       "name": "LIST",
@@ -128,7 +128,7 @@
           "num_tests": 3
         }
       ],
-      "points": 2
+      "points": 3
     },
     {
       "name": "ERR_UNKNOWN",
@@ -138,7 +138,7 @@
           "num_tests": 3
         }
       ],
-      "points": 1
+      "points": 2
     }
   ]
 }
