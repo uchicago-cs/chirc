@@ -59,7 +59,10 @@ int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_
 
 
 
-/* This struct represents one entry in the dispatch table:
+/*! \struct handler_entry
+ * \brief Entry in the handler dispatch table
+ *
+ * This struct represents one entry in the dispatch table:
  * a command name and a function pointer to a handler function
  * (using the handler_function_t type we defined earlier) */
 struct handler_entry

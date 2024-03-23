@@ -235,7 +235,7 @@ typedef struct chirc_connection
     /*! \brief Type of connection */
     conn_type_t type;
 
-    /*! \union A connection corresponds to either a user or a server */
+    /*! \brief A connection corresponds to either a user or a server */
     union {
         /*! \brief User on the other end of the connection */
         chirc_user_t *user;
