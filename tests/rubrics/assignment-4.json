@@ -1,6 +1,6 @@
 {
   "name": "Assignment 4",
-  "total_points": 50,
+  "total_points": 100,
   "categories": [
     {
       "name": "Connection Registration",
@@ -18,7 +18,7 @@
           "num_tests": 2
         }
       ],
-      "points": 8
+      "points": 15
     },
     {
       "name": "PRIVMSG and NOTICE (between users)",
@@ -28,7 +28,7 @@
           "num_tests": 14
         }
       ],
-      "points": 7
+      "points": 10
     },
     {
       "name": "PING and PONG",
@@ -48,7 +48,7 @@
           "num_tests": 8
         }
       ],
-      "points": 5
+      "points": 10
     },
     {
       "name": "WHOIS",
@@ -56,6 +56,14 @@
         {
           "cid": "WHOIS",
           "num_tests": 3
+        },
+        {
+          "cid": "WHOIS_CHANNEL",
+          "num_tests": 1
+        },
+        {
+          "cid": "WHOIS_CHANNEL_AWAY",
+          "num_tests": 1
         }
       ],
       "points": 5
@@ -78,7 +86,7 @@
           "num_tests": 6
         }
       ],
-      "points": 5
+      "points": 15
     },
     {
       "name": "PART",
@@ -91,24 +99,46 @@
       "points": 5
     },
     {
-      "name": "Channel Operator",
+      "name": "User and channel modes",
       "subcategories": [
+        {
+          "cid": "BASIC_MODE",
+          "num_tests": 6
+        },
         {
           "cid": "BASIC_CHANNEL_OPERATOR",
           "num_tests": 7
+        },
+        {
+          "cid": "MODES",
+          "num_tests": 43
         }
       ],
-      "points": 3
+      "points": 15
     },
     {
-      "name": "IRC Operator",
+      "name": "OPER",
       "subcategories": [
         {
           "cid": "BASIC_IRC_OPERATOR",
           "num_tests": 4
+        },
+        {
+          "cid": "OPER",
+          "num_tests": 4
         }
       ],
-      "points": 2
+      "points": 5
+    },
+    {
+      "name": "AWAY",
+      "subcategories": [
+        {
+          "cid": "AWAY",
+          "num_tests": 6
+        }
+      ],
+      "points": 5
     },
     {
       "name": "LIST",
@@ -116,9 +146,13 @@
         {
           "cid": "LIST",
           "num_tests": 3
+        },
+        {
+          "cid": "LIST_VOICE",
+          "num_tests": 1
         }
       ],
-      "points": 2
+      "points": 5
     },
     {
       "name": "ERR_UNKNOWN",
@@ -128,7 +162,7 @@
           "num_tests": 3
         }
       ],
-      "points": 1
+      "points": 3
     }
   ]
 }

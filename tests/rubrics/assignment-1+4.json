@@ -10,7 +10,7 @@
           "num_tests": 22
         }
       ],
-      "points": 25
+      "points": 5
     },
     {
       "name": "Connection Registration",
@@ -28,7 +28,7 @@
           "num_tests": 2
         }
       ],
-      "points": 12
+      "points": 10
     },
     {
       "name": "PRIVMSG and NOTICE (between users)",
@@ -48,7 +48,7 @@
           "num_tests": 6
         }
       ],
-      "points": 3
+      "points": 2
     },
     {
       "name": "LUSERS",
@@ -58,7 +58,7 @@
           "num_tests": 8
         }
       ],
-      "points": 7
+      "points": 10
     },
     {
       "name": "WHOIS",
@@ -66,9 +66,17 @@
         {
           "cid": "WHOIS",
           "num_tests": 3
+        },
+        {
+          "cid": "WHOIS_CHANNEL",
+          "num_tests": 1
+        },
+        {
+          "cid": "WHOIS_CHANNEL_AWAY",
+          "num_tests": 1
         }
       ],
-      "points": 7
+      "points": 5
     },
     {
       "name": "JOIN",
@@ -78,7 +86,7 @@
           "num_tests": 6
         }
       ],
-      "points": 8
+      "points": 5
     },
     {
       "name": "PRIVMSG and NOTICE (to channels)",
@@ -88,7 +96,7 @@
           "num_tests": 6
         }
       ],
-      "points": 8
+      "points": 15
     },
     {
       "name": "PART",
@@ -98,27 +106,49 @@
           "num_tests": 14
         }
       ],
-      "points": 7
+      "points": 5
     },
     {
-      "name": "Channel Operator",
+      "name": "User and channel modes",
       "subcategories": [
+        {
+          "cid": "BASIC_MODE",
+          "num_tests": 6
+        },
         {
           "cid": "BASIC_CHANNEL_OPERATOR",
           "num_tests": 7
+        },
+        {
+          "cid": "MODES",
+          "num_tests": 43
+        }
+      ],
+      "points": 15
+    },
+    {
+      "name": "OPER",
+      "subcategories": [
+        {
+          "cid": "BASIC_IRC_OPERATOR",
+          "num_tests": 4
+        },
+        {
+          "cid": "OPER",
+          "num_tests": 4
         }
       ],
       "points": 5
     },
     {
-      "name": "IRC Operator",
+      "name": "AWAY",
       "subcategories": [
         {
-          "cid": "BASIC_IRC_OPERATOR",
-          "num_tests": 4
+          "cid": "AWAY",
+          "num_tests": 6
         }
       ],
-      "points": 3
+      "points": 5
     },
     {
       "name": "LIST",
@@ -126,9 +156,13 @@
         {
           "cid": "LIST",
           "num_tests": 3
+        },
+        {
+          "cid": "LIST_VOICE",
+          "num_tests": 1
         }
       ],
-      "points": 3
+      "points": 5
     },
     {
       "name": "ERR_UNKNOWN",
@@ -138,7 +172,7 @@
           "num_tests": 3
         }
       ],
-      "points": 2
+      "points": 3
     }
   ]
 }
