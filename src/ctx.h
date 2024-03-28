@@ -94,6 +94,89 @@ int chirc_ctx_numchannels(chirc_ctx_t *ctx);
 int chirc_ctx_unknown_connections(chirc_ctx_t *ctx);
 
 
+/*!
+ * \brief Get a channel with a given name (if one exists)
+ * \param ctx Server context
+ * \param channelname Channel name
+ * \return The channel, if one exists. Otherwise, returns NULL.
+ */
+chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname);
+
+
+/*!
+ * \brief Get or create a channel.
+ *
+ * If a channel with the specified name already exists,
+ * returns the corresponding chirc_channel_t struct.
+ * Otherwise, creates a chirc_channel_t struct, initializes it,
+ * (including setting its name to the provided value),
+ * and adds it to the channels hash table.
+ *
+ * \param ctx Server context
+ * \param channelname Channel name
+ * \param channel (Output parameter) Channel
+ * \return True if the chirc_channel_t was created (i.e., if the channel
+ *         did not already exist). False otherwise (i.e., if there
+ *         was already a channel with the given name)
+ */
+bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_channel_t **channel);
+
+
+/*!
+ * \brief Remove a channel from the server
+ *
+ * This only removes the channel from the channels hash table.
+ * It does not perform any operations on the channel itself
+ * (e.g., it does not clear the list of users in the channel, etc.)
+ *
+ * \param ctx Server
+ * \param channel Channel
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_ctx_remove_channel(chirc_ctx_t *ctx, chirc_channel_t *channel);
+
+
+/*!
+ * \brief Get a user with a given nick (if one exists)
+ * \param ctx Server context
+ * \param nick User's nick
+ * \return The channel, if one exists. Otherwise, returns NULL.
+ */
+chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick);
+
+
+/*!
+ * \brief Get or create a user.
+ *
+ * If a user with the specified nick already exists,
+ * returns the corresponding chirc_user_t struct.
+ * Otherwise, creates a chirc_user_t struct, initializes it,
+ * (including setting its nick to the provided value),
+ * and adds it to the users hash table.
+ *
+ * \param ctx Server context
+ * \param nick User nick
+ * \param user (Output parameter) User
+ * \return True if the chirc_user_t was created (i.e., if the user
+ *         did not already exist). False otherwise (i.e., if there
+ *         was already a user with the given nick)
+ */
+bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **user);
+
+
+/*!
+ * \brief Remove a user from the server
+ *
+ * This only removes the user from the users hash table.
+ * It does not perform any operations on the user itself
+ * (e.g., it does not clear the list of channels the user is in, etc.)
+ *
+ * \param ctx Server
+ * \param user User
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user);
+
 
 /*! \brief Loads a network specification into the server context
  *

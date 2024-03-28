@@ -154,6 +154,95 @@ int chirc_ctx_unknown_connections(chirc_ctx_t *ctx)
 }
 
 
+/* See ctx.h */
+chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname)
+{
+    chirc_channel_t *channel;
+
+    HASH_FIND_STR(ctx->channels, channelname, channel);
+
+    return channel;
+}
+
+
+/* See ctx.h */
+bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_channel_t **channel)
+{
+    bool created;
+
+
+    HASH_FIND_STR(ctx->channels, channelname, *channel);
+    if(*channel)
+    {
+        created = false;
+    }
+    else
+    {
+        created = true;
+
+        *channel = malloc(sizeof(chirc_channel_t));
+        chirc_channel_init(*channel);
+        (*channel)->name = sdsnew(channelname);
+        HASH_ADD_KEYPTR(hh, ctx->channels, (*channel)->name, sdslen((*channel)->name), *channel);
+    }
+
+    return created;
+}
+
+
+/* See ctx.h */
+int chirc_ctx_remove_channel(chirc_ctx_t *ctx, chirc_channel_t *channel)
+{
+    HASH_DEL(ctx->channels, channel);
+
+    return CHIRC_OK;
+}
+
+
+/* See ctx.h */
+chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick)
+{
+    chirc_user_t *user;
+
+    HASH_FIND_STR(ctx->users, nick, user);
+
+    return user;
+}
+
+
+/* See ctx.h */
+bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **user)
+{
+    bool created;
+
+
+    HASH_FIND_STR(ctx->users, nick, *user);
+    if(*user)
+    {
+        created = false;
+    }
+    else
+    {
+        created = true;
+
+        *user = malloc(sizeof(chirc_user_t));
+        chirc_user_init(*user);
+        (*user)->nick = sdsnew(nick);
+        HASH_ADD_KEYPTR(hh, ctx->users, (*user)->nick, sdslen((*user)->nick), *user);
+    }
+
+    return created;
+}
+
+
+int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user)
+{
+    HASH_DEL(ctx->users, user);
+
+    return CHIRC_OK;
+}
+
+
 
 /* See ctx.h */
 int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
