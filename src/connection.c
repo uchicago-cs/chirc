@@ -43,7 +43,7 @@ int chirc_connection_send_message(chirc_ctx_t *ctx, chirc_connection_t *conn, ch
 
 
 /* See connection.h */
-int create_connection_thread(chirc_ctx_t *ctx, chirc_connection_t *connection)
+int chirc_connection_create_thread(chirc_ctx_t *ctx, chirc_connection_t *connection)
 {
     /* Your code here */
 

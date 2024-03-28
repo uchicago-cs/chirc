@@ -51,7 +51,7 @@ int chirc_connection_send_message(chirc_ctx_t *ctx, chirc_connection_t *conn, ch
  * \param conn The connection that will be handled by the thread
  * \return 0 on success, non-zero on failure
  */
-int create_connection_thread(chirc_ctx_t *ctx, chirc_connection_t *conn);
+int chirc_connection_create_thread(chirc_ctx_t *ctx, chirc_connection_t *conn);
 
 #ifndef CHIRC_HIDE_CODE
 int chirc_connection_disconnect(chirc_ctx_t *ctx, chirc_connection_t *conn, char *quitmsg);
