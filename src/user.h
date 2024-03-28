@@ -18,7 +18,7 @@
  * This function assumes that memory has already been allocated
  * for the struct, and will initialize its fields.
  *
- * \param conn The user to initialize
+ * \param user The user to initialize
  */
 void chirc_user_init(chirc_user_t *user);
 
@@ -30,7 +30,7 @@ void chirc_user_init(chirc_user_t *user);
  * itself (doing so is the responsibility of the caller
  * of this function)
  *
- * \param conn The user to free
+ * \param user The user to free
  */
 void chirc_user_free(chirc_user_t *user);
 
