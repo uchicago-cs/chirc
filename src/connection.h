@@ -53,9 +53,5 @@ int chirc_connection_send_message(chirc_ctx_t *ctx, chirc_connection_t *conn, ch
  */
 int chirc_connection_create_thread(chirc_ctx_t *ctx, chirc_connection_t *conn);
 
-#ifndef CHIRC_HIDE_CODE
-int chirc_connection_disconnect(chirc_ctx_t *ctx, chirc_connection_t *conn, char *quitmsg);
-bool chirc_connection_is_registered(chirc_connection_t *conn);
-#endif
 
 #endif /* USER_H_ */
