@@ -980,7 +980,7 @@ class TestPermissionsPRIVMSG(BaseTestPermissions):
         irc_session.get_reply(client2, expect_timeout = True)
 
 
-@pytest.mark.category("MODES")
+@pytest.mark.category("MODES_TOPIC")
 class TestPermissionsTOPIC(BaseTestPermissions):
 
     def test_permissions_topic1(self, irc_session):
@@ -998,8 +998,8 @@ class TestPermissionsTOPIC(BaseTestPermissions):
         
         irc_session.get_reply(client2, expect_code = replies.ERR_CHANOPRIVSNEEDED, expect_nick = nick2, 
                    expect_nparams = 2, expect_short_params = ["#test"],
-                   long_param_re = "You're not channel operator")       
-        
+                   long_param_re = "You're not channel operator")
+
 
     def test_permissions_topic2(self, irc_session):
         """
@@ -1021,9 +1021,9 @@ class TestPermissionsTOPIC(BaseTestPermissions):
             irc_session.verify_relayed_topic(client, from_nick=nick2, channel="#test", topic="Hello")
 
 
-@pytest.mark.category("OPER")
 class TestPermissionsOPER(BaseTestPermissions):
 
+    @pytest.mark.category("OPER")
     def test_permissions_oper1(self, irc_session):
         """
         Check that an IRCop can set a channel to be moderated
@@ -1039,10 +1039,10 @@ class TestPermissionsOPER(BaseTestPermissions):
         irc_session.set_channel_mode(client2, nick2, "#test", "+m")
                 
         for nick, client in clients:
-            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+m")                
-           
-        
+            irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+m")
 
+
+    @pytest.mark.category("OPER")
     def test_permissions_oper2(self, irc_session):
         """
         Check that an IRCop can grant voice privileges to someone on a channel
@@ -1060,6 +1060,7 @@ class TestPermissionsOPER(BaseTestPermissions):
         for nick, client in clients:
             irc_session.verify_relayed_mode(client, from_nick=nick2, channel="#test", mode="+v", mode_nick="user3")
 
+    @pytest.mark.category("OPER")
     def test_permissions_oper3(self, irc_session):
         """
         Check that an IRCop can send messages to a moderated channel despite
@@ -1074,6 +1075,7 @@ class TestPermissionsOPER(BaseTestPermissions):
 
         self._privmsg(irc_session, client2, nick2, "#test", clients)
 
+    @pytest.mark.category("OPER_TOPIC")
     def test_permissions_oper4(self, irc_session):
         """
         Check that an IRCop can change the topic in a channel with +t despite

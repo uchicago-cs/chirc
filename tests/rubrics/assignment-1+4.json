@@ -121,7 +121,7 @@
         },
         {
           "cid": "MODES",
-          "num_tests": 43
+          "num_tests": 41
         }
       ],
       "points": 15
@@ -135,7 +135,7 @@
         },
         {
           "cid": "OPER",
-          "num_tests": 4
+          "num_tests": 3
         }
       ],
       "points": 5
