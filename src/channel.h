@@ -70,4 +70,12 @@ int chirc_channel_set_mode(chirc_channel_t *channel, char mode);
 int chirc_channel_remove_mode(chirc_channel_t *channel, char mode);
 
 
+/*! \brief Returns the number of users in the channel
+ *
+ * \param channel Channel
+ * \return Number of users in the channel
+ */
+int chirc_channel_num_users(chirc_channel_t *channel);
+
+
 #endif /* CHANNEL_H_ */

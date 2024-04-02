@@ -73,4 +73,12 @@ int chirc_user_remove_mode(chirc_user_t *user, char mode);
  */
 int chirc_user_is_oper(chirc_user_t *user);
 
+
+/*! \brief Returns the number of channels the user is in
+ *
+ * \param user User
+ * \return Number of channels the user is in
+ */
+int chirc_user_num_channels(chirc_user_t *user);
+
 #endif /* USER_H_ */

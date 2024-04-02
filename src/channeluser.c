@@ -14,6 +14,14 @@ void chirc_channeluser_init(chirc_channeluser_t *channeluser)
     channeluser->modes[0] = '\0';
 }
 
+/* See channeluser.h */
+void chirc_channeluser_free(chirc_channeluser_t *channeluser)
+{
+    /* There is nothing to free at the moment. The user and channel
+     * fields point to user/channel structs that should be freed
+     * separately (and not at the time that a specific channeluser
+     * is removed) */
+}
 
 /* See channeluser.h */
 int chirc_channeluser_has_mode(chirc_channeluser_t *channeluser, char mode)
@@ -82,4 +90,15 @@ bool chirc_channeluser_get_or_create(chirc_channel_t *channel, chirc_user_t *use
     }
 
     return created;
+}
+
+
+/* See channeluser.h */
+int chirc_channeluser_remove(chirc_channeluser_t *channeluser)
+{
+    chirc_user_t *user = channeluser->user;
+    chirc_channel_t *channel = channeluser->channel;
+
+    HASH_DELETE(hh_from_channel, channel->users, channeluser);
+    HASH_DELETE(hh_from_user, user->channels, channeluser);
 }

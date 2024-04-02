@@ -64,3 +64,10 @@ int chirc_channel_remove_mode(chirc_channel_t *channel, char mode)
     return rc;
 }
 
+/* See channel.h */
+int chirc_channel_num_users(chirc_channel_t *channel)
+{
+    return HASH_CNT(hh_from_channel, channel->users);
+}
+
+

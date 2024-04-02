@@ -373,7 +373,7 @@ typedef struct
     sds version;
 
     /*! \brief Date/time the server started running */
-    struct tm *created;
+    struct tm created;
 
     /*! \brief Hash table of connections into the server*/
     chirc_connection_t *connections;

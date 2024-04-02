@@ -97,4 +97,19 @@ chirc_channeluser_t* chirc_channeluser_get(chirc_channel_t *channel, chirc_user_
 bool chirc_channeluser_get_or_create(chirc_channel_t *channel, chirc_user_t *user, chirc_channeluser_t **channeluser);
 
 
+/*!
+ * \brief Remove a channel-user association
+ *
+ * This will remove the channeluser from the user's
+ * channels hash table, and from the channel's hash
+ * table. It does not free the channeluser struct,
+ * nor does it perform other operations associated
+ * with a user leaving a channel (like relaying a PART
+ * or QUIT message)
+ *
+ * \param channeluser User-in-Channel
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_channeluser_remove(chirc_channeluser_t *channeluser);
+
 #endif /* CHANNELUSER_H_ */

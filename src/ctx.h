@@ -49,7 +49,7 @@ void chirc_ctx_add_connection(chirc_ctx_t *ctx, chirc_connection_t *conn);
 /*! \brief Removes a connection from the server context
  *
  * \param ctx Server context
- * \param conn The connection to add
+ * \param conn The connection to remove
  */
 void chirc_ctx_remove_connection(chirc_ctx_t *ctx, chirc_connection_t *conn);
 
@@ -104,6 +104,19 @@ chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname);
 
 
 /*!
+ * \brief Add a channel to the channels hash table.
+ *
+ * The channel struct must already be allocated/initialized,
+ * and must have a valid value in its name field.
+ *
+ * \param ctx Server context
+ * \param channel Channel
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_ctx_add_channel(chirc_ctx_t *ctx, chirc_channel_t *channel);
+
+
+/*!
  * \brief Get or create a channel.
  *
  * If a channel with the specified name already exists,
@@ -143,6 +156,19 @@ int chirc_ctx_remove_channel(chirc_ctx_t *ctx, chirc_channel_t *channel);
  * \return The channel, if one exists. Otherwise, returns NULL.
  */
 chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick);
+
+
+/*!
+ * \brief Add a user to the users hash table
+ *
+ * The user struct must already be allocated/initialized,
+ * and must have a valid value in its nick field.
+ *
+ * \param ctx Server context
+ * \param user User
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_ctx_add_user(chirc_ctx_t *ctx, chirc_user_t *user);
 
 
 /*!

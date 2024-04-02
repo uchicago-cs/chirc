@@ -76,3 +76,10 @@ int chirc_user_is_oper(chirc_user_t *user)
 {
     return chirc_user_has_mode(user, 'o');
 }
+
+
+/* See user.h */
+int chirc_user_num_channels(chirc_user_t *user)
+{
+    return HASH_CNT(hh_from_user, user->channels);
+}

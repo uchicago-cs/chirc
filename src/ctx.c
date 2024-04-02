@@ -29,7 +29,7 @@ void chirc_ctx_init(chirc_ctx_t *ctx)
     ctx->network.servers = NULL;
 
     ctx->version = sdsnew(VERSION);
-    ctx->created = localtime(&t);
+    localtime_r(&t, &ctx->created);
 }
 
 /* See ctx.h */
@@ -166,6 +166,15 @@ chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname)
 
 
 /* See ctx.h */
+int chirc_ctx_add_channel(chirc_ctx_t *ctx, chirc_channel_t *channel)
+{
+    HASH_ADD_KEYPTR(hh, ctx->channels, channel->name, sdslen(channel->name), channel);
+
+    return CHIRC_OK;
+}
+
+
+/* See ctx.h */
 bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_channel_t **channel)
 {
     bool created;
@@ -209,6 +218,14 @@ chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick)
     return user;
 }
 
+
+/* See ctx.h */
+int chirc_ctx_add_user(chirc_ctx_t *ctx, chirc_user_t *user)
+{
+    HASH_ADD_KEYPTR(hh, ctx->users, user->nick, sdslen(user->nick), user);
+
+    return CHIRC_OK;
+}
 
 /* See ctx.h */
 bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **user)
