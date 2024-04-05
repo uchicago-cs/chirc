@@ -777,7 +777,7 @@ class SingleIRCSession:
 
         expect_short_params = [passive_server.servername]
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "SERVER",
-                                 expect_short_params = expect_short_params, expect_nparams = 3)
+                                 expect_short_params = expect_short_params, expect_nparams = 4)
 
         self._assert_equals(reply.prefix.hostname, passive_server.servername,
                             explanation = "Expected prefix to be '{}'".format(passive_server.servername),

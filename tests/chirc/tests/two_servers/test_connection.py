@@ -35,7 +35,7 @@ class TestServerRegistration(object):
         client.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
         irc_session.get_reply(client, expect_timeout=True)
 
-        client.send_cmd("SERVER {} :Test".format(active_server.servername))
+        client.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
         irc_session.verify_server_registration(client, passive_server, active_server)
 
@@ -52,7 +52,7 @@ class TestServerRegistration(object):
         irc_session = passive_server.irc_session
         client = irc_session.get_client()
 
-        client.send_cmd("SERVER {} :Test".format(active_server.servername))
+        client.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
         irc_session.get_reply(client, expect_timeout=True)
 
         client.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
@@ -76,7 +76,7 @@ class TestServerRegistration(object):
         client.send_cmd("PASS wrongpassword 0210 chirc|test")
         irc_session.get_reply(client, expect_timeout=True)
 
-        client.send_cmd("SERVER {} :Test".format(active_server.servername))
+        client.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
         reply = irc_session.get_message(client, expect_prefix = False, expect_cmd = "ERROR",
                                         expect_nparams = 1,
@@ -99,7 +99,7 @@ class TestServerRegistration(object):
         client.send_cmd("PASS wrongpassword 0210 chirc|test")
         irc_session.get_reply(client, expect_timeout=True)
 
-        client.send_cmd("SERVER wrongserver :Test")
+        client.send_cmd("SERVER wrongserver 1 1 :Test")
 
         reply = irc_session.get_message(client, expect_prefix = False, expect_cmd = "ERROR",
                                         expect_nparams = 1,
@@ -122,14 +122,14 @@ class TestServerRegistration(object):
         client1.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
         irc_session.get_reply(client1, expect_timeout=True)
 
-        client1.send_cmd("SERVER {} :Test".format(active_server.servername))
+        client1.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
         irc_session.verify_server_registration(client1, passive_server, active_server)
 
         client2.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
         irc_session.get_reply(client2, expect_timeout=True)
 
-        client2.send_cmd("SERVER {} :Test".format(active_server.servername))
+        client2.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
         reply = irc_session.get_message(client2, expect_prefix = False, expect_cmd = "ERROR",
                                         expect_nparams = 1,
@@ -149,7 +149,7 @@ class TestServerRegistration(object):
         active_client.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
 
         reply = irc_session.get_reply(active_client, expect_code = replies.ERR_ALREADYREGISTRED, expect_nick = active_server.servername,
-                                      expect_nparams = 1, long_param_re = "Connection already registered")
+                                      expect_nparams = 1, long_param_re = r"Unauthorized command \(already registered\)")
 
     def test_server_registration_connection_already_registered2(self, irc_network_session):
         """
@@ -162,10 +162,10 @@ class TestServerRegistration(object):
         passive_server, active_server, active_client, _, _ = rv
         irc_session = passive_server.irc_session
 
-        active_client.send_cmd("SERVER {} :Test".format(active_server.servername))
+        active_client.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
         reply = irc_session.get_reply(active_client, expect_code = replies.ERR_ALREADYREGISTRED, expect_nick = active_server.servername,
-                                      expect_nparams = 1, long_param_re = "Connection already registered")
+                                      expect_nparams = 1, long_param_re = r"Unauthorized command \(already registered\)")
 
 
 @pytest.mark.category("CONNECT")

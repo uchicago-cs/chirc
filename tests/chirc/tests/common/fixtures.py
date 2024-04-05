@@ -40,7 +40,7 @@ def create_dummy_two_server_network(irc_network_session, num_clients_to_passive=
     active_client.send_cmd("PASS {} 0210 chirc|test".format(passive_server.passwd))
     irc_session.get_reply(active_client, expect_timeout=True)
 
-    active_client.send_cmd("SERVER {} :Test".format(active_server.servername))
+    active_client.send_cmd("SERVER {} 1 1 :Test".format(active_server.servername))
 
     irc_session.verify_server_registration(active_client, passive_server, active_server)
 

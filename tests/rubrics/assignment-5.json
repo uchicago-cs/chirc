@@ -1,6 +1,6 @@
 {
   "name": "Assignment 5",
-  "total_points": 50,
+  "total_points": 100,
   "categories": [
     {
       "name": "Server Registration",
@@ -14,7 +14,7 @@
           "num_tests": 1
         }
       ],
-      "points": 20
+      "points": 50
     },
     {
       "name": "Relaying Commands",
@@ -28,7 +28,7 @@
           "num_tests": 2
         }
       ],
-      "points": 20
+      "points": 30
     },
     {
       "name": "Querying the Network's State",
@@ -46,7 +46,7 @@
           "num_tests": 3
         }
       ],
-      "points": 10
+      "points": 20
     }
   ]
 }
