@@ -262,6 +262,26 @@ int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user)
 
 
 /* See ctx.h */
+chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, char *servername)
+{
+    chirc_server_t *server;
+
+    HASH_FIND_STR(ctx->network.servers, servername, server);
+
+    return server;
+}
+
+
+/* See ctx.h */
+int chirc_ctx_add_server(chirc_ctx_t *ctx, chirc_server_t *server)
+{
+    HASH_ADD_KEYPTR(hh, ctx->network.servers, server->servername, sdslen(server->servername), server);
+
+    return CHIRC_OK;
+}
+
+
+/* See ctx.h */
 int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
 {
     FILE *fp;
@@ -293,7 +313,7 @@ int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
 
         chirc_server_t *ns;
 
-        HASH_FIND_STR(ctx->network.servers, tokens[0], ns);
+        ns = chirc_ctx_get_server(ctx, tokens[0]);
 
         if (ns)
         {
@@ -309,7 +329,7 @@ int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
         ns->passwd = tokens[3];
         ns->conn = NULL;
 
-        HASH_ADD_KEYPTR(hh, ctx->network.servers, ns->servername, sdslen(ns->servername), ns);
+        chirc_ctx_add_server(ctx, ns);
 
         if (strcmp(ns->servername, servername) == 0)
         {

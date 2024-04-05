@@ -204,6 +204,28 @@ bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **u
 int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user);
 
 
+/*!
+ * \brief Get a server with a given server name (if one exists)
+ * \param ctx Server context
+ * \param servername Server name
+ * \return The channel, if one exists. Otherwise, returns NULL.
+ */
+chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, char *servername);
+
+
+/*!
+ * \brief Add a server to the servers hash table
+ *
+ * The server struct must already be allocated/initialized,
+ * and must have a valid value in its servername field.
+ *
+ * \param ctx Server context
+ * \param server Server
+ * \return 0 on success, non-zero on failure
+ */
+int chirc_ctx_add_server(chirc_ctx_t *ctx, chirc_server_t *server);
+
+
 /*! \brief Loads a network specification into the server context
  *
  * The network file is a CSV file like this:
