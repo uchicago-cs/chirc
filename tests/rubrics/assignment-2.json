@@ -3,6 +3,16 @@
   "total_points": 50,
   "categories": [
     {
+      "name": "Basic Connection",
+      "subcategories": [
+        {
+          "cid": "BASIC_CONNECTION",
+          "num_tests": 22
+        }
+      ],
+      "points": 5
+    },
+    {
       "name": "Connection Registration",
       "subcategories": [
         {
@@ -10,7 +20,7 @@
           "num_tests": 21
         }
       ],
-      "points": 15
+      "points": 10
     },
     {
       "name": "PRIVMSG and NOTICE",

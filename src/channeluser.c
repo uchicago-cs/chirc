@@ -101,4 +101,6 @@ int chirc_channeluser_remove(chirc_channeluser_t *channeluser)
 
     HASH_DELETE(hh_from_channel, channel->users, channeluser);
     HASH_DELETE(hh_from_user, user->channels, channeluser);
+
+    return CHIRC_OK;
 }

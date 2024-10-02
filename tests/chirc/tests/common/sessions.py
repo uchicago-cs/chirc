@@ -408,11 +408,16 @@ class SingleIRCSession:
         except ReplyTimeoutException as rte:
             if expect_timeout:
                 return None
-            
-            if len(rte.bytes_received) == 0:
-                failmsg = "Expected a reply but got none (no bytes received)"
+
+            if expect_code is not None:
+                reply_str = f"{expect_code} reply"
             else:
-                failmsg = "Expected a reply but did not get valid reply terminated with \\r\\n. Bytes received:\n|||{}|||".format(rte.bytes_received)
+                reply_str = "reply"
+
+            if len(rte.bytes_received) == 0:
+                failmsg = f"Expected a {reply_str} but got none (no bytes received)"
+            else:
+                failmsg = f"Expected a {reply_str} but did not get valid reply terminated with \\r\\n. Bytes received:\n|||{rte.bytes_received}|||"
             pytest.fail(failmsg)  
             
         self.verify_reply(msg, expect_code, expect_nick, expect_nparams, expect_short_params, long_param_re, long_param_values)

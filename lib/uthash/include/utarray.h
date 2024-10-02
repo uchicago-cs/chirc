@@ -38,11 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define UTARRAY_UNUSED
 #endif
 
-#ifdef oom
-#error "The name of macro 'oom' has been changed to 'utarray_oom'. Please update your code."
-#define utarray_oom() oom()
-#endif
-
 #ifndef utarray_oom
 #define utarray_oom() exit(-1)
 #endif
@@ -234,7 +229,16 @@ typedef struct {
 static void utarray_str_cpy(void *dst, const void *src) {
   char *const *srcc = (char *const *)src;
   char **dstc = (char**)dst;
-  *dstc = (*srcc == NULL) ? NULL : strdup(*srcc);
+  if (*srcc == NULL) {
+    *dstc = NULL;
+  } else {
+    *dstc = (char*)malloc(strlen(*srcc) + 1);
+    if (*dstc == NULL) {
+      utarray_oom();
+    } else {
+      strcpy(*dstc, *srcc);
+    }
+  }
 }
 static void utarray_str_dtor(void *elt) {
   char **eltc = (char**)elt;

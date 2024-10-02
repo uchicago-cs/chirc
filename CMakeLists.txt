@@ -22,24 +22,35 @@ add_executable(chirc
 target_link_libraries(chirc pthread)
 
 set(ASSIGNMENTS
-    1 2 3 4 1+4 5)
+    1 2 3 4 5 2+3 2+3+5 4+5)
 
 foreach(AID ${ASSIGNMENTS})
 
     add_custom_target(categories-assignment-${AID}
             COMMAND ../tests/print-categories.py ../tests/rubrics/assignment-${AID}.json)
 
+    # Plus sign found, split the assignment ID into parts
+    string(REPLACE "+" ";" ASSIGN_LIST ${AID})
+
+    # Generate a string of rubrics to pass to the command
+    set(RUBRIC_ARGS "")
+    set(PYTEST_ARGS "")
+    foreach(ID IN LISTS ASSIGN_LIST)
+        list(APPEND RUBRIC_ARGS ../tests/rubrics/assignment-${ID}.json)
+        list(APPEND PYTEST_ARGS --chirc-rubric ../tests/rubrics/assignment-${ID}.json)
+    endforeach()
+
     add_custom_target(tests-assignment-${AID}
-            COMMAND pytest --chirc-rubric ../tests/rubrics/assignment-${AID}.json ../tests/
+            COMMAND pytest ${PYTEST_ARGS} ../tests/
+            DEPENDS chirc)
+
+    add_custom_target(assignment-${AID}
+            COMMAND /bin/sh -c 'pytest ${PYTEST_ARGS} ../tests/\; exit 0'
+            COMMAND ../tests/grade.py ${RUBRIC_ARGS}
             DEPENDS chirc)
 
     add_custom_target(grade-assignment-${AID}
-            COMMAND ../tests/grade.py ../tests/rubrics/assignment-${AID}.json)
-
-    add_custom_target(assignment-${AID}
-            COMMAND /bin/sh -c 'pytest --chirc-rubric ../tests/rubrics/assignment-${AID}.json ../tests/\; exit 0'
-            COMMAND ../tests/grade.py ../tests/rubrics/assignment-${AID}.json
-            DEPENDS chirc)
+            COMMAND ../tests/grade.py ${RUBRIC_ARGS})
 
 endforeach()
 

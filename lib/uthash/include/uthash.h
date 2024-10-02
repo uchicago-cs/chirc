@@ -159,7 +159,7 @@ do {                                                                            
   if (head) {                                                                    \
     unsigned _hf_bkt;                                                            \
     HASH_TO_BKT(hashval, (head)->hh.tbl->num_buckets, _hf_bkt);                  \
-    if (HASH_BLOOM_TEST((head)->hh.tbl, hashval) != 0) {                         \
+    if (HASH_BLOOM_TEST((head)->hh.tbl, hashval)) {                              \
       HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ], keyptr, keylen, hashval, out); \
     }                                                                            \
   }                                                                              \
@@ -196,7 +196,7 @@ do {                                                                            
 } while (0)
 
 #define HASH_BLOOM_BITSET(bv,idx) (bv[(idx)/8U] |= (1U << ((idx)%8U)))
-#define HASH_BLOOM_BITTEST(bv,idx) (bv[(idx)/8U] & (1U << ((idx)%8U)))
+#define HASH_BLOOM_BITTEST(bv,idx) ((bv[(idx)/8U] & (1U << ((idx)%8U))) != 0)
 
 #define HASH_BLOOM_ADD(tbl,hashv)                                                \
   HASH_BLOOM_BITSET((tbl)->bloom_bv, ((hashv) & (uint32_t)((1UL << (tbl)->bloom_nbits) - 1U)))
@@ -208,7 +208,7 @@ do {                                                                            
 #define HASH_BLOOM_MAKE(tbl,oomed)
 #define HASH_BLOOM_FREE(tbl)
 #define HASH_BLOOM_ADD(tbl,hashv)
-#define HASH_BLOOM_TEST(tbl,hashv) (1)
+#define HASH_BLOOM_TEST(tbl,hashv) 1
 #define HASH_BLOOM_BYTELEN 0U
 #endif
 
@@ -452,7 +452,7 @@ do {                                                                            
 
 #define HASH_DELETE_HH(hh,head,delptrhh)                                         \
 do {                                                                             \
-  struct UT_hash_handle *_hd_hh_del = (delptrhh);                                \
+  const struct UT_hash_handle *_hd_hh_del = (delptrhh);                          \
   if ((_hd_hh_del->prev == NULL) && (_hd_hh_del->next == NULL)) {                \
     HASH_BLOOM_FREE((head)->hh.tbl);                                             \
     uthash_free((head)->hh.tbl->buckets,                                         \

@@ -6,7 +6,7 @@ import os.path
 def pytest_addoption(parser):
     parser.addoption("--chirc-category", action="store", metavar="CATEGORY_ID",
         help="only run tests in category CATEGORY_ID.")
-    parser.addoption("--chirc-rubric", action="store", metavar="RUBRIC_FILE",
+    parser.addoption("--chirc-rubric", action="append", metavar="RUBRIC_FILE",
                      help="only run the tests in this rubric file")
     parser.addoption("--chirc-exe", action="store", metavar="CHIRC_EXE", default="../build/chirc",
         help="set location of chirc executable")       
@@ -22,18 +22,18 @@ def pytest_addoption(parser):
 
 def pytest_sessionstart(session):
     session.rubric_categories = None
-    rubric_file = session.config.option.chirc_rubric
-    if rubric_file is not None:
-        if not os.path.exists(rubric_file):
-            pytest.exit("No such rubric file: {}".format(rubric_file))
-
+    rubric_files = session.config.option.chirc_rubric
+    if rubric_files is not None:
         session.rubric_categories = set()
+        for rubric_file in rubric_files:
+            if not os.path.exists(rubric_file):
+                pytest.exit("No such rubric file: {}".format(rubric_file))
 
-        with open(rubric_file) as f:
-            rubric = json.load(f)
-            for c in rubric["categories"]:
-                for sc in c["subcategories"]:
-                    session.rubric_categories.add(sc["cid"])
+            with open(rubric_file) as f:
+                rubric = json.load(f)
+                for c in rubric["categories"]:
+                    for sc in c["subcategories"]:
+                        session.rubric_categories.add(sc["cid"])
 
 def pytest_collection_finish(session):
     if session.config.option.chirc_external_port is not None and len(session.items) > 1:
@@ -61,13 +61,7 @@ def pytest_runtest_setup(item):
                 pytest.skip("Only running tests in categories {}".format(", ".join(rubric_categories)))
 
 
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    # execute all other hooks to obtain the report object
-    outcome = yield
-    report = outcome.get_result()
+def pytest_json_runtest_metadata(item, call):
     category = item.get_closest_marker("category").args[0]
 
-    report.test_metadata = {
-        'category': category
-    }
+    return {'category': category}
