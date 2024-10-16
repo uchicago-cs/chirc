@@ -38,41 +38,44 @@ void chirc_ctx_free(chirc_ctx_t *ctx)
     sdsfree(ctx->version);
 
     /* Free channels */
-    chirc_channel_t *channel;
-    for(channel = ctx->channels; channel != NULL; channel = channel->hh.next)
+    chirc_channel_t *channel, *tmp_channel;
+    HASH_ITER(hh, ctx->channels, channel, tmp_channel)
     {
-        /* Note: Once we publish the code for the channels module, we will
-         * update this function to call the chirc_channel_free function */
+        chirc_channel_free(channel);
+        HASH_DEL(ctx->channels, channel);
+        free(channel);
     }
-    HASH_CLEAR(hh, ctx->channels);
 
     /* Free users */
-    chirc_user_t *user;
-    for(user = ctx->users; user != NULL; user = user->hh.next)
+    chirc_user_t *user, *tmp_user;
+    HASH_ITER(hh, ctx->users, user, tmp_user)
     {
         chirc_user_free(user);
+        HASH_DEL(ctx->users, user);
+        free(user);
     }
-    HASH_CLEAR(hh, ctx->users);
 
     /* Free connections */
-    chirc_connection_t *conn;
-    for(conn = ctx->connections; conn != NULL; conn = conn->hh.next)
+    chirc_connection_t *conn, *tmp_conn;
+    HASH_ITER(hh, ctx->connections, conn, tmp_conn)
     {
         chirc_connection_free(conn);
+        HASH_DEL(ctx->connections, conn);
+        free(conn);
     }
-    HASH_CLEAR(hh, ctx->connections);
 
     /* Free servers */
     if (ctx->network.servers)
     {
         /* If we're running in network mode, we need to free the servers
          * in the servers hash table */
-        chirc_server_t *server;
-        for(server = ctx->network.servers; server != NULL; server = server->hh.next)
+        chirc_server_t *server, *tmp_server;
+        HASH_ITER(hh, ctx->network.servers, server, tmp_server)
         {
             chirc_server_free(server);
+            HASH_DEL(ctx->network.servers, server);
+            free(server);
         }
-        HASH_CLEAR(hh, ctx->connections);
     }
     else
     {
