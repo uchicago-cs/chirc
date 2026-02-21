@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2022, Troy D. Hanson  https://troydhanson.github.io/uthash/
+Copyright (c) 2008-2025, Troy D. Hanson  https://troydhanson.github.io/uthash/
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -134,6 +134,12 @@ typedef struct {
   if ((a)->icd.copy) { (a)->icd.copy( _utarray_eltptr(a,j), p); }             \
   else { memcpy(_utarray_eltptr(a,j), p, (a)->icd.sz); };                     \
   (a)->i++;                                                                   \
+} while(0)
+
+#define utarray_replace(a,p,j) do {                                           \
+  if ((a)->icd.dtor) { (a)->icd.dtor(_utarray_eltptr(a,j)); }                 \
+  if ((a)->icd.copy) { (a)->icd.copy(_utarray_eltptr(a,j), p); }              \
+  else { memcpy(_utarray_eltptr(a,j), p, (a)->icd.sz); }                      \
 } while(0)
 
 #define utarray_inserta(a,w,j) do {                                           \

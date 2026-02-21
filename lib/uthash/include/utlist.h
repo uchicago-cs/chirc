@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2007-2022, Troy D. Hanson  https://troydhanson.github.io/uthash/
+Copyright (c) 2007-2025, Troy D. Hanson  https://troydhanson.github.io/uthash/
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 3. CDL_ macros: circular doubly-linked lists.
  *
  * To use singly-linked lists, your structure must have a "next" pointer.
- * To use doubly-linked lists, your structure must "prev" and "next" pointers.
+ * To use doubly-linked lists, your structure must have "prev" and "next" pointers.
  * Either way, the pointer to the head of the list must be initialized to NULL.
  *
  * ----------------.EXAMPLE -------------------------

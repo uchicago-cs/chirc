@@ -139,7 +139,7 @@ a copy of the source string and pushes that copy into the array.
 About UT_icd
 ~~~~~~~~~~~~
 
-Arrays be made of any type of element, not just integers and strings.  The
+Arrays can be made of any type of element, not just integers and strings.  The
 elements can be basic types or structures. Unless you're dealing with integers
 and strings (which use pre-defined `ut_int_icd` and `ut_str_icd`), you'll need
 to define a `UT_icd` helper structure. This structure contains everything that
@@ -325,6 +325,7 @@ Operations
 | utarray_eltptr(UT_array *a,int j)    | get pointer of element from index
 | utarray_eltidx(UT_array *a,void *e)  | get index of element from pointer
 | utarray_insert(UT_array *a,void *p, int j) | insert element p to index j
+| utarray_replace(UT_array *a,void *p, int j) | replace element p at index j
 | utarray_inserta(UT_array *a,UT_array *w, int j) | insert array w into array a at index j
 | utarray_resize(UT_array *dst,int num)  | extend or shrink array to num elements
 | utarray_concat(UT_array *dst,UT_array *src) | copy src to end of dst array
