@@ -1,5 +1,6 @@
 /* See message.h for details about the functions in this module */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -7,6 +8,7 @@
 #include "message.h"
 #include "reply.h"
 #include "connection.h"
+#include "utils.h"
 
 /* See message.h */
 int chirc_message_from_string(chirc_message_t *msg, char *s)
@@ -18,7 +20,7 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
 
     msg->nparams = 0;
 
-    msgstr = malloc(len);
+    msgstr = xmalloc(len);
 
     strncpy(msgstr, s, len - 2);
     msgstr[len-2] = '\0';
@@ -54,7 +56,7 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
 
     msg->longlast = 0;
 
-    while (pch != NULL)
+    while (pch != NULL && msg->nparams < 15)
     {
         i = pch;
         while (*i++) ;
@@ -87,26 +89,22 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
 int chirc_message_to_string(chirc_message_t *msg, char **s)
 {
     char buffer[1024];
-
-    buffer[0] = '\0';
+    int pos = 0;
+    int rem = sizeof(buffer);
 
     if (msg->prefix)
-    {
-        strcat(buffer, ":");
-        strcat(buffer, msg->prefix);
-        strcat(buffer, " ");
-    }
+        pos += snprintf(buffer + pos, rem - pos, ":%s ", msg->prefix);
 
-    strcat(buffer, msg->cmd);
+    pos += snprintf(buffer + pos, rem - pos, "%s", msg->cmd);
 
     for(int i=0; i < msg->nparams; i++)
     {
-        strcat(buffer, " ");
-        if (i== msg->nparams - 1 && msg->longlast)
-            strcat(buffer, ":");
-        strcat(buffer, msg->params[i]);
+        if (i == msg->nparams - 1 && msg->longlast)
+            pos += snprintf(buffer + pos, rem - pos, " :%s", msg->params[i]);
+        else
+            pos += snprintf(buffer + pos, rem - pos, " %s", msg->params[i]);
     }
-    strcat(buffer,"\r\n");
+    snprintf(buffer + pos, rem - pos, "\r\n");
 
     *s = strdup(buffer);
 

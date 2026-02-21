@@ -11,6 +11,11 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include <stdlib.h>
+
+void *xmalloc(size_t size);
+void *xcalloc(size_t nmemb, size_t size);
+
 /* Add the declarations for your helper functions here,
  * and implement them in utils.c*/
 

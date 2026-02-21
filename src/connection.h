@@ -54,4 +54,4 @@ int chirc_connection_send_message(chirc_ctx_t *ctx, chirc_connection_t *conn, ch
 int chirc_connection_create_thread(chirc_ctx_t *ctx, chirc_connection_t *conn);
 
 
-#endif /* USER_H_ */
+#endif /* CONNECTION_H_ */

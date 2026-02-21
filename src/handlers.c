@@ -44,6 +44,7 @@
 #include "message.h"
 #include "user.h"
 #include "server.h"
+#include "utils.h"
 
 
 /* The following typedef defines a type called "handler_function"

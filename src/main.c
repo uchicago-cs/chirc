@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <netdb.h>
+#include "utils.h"
 
 
 #include "chirc.h"
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
         char hbuf[NI_MAXHOST];
         gethostname(hbuf, sizeof(hbuf));
 
-        ctx.network.this_server = calloc(1, sizeof(chirc_server_t));
+        ctx.network.this_server = xcalloc(1, sizeof(chirc_server_t));
 
         ctx.network.this_server->servername = sdsnew(hbuf);
         ctx.network.this_server->hostname = sdsnew(hbuf);

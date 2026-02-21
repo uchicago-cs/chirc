@@ -81,7 +81,7 @@ bool chirc_channeluser_get_or_create(chirc_channel_t *channel, chirc_user_t *use
     {
         created = true;
 
-        *channeluser = malloc(sizeof(chirc_channeluser_t));
+        *channeluser = xmalloc(sizeof(chirc_channeluser_t));
         chirc_channeluser_init(*channeluser);
         (*channeluser)->channel = channel;
         (*channeluser)->user = user;

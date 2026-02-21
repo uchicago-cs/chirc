@@ -13,6 +13,7 @@
 #include "server.h"
 #include "log.h"
 #include "chirc.h"
+#include "utils.h"
 
 /* See ctx.h */
 void chirc_ctx_init(chirc_ctx_t *ctx)
@@ -192,7 +193,7 @@ bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_
     {
         created = true;
 
-        *channel = malloc(sizeof(chirc_channel_t));
+        *channel = xmalloc(sizeof(chirc_channel_t));
         chirc_channel_init(*channel);
         (*channel)->name = sdsnew(channelname);
         HASH_ADD_KEYPTR(hh, ctx->channels, (*channel)->name, sdslen((*channel)->name), *channel);
@@ -245,7 +246,7 @@ bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **u
     {
         created = true;
 
-        *user = malloc(sizeof(chirc_user_t));
+        *user = xmalloc(sizeof(chirc_user_t));
         chirc_user_init(*user);
         (*user)->nick = sdsnew(nick);
         HASH_ADD_KEYPTR(hh, ctx->users, (*user)->nick, sdslen((*user)->nick), *user);
@@ -311,6 +312,8 @@ int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
         if (count != 4)
         {
             serverlog(CRITICAL, NULL, "Invalid line in network file: %s", line);
+            sdsfree(line);
+            sdsfreesplitres(tokens, count);
             return CHIRC_FAIL;
         }
 
@@ -321,15 +324,17 @@ int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
         if (ns)
         {
             serverlog(CRITICAL, NULL, "Network file contains duplicate server name: %s", ns->servername);
+            sdsfree(line);
+            sdsfreesplitres(tokens, count);
             return CHIRC_FAIL;
         }
 
-        ns = calloc(1, sizeof(chirc_server_t));
+        ns = xcalloc(1, sizeof(chirc_server_t));
 
-        ns->servername = tokens[0];
-        ns->hostname = tokens[1];
-        ns->port = tokens[2];
-        ns->passwd = tokens[3];
+        ns->servername = sdsdup(tokens[0]);
+        ns->hostname = sdsdup(tokens[1]);
+        ns->port = sdsdup(tokens[2]);
+        ns->passwd = sdsdup(tokens[3]);
         ns->conn = NULL;
 
         chirc_ctx_add_server(ctx, ns);
@@ -338,6 +343,9 @@ int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
         {
             ctx->network.this_server = ns;
         }
+
+        sdsfree(line);
+        sdsfreesplitres(tokens, count);
     }
 
     fclose(fp);

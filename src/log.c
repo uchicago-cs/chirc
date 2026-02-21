@@ -28,7 +28,9 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
         return;
 
     t = time(NULL);
-    strftime(buf,80,"%Y-%m-%d %H:%M:%S",localtime(&t));
+    struct tm tt;
+    localtime_r(&t, &tt);
+    strftime(buf,80,"%Y-%m-%d %H:%M:%S", &tt);
 
     switch(level)
     {
@@ -83,19 +85,19 @@ void serverlog(loglevel_t level, chirc_connection_t *conn, char *fmt, ...)
     {
         if(conn->type == CONN_TYPE_UNKNOWN)
         {
-            sprintf(buf, "%s -- ", conn->hostname);
+            snprintf(buf, sizeof(buf), "%s -- ", conn->hostname);
         }
         else if(conn->type == CONN_TYPE_USER)
         {
             chirc_user_t *user = conn->peer.user;
             if(user->nick)
-                sprintf(buf, "%s!%s@%s -- ", user->nick, user->username, conn->hostname);
+                snprintf(buf, sizeof(buf), "%s!%s@%s -- ", user->nick, user->username, conn->hostname);
             else
-                sprintf(buf, "unknown!unknown@%s -- ", conn->hostname);
+                snprintf(buf, sizeof(buf), "unknown!unknown@%s -- ", conn->hostname);
         }
         else if (conn->type == CONN_TYPE_SERVER)
         {
-            sprintf(buf, "%s -- ", conn->peer.server->servername);
+            snprintf(buf, sizeof(buf), "%s -- ", conn->peer.server->servername);
         }
     }
     else

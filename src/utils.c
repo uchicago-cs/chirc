@@ -1,5 +1,7 @@
 /* See utils.h for details about the functions in this module */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Add your helper functions here.
@@ -7,6 +9,30 @@
  * Careful: This module is intended for functions that may be needed in multiple
  *          modules. If a helper function is only used in a single C file, then it
  *          probably belongs there, not in this module. */
+
+/* See utils.h */
+void *xmalloc(size_t size)
+{
+    void *p = malloc(size);
+    if (!p) {
+        fprintf(stderr, "Out of memory\n");
+        abort();
+    }
+    return p;
+}
+
+
+/* See utils.h */
+void *xcalloc(size_t nmemb, size_t size)
+{
+    void *p = calloc(nmemb, size);
+    if (!p) {
+        fprintf(stderr, "Out of memory\n");
+        abort();
+    }
+    return p;
+}
+
 
 /* See utils.h */
 int has_mode(char *modes, char mode)
@@ -27,7 +53,7 @@ int set_mode(char *modes, char mode)
         return 1;
     else
     {
-        strcat(modes,modestr);
+        strncat(modes, modestr, 1);
         return 0;
     }
 }
