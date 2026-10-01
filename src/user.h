@@ -39,9 +39,9 @@ void chirc_user_free(chirc_user_t *user);
  *
  * \param user User
  * \param mode Mode
- * \return 1 if the user has the mode, 0 otherwise
+ * \return true if the user has the mode, false otherwise
  */
-int chirc_user_has_mode(chirc_user_t *user, char mode);
+bool chirc_user_has_mode(chirc_user_t *user, char mode);
 
 
 /*! \brief Adds a mode to a user
@@ -69,9 +69,9 @@ int chirc_user_remove_mode(chirc_user_t *user, char mode);
 /*! \brief Checks if a user is an IRC operator
  *
  * \param user User
- * \return 1 if the user is an IRC operator, 0 otherwise
+ * \return true if the user is an IRC operator, false otherwise
  */
-int chirc_user_is_oper(chirc_user_t *user);
+bool chirc_user_is_oper(chirc_user_t *user);
 
 
 /*! \brief Returns the number of channels the user is in

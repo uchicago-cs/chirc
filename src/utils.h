@@ -12,6 +12,7 @@
 #define UTILS_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 void *xmalloc(size_t size);
 void *xcalloc(size_t nmemb, size_t size);
@@ -23,9 +24,9 @@ void *xcalloc(size_t nmemb, size_t size);
  *
  * \param modes Modes array
  * \param mode Mode to check for
- * \return 1 if the array has the mode, 0 otherwise
+ * \return true if the array has the mode, false otherwise
  */
-int has_mode(char *modes, char mode);
+bool has_mode(const char *modes, char mode);
 
 
 /*! \brief Adds a mode to a modes array
@@ -34,10 +35,12 @@ int has_mode(char *modes, char mode);
  * has the specified mode
  *
  * \param modes Modes array
+ * \param size Size of the modes array (including room for the '\0')
  * \param mode Mode to add
- * \return 0 on success, non-zero on failure
+ * \return 0 on success, non-zero on failure (particularly
+ *         if the modes array is full)
  */
-int set_mode(char *modes, char mode);
+int set_mode(char *modes, size_t size, char mode);
 
 
 /*! \brief Removes a mode from a mode array

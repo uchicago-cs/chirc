@@ -24,9 +24,9 @@ void chirc_channeluser_free(chirc_channeluser_t *channeluser)
 }
 
 /* See channeluser.h */
-int chirc_channeluser_has_mode(chirc_channeluser_t *channeluser, char mode)
+bool chirc_channeluser_has_mode(chirc_channeluser_t *channeluser, char mode)
 {
-    int rc;
+    bool rc;
 
     rc = has_mode(channeluser->modes, mode);
 
@@ -39,7 +39,7 @@ int chirc_channeluser_set_mode(chirc_channeluser_t *channeluser, char mode)
 {
     int rc;
 
-    rc = set_mode(channeluser->modes, mode);
+    rc = set_mode(channeluser->modes, sizeof(channeluser->modes), mode);
 
     return rc;
 }
@@ -81,7 +81,7 @@ bool chirc_channeluser_get_or_create(chirc_channel_t *channel, chirc_user_t *use
     {
         created = true;
 
-        *channeluser = xmalloc(sizeof(chirc_channeluser_t));
+        *channeluser = xcalloc(1, sizeof(chirc_channeluser_t));
         chirc_channeluser_init(*channeluser);
         (*channeluser)->channel = channel;
         (*channeluser)->user = user;

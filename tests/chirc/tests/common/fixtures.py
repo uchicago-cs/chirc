@@ -78,8 +78,7 @@ def create_dummy_two_server_network(irc_network_session, num_clients_to_passive=
 
 def create_two_server_network(irc_network_session, num_clients_to_passive=0, num_clients_to_active=0, quit_ircop=False):
     irc_network_session.set_servers(2)
-    irc_network_session.start_session(0)
-    irc_network_session.start_session(1)
+    irc_network_session.start_sessions()
 
     passive_server = irc_network_session.servers[0]
     active_server = irc_network_session.servers[1]

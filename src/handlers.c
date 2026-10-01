@@ -55,8 +55,8 @@ typedef int (*handler_function_t)(chirc_ctx_t *ctx, chirc_connection_t *conn, ch
 /* Forward declaration of handler functions */
 
 // Miscellaneous messages
-int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg);
-int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg);
+static int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg);
+static int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg);
 
 
 
@@ -68,7 +68,7 @@ int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_
  * (using the handler_function_t type we defined earlier) */
 struct handler_entry
 {
-    char *name;
+    const char *name;
     handler_function_t func;
 };
 
@@ -89,7 +89,7 @@ struct handler_entry
  * Make sure to add it *before* the NULL_ENTRY entry, which
  * must always come last.
  */
-struct handler_entry handlers[] =
+static struct handler_entry handlers[] =
 {
     HANDLER_ENTRY (PING),
     HANDLER_ENTRY (PONG),
@@ -101,13 +101,12 @@ struct handler_entry handlers[] =
 /* See handlers.h */
 int chirc_handle(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
 {
-    chirc_message_t reply;
     int rc=0, h;
 
     /* Print message to the server log */
     serverlog(DEBUG, conn, "Handling command %s", msg->cmd);
-    for(int i=0; i<msg->nparams; i++)
-        serverlog(DEBUG, conn, "%s[%i] = %s", msg->cmd, i + 1, msg->params[i]);
+    for(unsigned int i=0; i<msg->nparams; i++)
+        serverlog(DEBUG, conn, "%s[%u] = %s", msg->cmd, i + 1, msg->params[i]);
 
     /* Search the dispatch table for an entry corresponding to the
      * message we are processing */
@@ -124,12 +123,12 @@ int chirc_handle(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *ms
 }
 
 
-int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
+static int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
 {
     /* Construct a reply to the PING */
     chirc_message_t reply;
     chirc_message_construct(&reply, NULL, "PONG");
-    chirc_message_add_parameter(&reply, ctx->network.this_server->servername, 0);
+    chirc_message_add_parameter(&reply, ctx->network.this_server->servername, false);
 
     /* Send the message */
     if(chirc_connection_send_message(ctx, conn, &reply))
@@ -144,7 +143,7 @@ int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_
     return CHIRC_OK;
 }
 
-int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
+static int chirc_handle_PONG(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
 {
     /* PONG messages are ignored, so we don't do anything */
 

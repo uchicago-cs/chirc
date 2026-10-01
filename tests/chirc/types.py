@@ -32,12 +32,12 @@ class IRCPrefix(object):
         
         self.nick = self.username = self.hostname = None
         
-        if not "@" in s and not "!" in s:
+        if "@" not in s and "!" not in s:
             self.nick = s[1:]
             self.hostname = s[1:]
         elif "@" in s and "!" in s:
             match = re.match("^:(?P<nick>[^!@]+)!(?P<username>[^!@]+)@(?P<hostname>[^!@]+)$", s)
-            if match == None:
+            if match is None:
                 raise PrefixNotWellFormedException()
             else:
                 # TODO: This could be validated further
@@ -59,6 +59,9 @@ class IRCMessage(object):
         
         fields = self._s.split(" ")
                
+        if len(fields[0]) == 0:
+            raise MessageNotWellFormedException("Message begins with a space.", s)
+
         if fields[0][0] == ":":
             if len(fields) == 1: 
                 raise MessageNotWellFormedException("Message contains a prefix but no command.", s)
@@ -73,6 +76,9 @@ class IRCMessage(object):
         self.params = []
         
         while p < len(fields):
+            if len(fields[p]) == 0:
+                p += 1
+                continue
             if fields[p][0] == ":":
                 self.params.append(" ".join(fields[p:]))
                 break

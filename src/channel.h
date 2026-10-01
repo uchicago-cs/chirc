@@ -43,9 +43,9 @@ void chirc_channel_free(chirc_channel_t *channel);
  *
  * \param channel Channel
  * \param mode Mode
- * \return 1 if the channel has the mode, 0 otherwise
+ * \return true if the channel has the mode, false otherwise
  */
-int chirc_channel_has_mode(chirc_channel_t *channel, char mode);
+bool chirc_channel_has_mode(chirc_channel_t *channel, char mode);
 
 
 /*! \brief Adds a mode to a channel

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils.h"
+
 /* Add your helper functions here.
  *
  * Careful: This module is intended for functions that may be needed in multiple
@@ -35,27 +37,29 @@ void *xcalloc(size_t nmemb, size_t size)
 
 
 /* See utils.h */
-int has_mode(char *modes, char mode)
+bool has_mode(const char *modes, char mode)
 {
-    if (strchr(modes, mode))
-        return 1;
-    else
-        return 0;
+    return strchr(modes, mode) != NULL;
 }
 
 
 /* See utils.h */
-int set_mode(char *modes, char mode)
+int set_mode(char *modes, size_t size, char mode)
 {
-    char modestr[2] = { mode, '\0' };
+    size_t len;
 
     if (has_mode(modes, mode))
         return 1;
-    else
-    {
-        strncat(modes, modestr, 1);
-        return 0;
-    }
+
+    /* Make sure there is room for the mode and the terminating '\0' */
+    len = strlen(modes);
+    if (len + 1 >= size)
+        return 1;
+
+    modes[len] = mode;
+    modes[len + 1] = '\0';
+
+    return 0;
 }
 
 

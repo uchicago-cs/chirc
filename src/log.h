@@ -18,6 +18,16 @@
 
 #include "connection.h"
 
+/* Lets GCC and Clang check the format string and arguments passed
+ * to the logging functions, just like they do for printf.
+ * FMT is the position of the format parameter, and ARGS is the
+ * position of the first variadic argument (0 for va_list functions) */
+#ifdef __GNUC__
+#define CHIRC_PRINTF_FORMAT(FMT, ARGS) __attribute__((format(printf, FMT, ARGS)))
+#else
+#define CHIRC_PRINTF_FORMAT(FMT, ARGS)
+#endif
+
 /*! \brief Log levels */
 typedef enum {
     QUIET    = 00,
@@ -45,7 +55,7 @@ void chirc_setloglevel(loglevel_t level);
  * \param fmt printf-style formatting string
  * \param ... Extra parameters if needed by fmt
  */
-void chilog(loglevel_t level, char *fmt, ...);
+void chilog(loglevel_t level, const char *fmt, ...) CHIRC_PRINTF_FORMAT(2, 3);
 
 /*! \brief Convenience function for logging information related to a connection
  *
@@ -57,6 +67,6 @@ void chilog(loglevel_t level, char *fmt, ...);
  * \param fmt printf-style formatting string
  * \param ... Extra parameters if needed by fmt
  */
-void serverlog(loglevel_t level, chirc_connection_t *conn, char *fmt, ...);
+void serverlog(loglevel_t level, chirc_connection_t *conn, const char *fmt, ...) CHIRC_PRINTF_FORMAT(3, 4);
 
 #endif /* CHIRC_LOG_H_ */

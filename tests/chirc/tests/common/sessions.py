@@ -64,6 +64,7 @@ class SingleIRCSession:
         self.oper_password = "oper-{}".format(random_str)
         self.started = False
         self.clients = []
+        self.tmpdir = None
 
     # Testing functions
     
@@ -94,63 +95,76 @@ class SingleIRCSession:
 
     # Start/end IRC session
 
+    def _launch_once(self):
+        """Launch chirc and poll briefly for early startup failure.
+
+        Returns the process exit code if chirc exited before the poll window
+        elapsed, or None if the process is still running (i.e. started OK).
+        Requires self.tmpdir to already exist.
+        """
+        if self.irc_network is not None:
+            network_file = self.tmpdir + "/network.txt"
+            with open(network_file, "w") as f:
+                for server in self.irc_network:
+                    line = "{},{},{},{}".format(server.servername,
+                                                server.hostname,
+                                                server.port,
+                                                server.passwd)
+                    print(line, file=f)
+
+            chirc_cmd = [os.path.abspath(self.chirc_exe), "-n", network_file,
+                         "-s", self.irc_network_server.servername]
+        else:
+            chirc_cmd = [os.path.abspath(self.chirc_exe), "-p", str(self.port)]
+
+        chirc_cmd += ["-o", self.oper_password]
+
+        if self.loglevel == -1:
+            chirc_cmd.append("-q")
+        elif self.loglevel == 1:
+            chirc_cmd.append("-v")
+        elif self.loglevel == 2:
+            chirc_cmd.append("-vv")
+
+        self.chirc_proc = subprocess.Popen(chirc_cmd, cwd=self.tmpdir)
+
+        # Poll for up to 50ms so we reliably detect a process that exits
+        # shortly after launch (e.g. because the port is already in use).
+        # A bind() failure is nearly instantaneous, so 50ms is a generous margin.
+        deadline = time.monotonic() + 0.05
+        rc = None
+        while time.monotonic() < deadline:
+            rc = self.chirc_proc.poll()
+            if rc is not None:
+                break
+            time.sleep(0.01)
+
+        return rc  # None = still running (success); non-None = exited (failure)
+
     def start_session(self):
         if self.external_chirc_port is not None:
             self.started = True
             return
 
         self.tmpdir = tempfile.mkdtemp()
-        
+
         if self.randomize_ports:
-            self.port = random.randint(10000,60000)
-        else:
-            self.port = self.chirc_port
- 
-        if self.randomize_ports:
+            self.port = random.randint(10000, 60000)
             tries = 10
         else:
+            self.port = self.chirc_port
             tries = 1
 
-
         while tries > 0:
-
-            if self.irc_network is not None:
-                network_file = self.tmpdir + "/network.txt"
-                with open(network_file, "w") as f:
-                    for server in self.irc_network:
-                        line = "{},{},{},{}".format(server.servername,
-                                                    server.hostname,
-                                                    server.port,
-                                                    server.passwd)
-                        print(line, file=f)
-
-                chirc_cmd = [os.path.abspath(self.chirc_exe), "-n", network_file,
-                             "-s", self.irc_network_server.servername]
-            else:
-                chirc_cmd = [os.path.abspath(self.chirc_exe), "-p", str(self.port)]
-
-            chirc_cmd += ["-o", self.oper_password]
-
-
-            if self.loglevel == -1:
-                chirc_cmd.append("-q")
-            elif self.loglevel == 1:
-                chirc_cmd.append("-v")
-            elif self.loglevel == 2:
-                chirc_cmd.append("-vv")
-
-            self.chirc_proc = subprocess.Popen(chirc_cmd, cwd = self.tmpdir)
-            time.sleep(0.01)
-            rc = self.chirc_proc.poll()        
-            if rc != None:
-                tries -=1
+            rc = self._launch_once()
+            if rc is not None:
+                tries -= 1
                 if tries == 0:
                     pytest.fail("chirc process failed to start. rc = %i" % rc)
                 else:
-                    if self.randomize_ports:
-                        self.port = random.randint(10000,60000)
+                    self.port = random.randint(10000, 60000)
             else:
-                break        
+                break
 
         self.started = True
         
@@ -209,7 +223,7 @@ class SingleIRCSession:
             client =  self.connect_user(nick, username)
             clients.append( (nick, client) )
         
-        if join_channel != None:
+        if join_channel is not None:
             self.join_channel(clients, join_channel)
 
         return clients       
@@ -309,7 +323,7 @@ class SingleIRCSession:
         clients2 = clients[:]
         
         for (nick1, client1) in clients:
-            client1.send_cmd("PART #test :%s is out of here!" % nick1)
+            client1.send_cmd("PART %s :%s is out of here!" % (channel, nick1))
             self.verify_relayed_part(client1, from_nick=nick1, channel=channel, msg="%s is out of here!" % nick1)  
             
             clients2.remove( (nick1, client1) )
@@ -450,33 +464,33 @@ class SingleIRCSession:
                       expect_nparams = None, expect_short_params = None, 
                       long_param_re = None, long_param_values = None):
         
-        if expect_prefix != None and expect_prefix:
+        if expect_prefix is not None and expect_prefix:
             assert msg.prefix is not None, "Expected a prefix, but got none.\nMessage: {}".format(msg.raw(bookends=True))
             
-        if expect_cmd != None:
+        if expect_cmd is not None:
             self._assert_equals(msg.cmd, expect_cmd, 
                                 "Expected command {}, got {} instead".format(expect_cmd, msg.cmd),
                                 irc_msg = msg)
             
-        if expect_nparams != None:
+        if expect_nparams is not None:
             nparams = len(msg.params)
             self._assert_equals(nparams, expect_nparams, 
                                 "Expected {} parameters, got {} instead".format(expect_nparams, nparams),
                                 irc_msg = msg)
             
-        if expect_short_params != None:
+        if expect_short_params is not None:
             for i, expect_p, p in zip (range(len(expect_short_params)), expect_short_params, msg.params):
                 if expect_p is not None:
                     self._assert_equals(str(p), str(expect_p), 
                                 "Expected parameter #{} to be {}, got {} instead".format(str(i+1), str(expect_p), str(p)),
                                 irc_msg = msg)                    
                 
-        if long_param_re != None:
+        if long_param_re is not None:
             lpre = "^:%s$" % long_param_re
             lp = msg.params[-1]
             match = re.match(lpre, lp)
             self._assert_is_not_none(match, "|||%s||| <-- Long parameter does not match regular expression: %s" % (lp, lpre), irc_msg = msg)
-            if long_param_values != None:
+            if long_param_values is not None:
                 for k,v in long_param_values.items():
                     self._assert_equals(match.group(k), str(v), 
                                 "Expected <{}> in long parameter to be {}, not {} (long parameter regex: {})".format(k, v, match.group(k), lpre),
@@ -611,7 +625,7 @@ class SingleIRCSession:
     def verify_join(self, client, nick, channel, expect_topic = None, expect_names = None):
         self.verify_relayed_join(client, nick, channel)
         
-        if expect_topic != None:
+        if expect_topic is not None:
             self.get_reply(client, expect_code = replies.RPL_TOPIC, expect_nick = nick,
                            expect_nparams = 2, expect_short_params = [channel], long_param_re=expect_topic)
         
@@ -620,13 +634,13 @@ class SingleIRCSession:
     def verify_relayed_join(self, client, from_nick, channel):
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "JOIN", 
                                  expect_nparams = 1, expect_short_params = [channel])
-        if from_nick != None:
+        if from_nick is not None:
             self._assert_equals(reply.prefix.nick, from_nick, 
                                 explanation = "Expected JOIN's prefix to have nick '{}'".format(from_nick), 
                                 irc_msg = reply)
 
     def verify_relayed_part(self, client, from_nick, channel, msg):
-        if msg != None:
+        if msg is not None:
             expect_nparams = 2
         else:
             expect_nparams = 1
@@ -855,7 +869,66 @@ class IRCNetworkSession:
     def start_session(self, server_idx):
         self.servers[server_idx].irc_session.start_session()
 
-    def end_sessions(self):
+    def start_sessions(self):
+        """Start all servers in the network.
+
+        When ports were randomly assigned (default_start_port == -1), retries
+        with a fresh set of random ports if any server fails to start, so that
+        a single port collision does not prevent the whole network from coming
+        up.  Fixed-port networks (the default) fail immediately on the first
+        error, since picking a different port would not match the configured
+        value.
+        """
+        randomize = (self.default_start_port == -1)
+        tries = 10 if randomize else 1
+
+        # Create a working directory for every session upfront so that
+        # _launch_once() can write the network file on any attempt.
         for server in self.servers:
-            server.irc_session.end_session()
+            server.irc_session.tmpdir = tempfile.mkdtemp()
+
+        rc = None
+        for attempt in range(tries):
+            if attempt > 0:
+                # Pick a fresh set of random ports for all servers so that the
+                # next attempt uses a different range than the one that failed.
+                base_port = random.randint(10000, 60000)
+                for i, server in enumerate(self.servers):
+                    server.port = base_port + i
+
+            started = []
+            failed = False
+
+            for server in self.servers:
+                rc = server.irc_session._launch_once()
+                if rc is not None:
+                    # Kill every server already started in this attempt before
+                    # retrying so we don't leave stray processes behind.
+                    for s in started:
+                        s.irc_session.chirc_proc.kill()
+                        s.irc_session.chirc_proc.wait()
+                    failed = True
+                    break
+                started.append(server)
+
+            if not failed:
+                for server in self.servers:
+                    server.irc_session.port = server.port
+                    server.irc_session.started = True
+                return
+
+        pytest.fail("chirc network failed to start after %i attempt(s). rc = %i" % (tries, rc))
+
+    def end_sessions(self):
+        # Attempt cleanup of every server regardless of individual failures so
+        # that a crashed server does not leave siblings running and holding ports.
+        first_exc = None
+        for server in self.servers:
+            try:
+                server.irc_session.end_session()
+            except BaseException as e:
+                if first_exc is None:
+                    first_exc = e
+        if first_exc is not None:
+            raise first_exc
 

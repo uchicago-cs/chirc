@@ -159,7 +159,7 @@ int chirc_ctx_unknown_connections(chirc_ctx_t *ctx)
 
 
 /* See ctx.h */
-chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname)
+chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, const char *channelname)
 {
     chirc_channel_t *channel;
 
@@ -179,7 +179,7 @@ int chirc_ctx_add_channel(chirc_ctx_t *ctx, chirc_channel_t *channel)
 
 
 /* See ctx.h */
-bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_channel_t **channel)
+bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, const char *channelname, chirc_channel_t **channel)
 {
     bool created;
 
@@ -193,7 +193,7 @@ bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_
     {
         created = true;
 
-        *channel = xmalloc(sizeof(chirc_channel_t));
+        *channel = xcalloc(1, sizeof(chirc_channel_t));
         chirc_channel_init(*channel);
         (*channel)->name = sdsnew(channelname);
         HASH_ADD_KEYPTR(hh, ctx->channels, (*channel)->name, sdslen((*channel)->name), *channel);
@@ -213,7 +213,7 @@ int chirc_ctx_remove_channel(chirc_ctx_t *ctx, chirc_channel_t *channel)
 
 
 /* See ctx.h */
-chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick)
+chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, const char *nick)
 {
     chirc_user_t *user;
 
@@ -232,7 +232,7 @@ int chirc_ctx_add_user(chirc_ctx_t *ctx, chirc_user_t *user)
 }
 
 /* See ctx.h */
-bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **user)
+bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, const char *nick, chirc_user_t **user)
 {
     bool created;
 
@@ -246,7 +246,7 @@ bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **u
     {
         created = true;
 
-        *user = xmalloc(sizeof(chirc_user_t));
+        *user = xcalloc(1, sizeof(chirc_user_t));
         chirc_user_init(*user);
         (*user)->nick = sdsnew(nick);
         HASH_ADD_KEYPTR(hh, ctx->users, (*user)->nick, sdslen((*user)->nick), *user);
@@ -266,7 +266,7 @@ int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user)
 
 
 /* See ctx.h */
-chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, char *servername)
+chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, const char *servername)
 {
     chirc_server_t *server;
 
@@ -286,7 +286,7 @@ int chirc_ctx_add_server(chirc_ctx_t *ctx, chirc_server_t *server)
 
 
 /* See ctx.h */
-int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername)
+int chirc_ctx_load_network(chirc_ctx_t *ctx, const char *file, const char *servername)
 {
     FILE *fp;
     char *l = NULL;

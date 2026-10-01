@@ -11,10 +11,10 @@
 #include "utils.h"
 
 /* See message.h */
-int chirc_message_from_string(chirc_message_t *msg, char *s)
+int chirc_message_from_string(chirc_message_t *msg, const char *s)
 {
-    char *params[15], *pch, *msgstr, *i, *saveptr;
-    unsigned int len;
+    char *params[MSG_MAX_PARAMS], *pch, *msgstr, *i, *saveptr;
+    size_t len;
 
     len = strlen(s);
 
@@ -52,11 +52,11 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
 
     msg->cmd = pch;
     for(i=pch; *i; i++)
-        *i = toupper(*i);
+        *i = toupper((unsigned char) *i);
 
-    msg->longlast = 0;
+    msg->longlast = false;
 
-    while (pch != NULL && msg->nparams < 15)
+    while (pch != NULL && msg->nparams < MSG_MAX_PARAMS)
     {
         i = pch;
         while (*i++) ;
@@ -64,7 +64,7 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
         if (*i == ':')
         {
             params[msg->nparams++] = i + 1;
-            msg->longlast = 1;
+            msg->longlast = true;
             break;
         }
 
@@ -74,9 +74,9 @@ int chirc_message_from_string(chirc_message_t *msg, char *s)
         params[msg->nparams++] = pch;
     }
 
-    for (int i=0; i < msg->nparams; i++)
+    for (unsigned int j=0; j < msg->nparams; j++)
     {
-        msg->params[i] = params[i];
+        msg->params[j] = params[j];
     }
 
     msg->raw = msgstr;
@@ -97,7 +97,7 @@ int chirc_message_to_string(chirc_message_t *msg, char **s)
 
     pos += snprintf(buffer + pos, rem - pos, "%s", msg->cmd);
 
-    for(int i=0; i < msg->nparams; i++)
+    for(unsigned int i=0; i < msg->nparams; i++)
     {
         if (i == msg->nparams - 1 && msg->longlast)
             pos += snprintf(buffer + pos, rem - pos, " :%s", msg->params[i]);
@@ -113,7 +113,7 @@ int chirc_message_to_string(chirc_message_t *msg, char **s)
 
 
 /* See message.h */
-int chirc_message_construct(chirc_message_t *msg, char *prefix, char *cmd)
+int chirc_message_construct(chirc_message_t *msg, const char *prefix, const char *cmd)
 {
     if (prefix)
         msg->prefix = strdup(prefix);
@@ -122,7 +122,7 @@ int chirc_message_construct(chirc_message_t *msg, char *prefix, char *cmd)
 
     msg->cmd = strdup(cmd);
     msg->nparams = 0;
-    msg->longlast = 0;
+    msg->longlast = false;
     msg->raw = NULL;
 
     return 0;
@@ -130,8 +130,11 @@ int chirc_message_construct(chirc_message_t *msg, char *prefix, char *cmd)
 
 
 /* See message.h */
-int chirc_message_add_parameter(chirc_message_t *msg, char *param, bool longlast)
+int chirc_message_add_parameter(chirc_message_t *msg, const char *param, bool longlast)
 {
+    if (msg->nparams >= MSG_MAX_PARAMS)
+        return CHIRC_FAIL;
+
     msg->params[msg->nparams++] = strdup(param);
     msg->longlast = longlast;
 
@@ -140,7 +143,7 @@ int chirc_message_add_parameter(chirc_message_t *msg, char *param, bool longlast
 
 
 /* See message.h */
-int chirc_message_construct_reply(chirc_message_t *msg, chirc_ctx_t *ctx, chirc_connection_t *conn, char *code)
+int chirc_message_construct_reply(chirc_message_t *msg, chirc_ctx_t *ctx, chirc_connection_t *conn, const char *code)
 {
     assert(strlen(code) == 3);
 
@@ -184,7 +187,7 @@ void chirc_message_free(chirc_message_t *msg)
     {
         free(msg->prefix);
         free(msg->cmd);
-        for(int i=0; i < msg->nparams; i++)
+        for(unsigned int i=0; i < msg->nparams; i++)
         {
             free(msg->params[i]);
         }

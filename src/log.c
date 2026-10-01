@@ -9,7 +9,7 @@
 
 
 /* Logging level. Set by default to print just informational messages */
-static int loglevel = INFO;
+static loglevel_t loglevel = INFO;
 
 
 void chirc_setloglevel(loglevel_t level)
@@ -17,12 +17,16 @@ void chirc_setloglevel(loglevel_t level)
     loglevel = level;
 }
 
-/* This function does the actual logging and is called by chilog().
- * It has a va_list parameter instead of being a variadic function */
-void __chilog(loglevel_t level, char *fmt, va_list argptr)
+/* This function does the actual logging and is called by chilog()
+ * and serverlog(). It has a va_list parameter instead of being a
+ * variadic function. The prefix is printed verbatim before the
+ * formatted message (it is never interpreted as a format string) */
+CHIRC_PRINTF_FORMAT(3, 0)
+static void vchilog(loglevel_t level, const char *prefix, const char *fmt, va_list argptr)
 {
     time_t t;
-    char buf[80], *levelstr;
+    char buf[80];
+    const char *levelstr;
 
     if(level > loglevel)
         return;
@@ -30,7 +34,7 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
     t = time(NULL);
     struct tm tt;
     localtime_r(&t, &tt);
-    strftime(buf,80,"%Y-%m-%d %H:%M:%S", &tt);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tt);
 
     switch(level)
     {
@@ -58,7 +62,7 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
     }
 
     flockfile(stdout);
-    printf("[%s] %6s ", buf, levelstr);
+    printf("[%s] %6s %s", buf, levelstr, prefix);
 
     vprintf(fmt, argptr);
     printf("\n");
@@ -67,20 +71,21 @@ void __chilog(loglevel_t level, char *fmt, va_list argptr)
 }
 
 /* See log.h */
-void chilog(loglevel_t level, char *fmt, ...)
+void chilog(loglevel_t level, const char *fmt, ...)
 {
     va_list argptr;
 
     va_start(argptr, fmt);
-    __chilog(level, fmt, argptr);
+    vchilog(level, "", fmt, argptr);
     va_end(argptr);
 }
 
 /* See log.h */
-void serverlog(loglevel_t level, chirc_connection_t *conn, char *fmt, ...)
+void serverlog(loglevel_t level, chirc_connection_t *conn, const char *fmt, ...)
 {
     char buf[256];
 
+    buf[0] = '\0';
     if (conn)
     {
         if(conn->type == CONN_TYPE_UNKNOWN)
@@ -100,14 +105,10 @@ void serverlog(loglevel_t level, chirc_connection_t *conn, char *fmt, ...)
             snprintf(buf, sizeof(buf), "%s -- ", conn->peer.server->servername);
         }
     }
-    else
-        buf[0] = '\0';
-
-    strncat(buf, fmt, 256 - strlen(buf) - 1);
 
     va_list argptr;
 
     va_start(argptr, fmt);
-    __chilog(level, buf, argptr);
+    vchilog(level, buf, fmt, argptr);
     va_end(argptr);
 }

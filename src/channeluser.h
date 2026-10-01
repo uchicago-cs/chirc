@@ -39,9 +39,9 @@ void chirc_channeluser_free(chirc_channeluser_t *channeluser);
  *
  * \param channeluser User-in-Channel
  * \param mode Mode
- * \return 1 if the channel has the mode, 0 otherwise
+ * \return true if the channel has the mode, false otherwise
  */
-int chirc_channeluser_has_mode(chirc_channeluser_t *channeluser, char mode);
+bool chirc_channeluser_has_mode(chirc_channeluser_t *channeluser, char mode);
 
 
 /*! \brief Adds a mode to a user in a channel

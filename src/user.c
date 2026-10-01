@@ -15,12 +15,15 @@ void chirc_user_init(chirc_user_t *user)
     user->nick = NULL;
     user->username = NULL;
     user->fullname = NULL;
+    user->hostname = NULL;
     user->modes[0] = '\0';
     user->awaymsg = NULL;
     user->server = NULL;
     user->registered = false;
 
     user->channels = NULL;
+
+    user->conn = NULL;
 }
 
 
@@ -30,6 +33,7 @@ void chirc_user_free(chirc_user_t *user)
     sdsfree(user->nick);
     sdsfree(user->username);
     sdsfree(user->fullname);
+    sdsfree(user->hostname);
     sdsfree(user->awaymsg);
 
     /* We shouldn't free a user until all their channels
@@ -39,9 +43,9 @@ void chirc_user_free(chirc_user_t *user)
 
 
 /* See user.h */
-int chirc_user_has_mode(chirc_user_t *user, char mode)
+bool chirc_user_has_mode(chirc_user_t *user, char mode)
 {
-    int rc;
+    bool rc;
 
     rc = has_mode(user->modes, mode);
 
@@ -54,7 +58,7 @@ int chirc_user_set_mode(chirc_user_t *user, char mode)
 {
     int rc;
 
-    rc = set_mode(user->modes, mode);
+    rc = set_mode(user->modes, sizeof(user->modes), mode);
 
     return rc;
 }
@@ -72,7 +76,7 @@ int chirc_user_remove_mode(chirc_user_t *user, char mode)
 
 
 /* See user.h */
-int chirc_user_is_oper(chirc_user_t *user)
+bool chirc_user_is_oper(chirc_user_t *user)
 {
     return chirc_user_has_mode(user, 'o');
 }

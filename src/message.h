@@ -61,7 +61,7 @@
  * \param s String containing an IRC message
  * \return 0 on success, non-zero if the message couldn't be parsed
  */
-int chirc_message_from_string(chirc_message_t *msg, char *s);
+int chirc_message_from_string(chirc_message_t *msg, const char *s);
 
 
 /*! \brief Produces a string representation of the message
@@ -84,7 +84,7 @@ int chirc_message_to_string(chirc_message_t *msg, char **s);
  * \param cmd Command (cannot be NULL)
  * \return 0 on success, non-zero on failure
  */
-int chirc_message_construct(chirc_message_t *msg, char *prefix, char *cmd);
+int chirc_message_construct(chirc_message_t *msg, const char *prefix, const char *cmd);
 
 
 /*! \brief Adds a parameter to a message
@@ -96,7 +96,7 @@ int chirc_message_construct(chirc_message_t *msg, char *prefix, char *cmd);
  *        be a long parameter).
  * \return 0 on success, non-zero on failure
  */
-int chirc_message_add_parameter(chirc_message_t *msg, char *param, bool longlast);
+int chirc_message_add_parameter(chirc_message_t *msg, const char *param, bool longlast);
 
 
 /*! \brief Constructs a reply
@@ -114,7 +114,7 @@ int chirc_message_add_parameter(chirc_message_t *msg, char *param, bool longlast
  * \param code 3-digit reply code
  * \return 0 on success, non-zero on failure
  */
-int chirc_message_construct_reply(chirc_message_t *msg, chirc_ctx_t *ctx, chirc_connection_t *conn, char *code);
+int chirc_message_construct_reply(chirc_message_t *msg, chirc_ctx_t *ctx, chirc_connection_t *conn, const char *code);
 
 
 /*! \brief Frees a chirc_message_t struct

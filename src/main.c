@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <netdb.h>
 #include "utils.h"
@@ -23,7 +24,7 @@
 #include "connection.h"
 
 /* Forward declaration of chirc_run */
-int chirc_run(chirc_ctx_t *ctx);
+static int chirc_run(chirc_ctx_t *ctx);
 
 /* DO NOT modify the contents of the main() function.
  * Add your code in the chirc_run function found below
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
                 if (access(optarg, R_OK) == -1)
                 {
                     printf("ERROR: No such file: %s\n", optarg);
-                    exit(-1);
+                    exit(EXIT_FAILURE);
                 }
                 network_file = sdsnew(optarg);
                 break;
@@ -63,23 +64,23 @@ int main(int argc, char *argv[])
                 break;
             case 'h':
                 printf("Usage: chirc -o OPER_PASSWD [-p PORT] [-s SERVERNAME] [-n NETWORK_FILE] [(-q|-v|-vv)]\n");
-                exit(0);
+                exit(EXIT_SUCCESS);
                 break;
             default:
                 fprintf(stderr, "ERROR: Unknown option -%c\n", opt);
-                exit(-1);
+                exit(EXIT_FAILURE);
         }
 
     if (!passwd)
     {
         fprintf(stderr, "ERROR: You must specify an operator password\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     if (network_file && !servername)
     {
         fprintf(stderr, "ERROR: If specifying a network file, you must also specify a server name.\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     /* Set logging level based on verbosity */
@@ -112,7 +113,13 @@ int main(int argc, char *argv[])
         /* If running in standalone mode, we have an IRC Network with
          * just one server. We only initialize ctx.network.this_server */
         char hbuf[NI_MAXHOST];
-        gethostname(hbuf, sizeof(hbuf));
+        if (gethostname(hbuf, sizeof(hbuf)) == -1)
+        {
+            serverlog(CRITICAL, NULL, "Could not get hostname: %s", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        /* If the hostname was truncated, it may not be null-terminated */
+        hbuf[sizeof(hbuf) - 1] = '\0';
 
         ctx.network.this_server = xcalloc(1, sizeof(chirc_server_t));
 
@@ -137,7 +144,7 @@ int main(int argc, char *argv[])
         if (chirc_ctx_load_network(&ctx, network_file, servername) == CHIRC_FAIL)
         {
             serverlog(CRITICAL, NULL, "Could not load network file.");
-            exit(-1);
+            exit(EXIT_FAILURE);
         }
 
         serverlog(INFO, NULL, "%s: IRC network mode", ctx.version);
@@ -151,7 +158,7 @@ int main(int argc, char *argv[])
     }
 
     /* Run the server */
-    return chirc_run(&ctx);
+    return chirc_run(&ctx) == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /*!
@@ -169,7 +176,7 @@ int main(int argc, char *argv[])
  * \param ctx Server context
  * \return 0 on success, non-zero on failure.
  */
-int chirc_run(chirc_ctx_t *ctx)
+static int chirc_run(chirc_ctx_t *ctx)
 {
     /* Your code goes here */
 

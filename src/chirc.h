@@ -31,6 +31,9 @@
 /*! Maximum size of an IRC message */
 #define MSG_MAX (512)
 
+/*! Maximum number of parameters in an IRC message */
+#define MSG_MAX_PARAMS (15)
+
 /*! Function return value: success */
 #define CHIRC_OK (0)
 
@@ -67,7 +70,7 @@ typedef struct {
     char *cmd;
 
     /*! \brief Command parameters */
-    char *params[15];
+    char *params[MSG_MAX_PARAMS];
 
     /*! \brief Number of parameters */
     unsigned int nparams;

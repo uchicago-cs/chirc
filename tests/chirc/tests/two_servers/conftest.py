@@ -12,10 +12,7 @@ def irc_network_session(request):
                                 loglevel=chirc_loglevel,
                                 default_start_port=chirc_port)
 
-    def fin():
-        session.end_sessions()
-        
-    request.addfinalizer(fin)    
-    
-    return session
+    yield session
+
+    session.end_sessions()
 

@@ -6,13 +6,15 @@ import click
 from collections import OrderedDict
 
 
-def print_empty_gradescope():
+def print_empty_gradescope(gradescope):
     gradescope_json = {}
     gradescope_json["score"] = 0.0
     gradescope_json["output"] = "We were unable to run the tests due to an error in your code."
     gradescope_json["visibility"] = "visible"
     gradescope_json["stdout_visibility"] = "visible"
-    print(json.dumps(gradescope_json, indent=2))
+
+    with open(gradescope, "w") as file:
+        json.dump(gradescope_json, file, indent=2)
 
 class Subcategory:
     def __init__(self, assignment, cid, expected_num_tests):
@@ -57,14 +59,14 @@ class Assignment:
 @click.command(name="grade")
 @click.argument('rubric_files', type=click.File(), nargs=-1)
 @click.option("--report-file", type=click.File(), default="tests.json")
-@click.option("--gradescope", is_flag=True)
+@click.option("--gradescope", type=click.Path())
 def cmd(rubric_files, report_file, gradescope):
 
     def fail(msg):
         print(msg, file=sys.stderr)
 
-        if gradescope:
-            print_empty_gradescope()
+        if gradescope is not None:
+            print_empty_gradescope(gradescope)
             sys.exit(0)
         else:
             sys.exit(1)
@@ -112,7 +114,7 @@ def cmd(rubric_files, report_file, gradescope):
             if outcome == "passed":
                 subcategories[cid].assignment.subcategories[cid].passed_tests += 1
 
-    if gradescope:
+    if gradescope is not None:
         gradescope_json = {}
         gradescope_json["tests"] = []
 
@@ -134,7 +136,8 @@ def cmd(rubric_files, report_file, gradescope):
         gradescope_json["visibility"] = "visible"
         gradescope_json["stdout_visibility"] = "visible"
 
-        print(json.dumps(gradescope_json, indent=2))
+        with open(gradescope, "w") as file:
+            json.dump(gradescope_json, file, indent=2)
     else:
         total_points_obtained = 0
         total_points_possible = 0

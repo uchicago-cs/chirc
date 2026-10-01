@@ -100,7 +100,7 @@ int chirc_ctx_unknown_connections(chirc_ctx_t *ctx);
  * \param channelname Channel name
  * \return The channel, if one exists. Otherwise, returns NULL.
  */
-chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, char *channelname);
+chirc_channel_t* chirc_ctx_get_channel(chirc_ctx_t *ctx, const char *channelname);
 
 
 /*!
@@ -132,7 +132,7 @@ int chirc_ctx_add_channel(chirc_ctx_t *ctx, chirc_channel_t *channel);
  *         did not already exist). False otherwise (i.e., if there
  *         was already a channel with the given name)
  */
-bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, char *channelname, chirc_channel_t **channel);
+bool chirc_ctx_get_or_create_channel(chirc_ctx_t *ctx, const char *channelname, chirc_channel_t **channel);
 
 
 /*!
@@ -155,7 +155,7 @@ int chirc_ctx_remove_channel(chirc_ctx_t *ctx, chirc_channel_t *channel);
  * \param nick User's nick
  * \return The channel, if one exists. Otherwise, returns NULL.
  */
-chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, char *nick);
+chirc_user_t* chirc_ctx_get_user(chirc_ctx_t *ctx, const char *nick);
 
 
 /*!
@@ -187,7 +187,7 @@ int chirc_ctx_add_user(chirc_ctx_t *ctx, chirc_user_t *user);
  *         did not already exist). False otherwise (i.e., if there
  *         was already a user with the given nick)
  */
-bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, char *nick, chirc_user_t **user);
+bool chirc_ctx_get_or_create_user(chirc_ctx_t *ctx, const char *nick, chirc_user_t **user);
 
 
 /*!
@@ -210,7 +210,7 @@ int chirc_ctx_remove_user(chirc_ctx_t *ctx, chirc_user_t *user);
  * \param servername Server name
  * \return The channel, if one exists. Otherwise, returns NULL.
  */
-chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, char *servername);
+chirc_server_t* chirc_ctx_get_server(chirc_ctx_t *ctx, const char *servername);
 
 
 /*!
@@ -253,6 +253,6 @@ int chirc_ctx_add_server(chirc_ctx_t *ctx, chirc_server_t *server);
  * \param servername Name of the running server
  * \return 0 on success, non-zero on failure
  */
-int chirc_ctx_load_network(chirc_ctx_t *ctx, char *file, char *servername);
+int chirc_ctx_load_network(chirc_ctx_t *ctx, const char *file, const char *servername);
 
 #endif /* CTX_H_ */

@@ -62,6 +62,7 @@ def pytest_runtest_setup(item):
 
 
 def pytest_json_runtest_metadata(item, call):
-    category = item.get_closest_marker("category").args[0]
-
-    return {'category': category}
+    marker = item.get_closest_marker("category")
+    if marker is None:
+        return {}
+    return {'category': marker.args[0]}

@@ -33,9 +33,9 @@ void chirc_channel_free(chirc_channel_t *channel)
 
 
 /* See channel.h */
-int chirc_channel_has_mode(chirc_channel_t *channel, char mode)
+bool chirc_channel_has_mode(chirc_channel_t *channel, char mode)
 {
-    int rc;
+    bool rc;
 
     rc = has_mode(channel->modes, mode);
 
@@ -48,7 +48,7 @@ int chirc_channel_set_mode(chirc_channel_t *channel, char mode)
 {
     int rc;
 
-    rc = set_mode(channel->modes, mode);
+    rc = set_mode(channel->modes, sizeof(channel->modes), mode);
 
     return rc;
 }

@@ -9,6 +9,7 @@
 
 #include "ctx.h"
 #include "connection.h"
+#include "user.h"
 #include "utils.h"
 #include "message.h"
 #include "handlers.h"
@@ -21,7 +22,7 @@ void chirc_connection_init(chirc_connection_t *conn)
     conn->type = CONN_TYPE_UNKNOWN;
 
     conn->hostname = NULL;
-    conn->port = 0;
+    conn->port = NULL;
 
 }
 
@@ -30,6 +31,7 @@ void chirc_connection_init(chirc_connection_t *conn)
 void chirc_connection_free(chirc_connection_t *conn)
 {
     sdsfree(conn->hostname);
+    sdsfree(conn->port);
 
 }
 
