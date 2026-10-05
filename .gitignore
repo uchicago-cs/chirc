@@ -58,3 +58,5 @@ alltests
 build/
 cmake-build*
 .DS_Store
+venv/
+.venv/
