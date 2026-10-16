@@ -41,7 +41,7 @@
 #define CHIRC_FAIL (-1)
 
 /*! Server version */
-#define VERSION "chirc-0.6.0"
+#define VERSION "chirc-0.6.1"
 
 /*! Supported user modes */
 #define USERMODES "ao"
