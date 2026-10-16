@@ -12,8 +12,42 @@ class TestPING(object):
         
         client1.send_cmd("PING")
 
-        irc_session.get_message(client1, expect_cmd = "PONG", expect_nparams = 1)        
-        
+        irc_session.get_message(client1, expect_cmd = "PONG", expect_nparams = 1)
+
+    def _test_ping_token(self, irc_session, ping_param, token):
+        """
+        Sends a PING with a parameter, and checks that the PONG includes
+        the same token as its last parameter (IRC clients rely on this
+        to match PONGs to PINGs, e.g., to measure lag)
+        """
+
+        client1 = irc_session.connect_user("user1", "User One")
+
+        client1.send_cmd("PING " + ping_param)
+
+        msg = irc_session.get_message(client1, expect_cmd = "PONG", expect_nparams = 2)
+
+        # The token may be sent back as a long parameter (with a colon) or not
+        pong_token = msg.params[-1]
+        if pong_token.startswith(":"):
+            pong_token = pong_token[1:]
+
+        assert pong_token == token, \
+            "Expected the PONG to include the PING's token ({}), got {} instead\nMessage: {}".format(token, pong_token, msg.raw(bookends=True))
+
+    def test_ping_token1(self, irc_session):
+        """
+        Test sending a PING with a token. The PONG should include the same token.
+        """
+        self._test_ping_token(irc_session, "abc123", "abc123")
+
+    def test_ping_token2(self, irc_session):
+        """
+        Test sending a PING with a token in a long parameter, like some IRC
+        clients do when measuring lag. The PONG should include the same token.
+        """
+        self._test_ping_token(irc_session, ":LAG1759671234", "LAG1759671234")
+
     #
     # The following tests are not so much a test of the PING command,
     # but a basic test of whether replies will leak from one client to another

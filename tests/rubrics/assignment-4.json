@@ -45,7 +45,7 @@
       "subcategories": [
         {
           "cid": "PING_PONG",
-          "num_tests": 6
+          "num_tests": 8
         }
       ],
       "points": 2

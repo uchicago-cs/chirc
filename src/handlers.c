@@ -125,10 +125,16 @@ int chirc_handle(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *ms
 
 static int chirc_handle_PING(chirc_ctx_t *ctx, chirc_connection_t *conn, chirc_message_t *msg)
 {
-    /* Construct a reply to the PING */
+    /* Construct a reply to the PING.
+     *
+     * Strictly speaking, RFC 2812 requires that we reply with a server name.
+     * However, in practice, most IRC servers interpret the PING parameter
+     * as a token that must repeated in the PONG reply. */
     chirc_message_t reply;
-    chirc_message_construct(&reply, NULL, "PONG");
+    chirc_message_construct(&reply, ctx->network.this_server->servername, "PONG");
     chirc_message_add_parameter(&reply, ctx->network.this_server->servername, false);
+    if (msg->nparams >= 1)
+        chirc_message_add_parameter(&reply, msg->params[0], true);
 
     /* Send the message */
     if(chirc_connection_send_message(ctx, conn, &reply))
