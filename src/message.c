@@ -13,73 +13,63 @@
 /* See message.h */
 int chirc_message_from_string(chirc_message_t *msg, const char *s)
 {
-    char *params[MSG_MAX_PARAMS], *pch, *msgstr, *i, *saveptr;
-    size_t len;
+    char *p, *trailing, *token, *saveptr;
+    sds raw;
 
-    len = strlen(s);
+    /* Initialize all chirc_message_t fields to zero */
+    *msg = (chirc_message_t) {0};
 
-    msg->nparams = 0;
+    /* We make a copy of the message (without the trailing "\r\n"). The
+     * prefix, command, and parameters will all point into this copy. */
+    raw = sdstrim(sdsnew(s), "\r\n");
 
-    msgstr = xmalloc(len);
+    /* Skip over any leading spaces */
+    p = raw + strspn(raw, " ");
 
-    strncpy(msgstr, s, len - 2);
-    msgstr[len-2] = '\0';
-
-    // For ":" lookahead
-    msgstr[len-1] = '\0';
-
-    pch = strtok_r(msgstr, " ", &saveptr);
-    if (!pch)
+    /* The long parameter (if any) starts at the first " :" and includes
+     * the rest of the message, so we split it off before tokenizing */
+    trailing = strstr(p, " :");
+    if (trailing)
     {
-        free(msgstr);
+        *trailing = '\0';
+        trailing += 2;
+    }
+
+    token = strtok_r(p, " ", &saveptr);
+    if (token && token[0] == ':')
+    {
+        msg->prefix = token + 1;
+        /* If the message starts with a prefix, there
+           has to be something after the prefix */
+        token = strtok_r(NULL, " ", &saveptr);
+    }
+
+    /* If there was no token (because the message is empty or because
+     * there was nothing after the prefix), this is not a valid message */
+    if (!token)
+    {
+        sdsfree(raw);
         return -1;
     }
 
-    if (*pch == ':')
+    /* Make the command all uppercase */
+    msg->cmd = token;
+    for(char *c = token; *c; c++)
+        *c = toupper((unsigned char) *c);
+
+    /* Extract the remaining parameters, except the long parameter */
+    while (msg->nparams < MSG_MAX_PARAMS && (token = strtok_r(NULL, " ", &saveptr)))
+        msg->params[msg->nparams++] = token;
+
+    /* If there is a long parameter, save it (as long as we haven't
+     * reached the maximum number of parameters) */
+    if (trailing && msg->nparams < MSG_MAX_PARAMS)
     {
-        msg->prefix = pch+1;
-        pch = strtok_r(NULL, " ", &saveptr);
-        /* If the message starts with a prefix, there
-           has to be something after the prefix */
-        if (!pch)
-        {
-            free(msgstr);
-            return -1;
-        }
-    }
-    else
-        msg->prefix = NULL;
-
-    msg->cmd = pch;
-    for(i=pch; *i; i++)
-        *i = toupper((unsigned char) *i);
-
-    msg->longlast = false;
-
-    while (pch != NULL && msg->nparams < MSG_MAX_PARAMS)
-    {
-        i = pch;
-        while (*i++) ;
-
-        if (*i == ':')
-        {
-            params[msg->nparams++] = i + 1;
-            msg->longlast = true;
-            break;
-        }
-
-        pch = strtok_r(NULL, " ", &saveptr);
-        if(!pch)
-            break;
-        params[msg->nparams++] = pch;
+        msg->params[msg->nparams++] = trailing;
+        msg->longlast = true;
     }
 
-    for (unsigned int j=0; j < msg->nparams; j++)
-    {
-        msg->params[j] = params[j];
-    }
-
-    msg->raw = msgstr;
+    msg->raw = raw;
 
     return 0;
 }
@@ -88,25 +78,29 @@ int chirc_message_from_string(chirc_message_t *msg, const char *s)
 /* See message.h */
 int chirc_message_to_string(chirc_message_t *msg, char **s)
 {
-    char buffer[1024];
-    int pos = 0;
-    int rem = sizeof(buffer);
+    /* We build the string with sds, so it can grow as needed (messages
+     * longer than MSG_MAX are truncated when they are sent) */
+    sds str = sdsempty();
 
     if (msg->prefix)
-        pos += snprintf(buffer + pos, rem - pos, ":%s ", msg->prefix);
+        str = sdscatprintf(str, ":%s ", msg->prefix);
 
-    pos += snprintf(buffer + pos, rem - pos, "%s", msg->cmd);
+    str = sdscat(str, msg->cmd);
 
     for(unsigned int i=0; i < msg->nparams; i++)
     {
-        if (i == msg->nparams - 1 && msg->longlast)
-            pos += snprintf(buffer + pos, rem - pos, " :%s", msg->params[i]);
-        else
-            pos += snprintf(buffer + pos, rem - pos, " %s", msg->params[i]);
+        bool long_param = (i == msg->nparams - 1 && msg->longlast);
+        str = sdscat(str, long_param ? " :" : " ");
+        str = sdscat(str, msg->params[i]);
     }
-    snprintf(buffer + pos, rem - pos, "\r\n");
 
-    *s = strdup(buffer);
+    str = sdscat(str, "\r\n");
+
+    /* Return a regular C string, to avoid breaking existing code.
+     * At a later point, we will make this module use SDS strings
+     * exclusively. */
+    *s = strdup(str);
+    sdsfree(str);
 
     return 0;
 }
@@ -181,7 +175,8 @@ void chirc_message_free(chirc_message_t *msg)
 {
     if(msg->raw)
     {
-        free(msg->raw);
+        /* The prefix, command, and parameters point into the raw string */
+        sdsfree(msg->raw);
     }
     else
     {
