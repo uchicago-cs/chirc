@@ -10,7 +10,81 @@ import chirc.replies as replies
 from chirc.client import ChircClient
 from chirc.types import ReplyTimeoutException
 import pytest
+import socket
 import time
+
+
+# How long we wait for a chirc server to start listening on its port
+STARTUP_TIMEOUT = 5.0
+
+
+def random_port_base(num_ports=1):
+    """Returns a random port P such that ports P to P+num_ports-1 are all below
+    the kernel's ephemeral port range (the range used for the local end of
+    outgoing connections, including the tests' own client connections).
+    Choosing ports in that range would make collisions with those connections
+    (or with recently closed ones, which hold their port for a while) likely.
+    """
+    low, high = 10000, 32767
+    try:
+        with open("/proc/sys/net/ipv4/ip_local_port_range") as f:
+            high = int(f.read().split()[0]) - 1
+    except (OSError, ValueError, IndexError):
+        pass
+
+    if high - num_ports + 1 < low:
+        # Unusual ephemeral range configuration; fall back to a wide range
+        low, high = 10000, 60000
+
+    return random.randint(low, high - num_ports + 1)
+
+
+def _listening_socket_inodes(port):
+    """Returns the inodes of the TCP sockets listening on the given port,
+    according to /proc/net/tcp and /proc/net/tcp6 (Linux only)"""
+    inodes = set()
+    for path in ("/proc/net/tcp", "/proc/net/tcp6"):
+        try:
+            with open(path) as f:
+                next(f)
+                for line in f:
+                    fields = line.split()
+                    local_port = int(fields[1].rsplit(":", 1)[1], 16)
+                    if local_port == port and fields[3] == "0A":  # 0A = LISTEN
+                        inodes.add(fields[9])
+        except OSError:
+            pass
+    return inodes
+
+
+def chirc_is_listening(pid, port):
+    """Checks whether the process with the given pid is listening on the
+    given port. On Linux, we check this without connecting to the port
+    (a connection would briefly count as an "unknown connection" in the
+    server). Elsewhere, we fall back to trying to connect to the port."""
+    if os.path.exists("/proc/net/tcp"):
+        inodes = _listening_socket_inodes(port)
+        if not inodes:
+            return False
+        sockets = {"socket:[{}]".format(inode) for inode in inodes}
+        try:
+            fds = os.listdir("/proc/{}/fd".format(pid))
+        except OSError:
+            return False
+        for fd in fds:
+            try:
+                if os.readlink("/proc/{}/fd/{}".format(pid, fd)) in sockets:
+                    return True
+            except OSError:
+                continue
+        return False
+    else:
+        try:
+            socket.create_connection(("localhost", port), timeout=0.1).close()
+            return True
+        except OSError:
+            return False
+
 
 
 
@@ -24,7 +98,7 @@ class SingleIRCSession:
     and verifying that they were performed correctly.
     '''
 
-    def __init__(self, chirc_exe = None, msg_timeout = 0.1,
+    def __init__(self, chirc_exe = None, msg_timeout = 0.25, no_reply_timeout = 0.1,
                  chirc_port = None, loglevel = -1, debug = False,
                  irc_network = None, irc_network_server = None, external_chirc_port=None):
         if chirc_exe is None:
@@ -56,6 +130,7 @@ class SingleIRCSession:
             self.irc_network_server = None
 
         self.msg_timeout = msg_timeout
+        self.no_reply_timeout = no_reply_timeout
         self.loglevel = loglevel
         self.debug = debug
         self.external_chirc_port = external_chirc_port
@@ -128,18 +203,27 @@ class SingleIRCSession:
 
         self.chirc_proc = subprocess.Popen(chirc_cmd, cwd=self.tmpdir)
 
-        # Poll for up to 50ms so we reliably detect a process that exits
-        # shortly after launch (e.g. because the port is already in use).
-        # A bind() failure is nearly instantaneous, so 50ms is a generous margin.
-        deadline = time.monotonic() + 0.05
-        rc = None
+        if self.irc_network is not None:
+            port = self.irc_network_server.port
+        else:
+            port = self.port
+
+        # Wait until chirc is listening on its port, or until it exits (e.g.,
+        # because the port is already in use). Note that how long this takes
+        # can vary considerably, depending on how chirc was built and on how
+        # busy the machine is.
+        deadline = time.monotonic() + STARTUP_TIMEOUT
         while time.monotonic() < deadline:
             rc = self.chirc_proc.poll()
             if rc is not None:
-                break
-            time.sleep(0.01)
+                return rc  # Exited (failure)
+            if chirc_is_listening(self.chirc_proc.pid, port):
+                return None  # Listening (success)
+            time.sleep(0.005)
 
-        return rc  # None = still running (success); non-None = exited (failure)
+        self.chirc_proc.kill()
+        self.chirc_proc.wait()
+        pytest.fail("chirc did not start listening on port {} within {} seconds".format(port, STARTUP_TIMEOUT))
 
     def start_session(self):
         if self.external_chirc_port is not None:
@@ -149,7 +233,7 @@ class SingleIRCSession:
         self.tmpdir = tempfile.mkdtemp()
 
         if self.randomize_ports:
-            self.port = random.randint(10000, 60000)
+            self.port = random_port_base()
             tries = 10
         else:
             self.port = self.chirc_port
@@ -162,7 +246,7 @@ class SingleIRCSession:
                 if tries == 0:
                     pytest.fail("chirc process failed to start. rc = %i" % rc)
                 else:
-                    self.port = random.randint(10000, 60000)
+                    self.port = random_port_base()
             else:
                 break
 
@@ -195,7 +279,8 @@ class SingleIRCSession:
             port = self.external_chirc_port
         else:
             port = self.port
-        c = ChircClient(msg_timeout = self.msg_timeout, port=port, nodelay = nodelay)
+        c = ChircClient(msg_timeout = self.msg_timeout, no_reply_timeout = self.no_reply_timeout,
+                        port=port, nodelay = nodelay)
         self.clients.append(c)
         return c
         
@@ -407,13 +492,105 @@ class SingleIRCSession:
                            long_param_re = "They aren't on that channel")
             
             
+    # Waiting for state that depends on messages relayed between servers.
+    #
+    # When a test does something on one server, and then checks the state of
+    # another server, the relayed messages may not have arrived yet. Instead
+    # of waiting for an arbitrary amount of time, we repeat the check until it
+    # succeeds (or until a deadline passes).
+
+    # How long we keep retrying a check that depends on relayed messages
+    RELAY_TIMEOUT = 0.5
+
+    def drain(self, client):
+        """
+        Reads (and discards) any messages that are waiting to be read
+        by this client (e.g., the remaining replies of a failed check)
+        """
+        while True:
+            try:
+                client.get_message(timeout = client.no_reply_timeout)
+            except (ReplyTimeoutException, EOFError):
+                return
+
+    def eventually(self, client, check, timeout = RELAY_TIMEOUT, interval = 0.05):
+        """
+        Repeatedly runs `check` (a function that sends a query with `client`
+        and verifies the replies) until it succeeds. If it still fails when
+        the timeout expires, the test fails with the check's own error.
+        """
+        deadline = time.monotonic() + timeout
+        while True:
+            try:
+                return check()
+            except (AssertionError, pytest.fail.Exception):
+                if time.monotonic() >= deadline:
+                    raise
+                self.drain(client)
+                time.sleep(interval)
+
+    def query(self, client, cmd, end_codes):
+        """
+        Sends `cmd`, and returns the messages received in reply, up to (and
+        including) the first one with a command in `end_codes`. Returns None
+        if that message doesn't arrive. Does not verify the replies.
+        """
+        client.send_cmd(cmd)
+        msgs = []
+        while True:
+            try:
+                msg = client.get_message()
+            except (ReplyTimeoutException, EOFError):
+                return None
+            msgs.append(msg)
+            if msg.cmd in end_codes:
+                return msgs
+
+    def verify_lusers_eventually(self, client, nick, **expect):
+        """
+        Sends LUSERS and verifies the replies (see verify_lusers), retrying
+        until the counts are as expected (or the deadline passes)
+        """
+        def check():
+            client.send_cmd("LUSERS")
+            self.verify_lusers(client, nick, **expect)
+        self.eventually(client, check)
+
+    def verify_list_eventually(self, channels, client, nick, expect_topics = None):
+        """
+        Sends LIST and verifies the replies (see verify_list), retrying
+        until the channels are as expected (or the deadline passes)
+        """
+        self.eventually(client, lambda: self.verify_list(channels, client, nick, expect_topics))
+
+    def verify_whois_eventually(self, client, whois_nick, expect_servername, expect_fullname):
+        """
+        Sends a WHOIS for `whois_nick` and verifies the RPL_WHOISUSER,
+        RPL_WHOISSERVER, and RPL_ENDOFWHOIS replies, retrying until the
+        user is known (or the deadline passes)
+        """
+        def check():
+            client.send_cmd("WHOIS {}".format(whois_nick))
+            self.get_reply(client, expect_code = replies.RPL_WHOISUSER,
+                           expect_nparams = 5, long_param_re = expect_fullname)
+            self.get_reply(client, expect_code = replies.RPL_WHOISSERVER,
+                           expect_short_params = [whois_nick, expect_servername], expect_nparams = 3)
+            self.get_reply(client, expect_code = replies.RPL_ENDOFWHOIS,
+                           expect_nparams = 2, long_param_re = "End of WHOIS list")
+        self.eventually(client, check)
+
+
     # Message/reply getters
 
     def get_reply(self, client, expect_code = None, expect_nick = None, expect_nparams = None,
                   expect_short_params = None, long_param_re = None, long_param_values = None,
                   expect_timeout = False):
         try:
-            msg = client.get_message()
+            if expect_timeout:
+                # We're checking that no message arrives, so we only wait briefly
+                msg = client.get_message(timeout = client.no_reply_timeout)
+            else:
+                msg = client.get_message()
             
             if expect_timeout:
                 pytest.fail("Was not expecting a reply, but got one:\n" + msg.raw(bookends=True))                
@@ -631,13 +808,36 @@ class SingleIRCSession:
         
         self.verify_names(client, nick, expect_names = expect_names)
         
-    def verify_relayed_join(self, client, from_nick, channel):
+    def _verify_nick_only_prefix(self, reply):
+        """
+        Messages relayed to a server must have a prefix that only
+        contains the nick of the originating user (not nick!user@host)
+        """
+        self._assert_is_none(reply.prefix.username,
+                             explanation = "Expected the prefix of a message relayed to a server to contain only a nick",
+                             irc_msg = reply)
+
+    def verify_disconnected(self, client):
+        """
+        Checks that the server has closed the connection with this client
+        """
+        try:
+            msg = client.get_message()
+            pytest.fail("Expected the server to close the connection, but got a message instead:\n" + msg.raw(bookends=True))
+        except EOFError:
+            return
+        except ReplyTimeoutException:
+            pytest.fail("Expected the server to close the connection, but it is still open")
+
+    def verify_relayed_join(self, client, from_nick, channel, expect_nick_only_prefix = False):
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "JOIN", 
                                  expect_nparams = 1, expect_short_params = [channel])
         if from_nick is not None:
             self._assert_equals(reply.prefix.nick, from_nick, 
                                 explanation = "Expected JOIN's prefix to have nick '{}'".format(from_nick), 
                                 irc_msg = reply)
+        if expect_nick_only_prefix:
+            self._verify_nick_only_prefix(reply)
 
     def verify_relayed_part(self, client, from_nick, channel, msg):
         if msg is not None:
@@ -667,13 +867,15 @@ class SingleIRCSession:
                             explanation = "Expected NICK's prefix to have nick '{}'".format(from_nick), 
                             irc_msg = reply)
         
-    def verify_relayed_privmsg(self, client, from_nick, recip, msg):
+    def verify_relayed_privmsg(self, client, from_nick, recip, msg, expect_nick_only_prefix = False):
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "PRIVMSG", 
                                  expect_nparams = 2, expect_short_params = [recip],
                                  long_param_re = msg)
         self._assert_equals(reply.prefix.nick, from_nick, 
                             explanation = "Expected PRIVMSG's prefix to have nick '{}'".format(from_nick), 
                             irc_msg = reply)
+        if expect_nick_only_prefix:
+            self._verify_nick_only_prefix(reply)
 
     def verify_relayed_topic(self, client, from_nick, channel, topic):
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "TOPIC", 
@@ -696,13 +898,15 @@ class SingleIRCSession:
                             explanation = "Expected MODE's prefix to have nick '{}'".format(from_nick), 
                             irc_msg = reply)
         
-    def verify_relayed_notice(self, client, from_nick, recip, msg):
+    def verify_relayed_notice(self, client, from_nick, recip, msg, expect_nick_only_prefix = False):
         reply = self.get_message(client, expect_prefix = True, expect_cmd = "NOTICE", 
                                  expect_nparams = 2, expect_short_params = [recip],
                                  long_param_re = msg)
         self._assert_equals(reply.prefix.nick, from_nick, 
                             explanation = "Expected NOTICE's prefix to have nick '{}'".format(from_nick), 
                             irc_msg = reply)
+        if expect_nick_only_prefix:
+            self._verify_nick_only_prefix(reply)
         
     def verify_names_single(self, reply, nick, expect_channel = None, expect_names = None):        
         if expect_channel is not None:
@@ -811,6 +1015,23 @@ class SingleIRCSession:
                             explanation = "Expected NICK's prefix to be servername '{}'".format(from_server.servername),
                             irc_msg = reply)
 
+
+def wait_for(condition, timeout = SingleIRCSession.RELAY_TIMEOUT, interval = 0.05):
+    """
+    Waits until `condition()` returns True, or until the timeout expires.
+    Returns whether the condition became True. This is a *best-effort*
+    wait: it never fails the test by itself (used, e.g., to give relayed
+    messages time to arrive before moving on to the next step of a test).
+    """
+    deadline = time.monotonic() + timeout
+    while True:
+        if condition():
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(interval)
+
+
 class IRCNetworkServer:
 
     def __init__(self, servername, hostname, port, passwd):
@@ -828,7 +1049,7 @@ class IRCNetworkSession:
     It creates one SingleIRCSession object per server.
     '''
 
-    def __init__(self, chirc_exe=None, msg_timeout = 0.1,
+    def __init__(self, chirc_exe=None, msg_timeout = 0.25,
                  default_start_port=7776, loglevel=-1, debug=False):
 
         # We skip validating many of the parameters, because this will be done in
@@ -844,15 +1065,15 @@ class IRCNetworkSession:
     def set_servers(self, num_servers):
 
         if self.default_start_port == -1:
-            port = random.randint(10000,60000)
+            base_port = random_port_base(num_servers)
         else:
-            port = self.default_start_port
+            base_port = self.default_start_port
 
         for i in range(num_servers):
             n = i+1
             servername = "irc-{}.example.net".format(n)
             hostname = "127.0.0.1"
-            port = port + i
+            port = base_port + i
             passwd = "passwd{}".format(n)
 
             server = IRCNetworkServer(servername, hostname, port, passwd)
@@ -866,8 +1087,40 @@ class IRCNetworkSession:
                                         irc_network_server=server)
             server.irc_session = session
 
+    def _assign_random_ports(self):
+        base_port = random_port_base(len(self.servers))
+        for i, server in enumerate(self.servers):
+            server.port = base_port + i
+
     def start_session(self, server_idx):
-        self.servers[server_idx].irc_session.start_session()
+        """Start a single server in the network.
+
+        When ports were randomly assigned, and no other server in the network
+        is running yet, a failed start is retried with a fresh set of random
+        ports for the whole network. Once another server is running, its network
+        file already lists the current ports, so we can't change them.
+        """
+        server = self.servers[server_idx]
+        session = server.irc_session
+
+        can_retry = (self.default_start_port == -1 and
+                     not any(s.irc_session.started for s in self.servers))
+        tries = 10 if can_retry else 1
+
+        session.tmpdir = tempfile.mkdtemp()
+
+        rc = None
+        for attempt in range(tries):
+            if attempt > 0:
+                self._assign_random_ports()
+            rc = session._launch_once()
+            if rc is None:
+                session.port = server.port
+                session.started = True
+                return
+
+        shutil.rmtree(session.tmpdir)
+        pytest.fail("chirc process failed to start after %i attempt(s). rc = %i" % (tries, rc))
 
     def start_sessions(self):
         """Start all servers in the network.
@@ -892,9 +1145,7 @@ class IRCNetworkSession:
             if attempt > 0:
                 # Pick a fresh set of random ports for all servers so that the
                 # next attempt uses a different range than the one that failed.
-                base_port = random.randint(10000, 60000)
-                for i, server in enumerate(self.servers):
-                    server.port = base_port + i
+                self._assign_random_ports()
 
             started = []
             failed = False

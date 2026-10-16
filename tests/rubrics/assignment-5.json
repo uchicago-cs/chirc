@@ -7,25 +7,25 @@
       "subcategories": [
         {
           "cid": "SERVER_REGISTRATION",
-          "num_tests": 7
+          "num_tests": 9
         },
         {
           "cid": "CONNECT",
-          "num_tests": 1
+          "num_tests": 4
         }
       ],
-      "points": 50
+      "points": 40
     },
     {
       "name": "Relaying Commands",
       "subcategories": [
         {
           "cid": "NETWORK_RELAY_NO_CONNECT",
-          "num_tests": 11
+          "num_tests": 18
         },
         {
           "cid": "NETWORK_RELAY_CONNECT",
-          "num_tests": 2
+          "num_tests": 4
         }
       ],
       "points": 30
@@ -46,7 +46,21 @@
           "num_tests": 3
         }
       ],
-      "points": 20
+      "points": 15
+    },
+    {
+      "name": "Network Topologies",
+      "subcategories": [
+        {
+          "cid": "NETWORK_HUB_SPOKE",
+          "num_tests": 10
+        },
+        {
+          "cid": "NETWORK_CHAIN",
+          "num_tests": 4
+        }
+      ],
+      "points": 15
     }
   ]
 }

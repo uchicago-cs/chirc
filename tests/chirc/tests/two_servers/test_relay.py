@@ -1,7 +1,8 @@
 import chirc.replies as replies
 import pytest
 
-from chirc.tests.common.fixtures import create_dummy_two_server_network, create_two_server_network
+from chirc.tests.common.fixtures import create_dummy_two_server_network, create_two_server_network, \
+    settle, channel_known
 from chirc.types import ReplyTimeoutException
 
 
@@ -80,7 +81,7 @@ class TestNetworkRelayNoConnect(object):
 
         from_client.send_cmd("PRIVMSG {} :Hello".format(to_nick))
 
-        irc_session.verify_relayed_privmsg(active_client, from_nick=from_nick, recip=to_nick, msg="Hello")
+        irc_session.verify_relayed_privmsg(active_client, from_nick=from_nick, recip=to_nick, msg="Hello", expect_nick_only_prefix=True)
 
     def test_network_relay_privmsg2(self, irc_network_session):
         """
@@ -145,7 +146,7 @@ class TestNetworkRelayNoConnect(object):
         client1.send_cmd("JOIN #test")
         irc_session.verify_join(client1, nick1, "#test")
 
-        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test")
+        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test", expect_nick_only_prefix=True)
 
 
     def test_network_relay_join2(self, irc_network_session):
@@ -166,8 +167,8 @@ class TestNetworkRelayNoConnect(object):
 
         irc_session.join_channel(clients_to_passive, "#test")
 
-        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test")
-        irc_session.verify_relayed_join(active_client, from_nick="user2", channel="#test")
+        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test", expect_nick_only_prefix=True)
+        irc_session.verify_relayed_join(active_client, from_nick="user2", channel="#test", expect_nick_only_prefix=True)
 
         active_client.send_cmd(":{} JOIN #test".format(nick101))
         irc_session.verify_relayed_join(client1, from_nick=nick101, channel="#test")
@@ -194,11 +195,11 @@ class TestNetworkRelayNoConnect(object):
         client1.send_cmd("JOIN #test")
         irc_session.verify_join(client1, nick1, "#test")
 
-        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test")
+        irc_session.verify_relayed_join(active_client, from_nick="user1", channel="#test", expect_nick_only_prefix=True)
 
         client1.send_cmd("PRIVMSG #test :Hello channel")
 
-        irc_session.verify_relayed_privmsg(active_client, from_nick=nick1, recip="#test", msg="Hello channel")
+        irc_session.verify_relayed_privmsg(active_client, from_nick=nick1, recip="#test", msg="Hello channel", expect_nick_only_prefix=True)
 
 
     def test_network_relay_privmsg_channel2(self, irc_network_session):
@@ -221,7 +222,7 @@ class TestNetworkRelayNoConnect(object):
 
         client1.send_cmd("JOIN #test")
         irc_session.verify_join(client1, nick1, "#test")
-        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test")
+        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test", expect_nick_only_prefix=True)
 
         active_client.send_cmd(":{} JOIN #test".format(nick101))
         irc_session.verify_relayed_join(client1, from_nick=nick101, channel="#test")
@@ -229,6 +230,181 @@ class TestNetworkRelayNoConnect(object):
         active_client.send_cmd(":{} PRIVMSG #test :Hello channel".format(nick101))
         irc_session.verify_relayed_privmsg(client1, from_nick=nick101, recip="#test", msg="Hello channel")
 
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+
+    def test_network_relay_notice1(self, irc_network_session):
+        """
+        Check that a NOTICE sent from a user in the passive server
+        to a user in the active server is relayed correctly
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        from_nick, from_client = clients_to_passive[0]
+        to_nick = dummy_active_nicks[0]
+
+        from_client.send_cmd("NOTICE {} :Hello".format(to_nick))
+        irc_session.verify_relayed_notice(active_client, from_nick=from_nick, recip=to_nick, msg="Hello",
+                                          expect_nick_only_prefix=True)
+
+    def test_network_relay_notice2(self, irc_network_session):
+        """
+        Check that a NOTICE sent from a user in the active server
+        to a user in the passive server is relayed correctly (and
+        not relayed back to the active server)
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        to_nick, to_client = clients_to_passive[0]
+        from_nick = dummy_active_nicks[0]
+
+        active_client.send_cmd(":{} NOTICE {} :Hello".format(from_nick, to_nick))
+        irc_session.verify_relayed_notice(to_client, from_nick=from_nick, recip=to_nick, msg="Hello")
+
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+    def test_network_relay_notice_channel1(self, irc_network_session):
+        """
+        Check that a NOTICE to a channel (sent from a user connected to the
+        passive server) is relayed to the active server
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        nick1, client1 = clients_to_passive[0]
+
+        client1.send_cmd("JOIN #test")
+        irc_session.verify_join(client1, nick1, "#test")
+        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test",
+                                        expect_nick_only_prefix=True)
+
+        client1.send_cmd("NOTICE #test :Hello channel")
+        irc_session.verify_relayed_notice(active_client, from_nick=nick1, recip="#test", msg="Hello channel",
+                                          expect_nick_only_prefix=True)
+
+    def test_network_relay_notice_channel2(self, irc_network_session):
+        """
+        Check that a NOTICE to a channel (sent from a user connected to the
+        active server) is delivered to the channel's users in the passive
+        server (and not relayed back to the active server)
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        nick1, client1 = clients_to_passive[0]
+        nick101 = dummy_active_nicks[0]
+
+        client1.send_cmd("JOIN #test")
+        irc_session.verify_join(client1, nick1, "#test")
+        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test",
+                                        expect_nick_only_prefix=True)
+
+        active_client.send_cmd(":{} JOIN #test".format(nick101))
+        irc_session.verify_relayed_join(client1, from_nick=nick101, channel="#test")
+
+        active_client.send_cmd(":{} NOTICE #test :Hello channel".format(nick101))
+        irc_session.verify_relayed_notice(client1, from_nick=nick101, recip="#test", msg="Hello channel")
+
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+    def test_network_relay_privmsg_not_relayed_back(self, irc_network_session):
+        """
+        Check that a PRIVMSG received from a server (for a user in the
+        passive server) is not relayed back to the server it came from
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        to_nick, to_client = clients_to_passive[0]
+        from_nick = dummy_active_nicks[0]
+
+        active_client.send_cmd(":{} PRIVMSG {} :Hello".format(from_nick, to_nick))
+        irc_session.verify_relayed_privmsg(to_client, from_nick=from_nick, recip=to_nick, msg="Hello")
+
+        # The PRIVMSG must not be relayed back to the active server
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+    def test_network_relay_join_not_relayed_back(self, irc_network_session):
+        """
+        Check that a JOIN received from a server is not relayed back
+        to the server it came from
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        nick1, client1 = clients_to_passive[0]
+        nick101 = dummy_active_nicks[0]
+
+        client1.send_cmd("JOIN #test")
+        irc_session.verify_join(client1, nick1, "#test")
+        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test",
+                                        expect_nick_only_prefix=True)
+
+        active_client.send_cmd(":{} JOIN #test".format(nick101))
+        irc_session.verify_relayed_join(client1, from_nick=nick101, channel="#test")
+
+        # The JOIN must not be relayed back to the active server
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+    def test_network_relay_privmsg_channel_not_relayed_back(self, irc_network_session):
+        """
+        Check that a PRIVMSG to a channel received from a server is not
+        relayed back to the server it came from
+        """
+
+        rv = create_dummy_two_server_network(irc_network_session,
+                                             num_clients_to_passive=1,
+                                             num_dummy_users_in_active=1)
+
+        passive_server, active_server, active_client, clients_to_passive, dummy_active_nicks = rv
+        irc_session = passive_server.irc_session
+
+        nick1, client1 = clients_to_passive[0]
+        nick101 = dummy_active_nicks[0]
+
+        active_client.send_cmd(":{} JOIN #test".format(nick101))
+        irc_session.get_reply(active_client, expect_timeout=True)
+
+        client1.send_cmd("JOIN #test")
+        irc_session.verify_join(client1, nick1, "#test")
+        irc_session.verify_relayed_join(active_client, from_nick=nick1, channel="#test",
+                                        expect_nick_only_prefix=True)
+
+        active_client.send_cmd(":{} PRIVMSG #test :Hello channel".format(nick101))
+        irc_session.verify_relayed_privmsg(client1, from_nick=nick101, recip="#test", msg="Hello channel")
+
+        # The PRIVMSG must not be relayed back to the active server
         irc_session.get_reply(active_client, expect_timeout=True)
 
 
@@ -285,9 +461,63 @@ class TestNetworkRelayConnect(object):
         from_client.send_cmd("JOIN #test")
         passive_server.irc_session.verify_join(from_client, from_nick, "#test")
 
+        # Wait until the JOIN has been relayed to the active server (otherwise, it
+        # could arrive in the middle of the replies to the next JOIN)
+        settle(active_server.irc_session, to_client,
+               lambda: channel_known(active_server.irc_session, to_client, "#test"))
+
         to_client.send_cmd("JOIN #test")
         active_server.irc_session.verify_join(to_client, to_nick, "#test")
 
         from_client.send_cmd("PRIVMSG #test :Hello channel")
 
         active_server.irc_session.verify_relayed_privmsg(to_client, from_nick=from_nick, recip="#test", msg="Hello channel")
+
+
+    def test_network_relay_connect_notice1(self, irc_network_session):
+        """
+        Check that a NOTICE sent to a user in a different server is relayed correctly.
+        """
+
+        rv = create_two_server_network(irc_network_session,
+                                       num_clients_to_passive=1,
+                                       num_clients_to_active=1)
+
+        passive_server, active_server, clients_to_passive, clients_to_active = rv
+
+        from_nick, from_client = clients_to_passive[0]
+        to_nick, to_client = clients_to_active[0]
+
+        from_client.send_cmd("NOTICE {} :Hello".format(to_nick))
+
+        active_server.irc_session.verify_relayed_notice(to_client, from_nick=from_nick, recip=to_nick, msg="Hello")
+
+    def test_network_relay_connect_notice_channel1(self, irc_network_session):
+        """
+        Check that a NOTICE to a channel is relayed correctly (to a user
+        in the channel that is connected to a different server)
+        """
+
+        rv = create_two_server_network(irc_network_session,
+                                       num_clients_to_passive=1,
+                                       num_clients_to_active=1)
+
+        passive_server, active_server, clients_to_passive, clients_to_active = rv
+
+        from_nick, from_client = clients_to_passive[0]
+        to_nick, to_client = clients_to_active[0]
+
+        from_client.send_cmd("JOIN #test")
+        passive_server.irc_session.verify_join(from_client, from_nick, "#test")
+
+        # Wait until the JOIN has been relayed to the active server (otherwise, it
+        # could arrive in the middle of the replies to the next JOIN)
+        settle(active_server.irc_session, to_client,
+               lambda: channel_known(active_server.irc_session, to_client, "#test"))
+
+        to_client.send_cmd("JOIN #test")
+        active_server.irc_session.verify_join(to_client, to_nick, "#test")
+
+        from_client.send_cmd("NOTICE #test :Hello channel")
+
+        active_server.irc_session.verify_relayed_notice(to_client, from_nick=from_nick, recip="#test", msg="Hello channel")

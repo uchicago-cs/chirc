@@ -6,10 +6,15 @@ from chirc.types import CouldNotConnectException, ReplyTimeoutException, IRCMess
 
 class ChircClient(object):
 
-    def __init__(self, host="localhost", port=7776, msg_timeout=0.1, nodelay=False):
+    def __init__(self, host="localhost", port=7776, msg_timeout=0.25, no_reply_timeout=0.1, nodelay=False):
         self.host = host
         self.port = port
+        # How long to wait for a message we expect to receive (this only
+        # matters if the message is slow to arrive, or never arrives)
         self.msg_timeout = msg_timeout
+        # How long to wait when checking that we *don't* receive a message
+        # (we always wait this long, so it should be short)
+        self.no_reply_timeout = no_reply_timeout
         self._buf = b""
 
         tries = 3
@@ -30,8 +35,10 @@ class ChircClient(object):
     def disconnect(self):
         self._sock.close()
 
-    def get_message(self):
-        deadline = time.monotonic() + self.msg_timeout
+    def get_message(self, timeout=None):
+        if timeout is None:
+            timeout = self.msg_timeout
+        deadline = time.monotonic() + timeout
         while b"\r\n" not in self._buf:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
